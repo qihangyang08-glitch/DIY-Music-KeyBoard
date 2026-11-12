@@ -15,8 +15,28 @@ jobs:
       - name: Install desktop dependencies
         run: pip install -r pc/requirements.txt
       - name: Run unit tests
+        shell: pwsh
         working-directory: pc
-        run: python -m unittest discover -s tests -v
+        run: |
+          # Capture the full run so a failure can be surfaced as a check-run
+          # annotation (the raw log needs repository admin rights via API).
+          $output = & python -m unittest discover -s tests -v 2>&1
+          $code = $LASTEXITCODE
+          $output | Tee-Object -FilePath unit-tests.log
+          if ($code -ne 0) {
+            $lines = @($output)
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+              if ($lines[$i] -match '^(FAIL|ERROR):') {
+                $message = $lines[$i]
+                for ($j = 1; $j -le 5 -and ($i + $j) -lt $lines.Count; $j++) {
+                  $message += " | " + $lines[$i + $j]
+                }
+                Write-Host "::error::$message"
+              }
+            }
+            Write-Host "::error::$code test runner exit code"
+          }
+          exit $code
 
   firmware-build:
     runs-on: windows-latest
