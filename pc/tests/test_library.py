@@ -15,6 +15,16 @@ from xml.sax.saxutils import escape
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+
+def public_piece_count() -> int:
+    """Planned cards only exist for public items whose asset is missing."""
+    return sum(
+        1
+        for stage in STAGES
+        for item in stage.pieces
+        if item.visibility == "public"
+    )
+
 from app.core.curriculum import STAGES, PracticeItem, Stage
 from app.core.library import (
     BADGE_FAILED,
@@ -139,7 +149,7 @@ class ReadyCardTest(LibraryTestCase):
         self.assertEqual(len(registry.select(VIEW_READY)), 1)
         self.assertEqual(
             registry.counts()["planned"],
-            sum(len(stage.pieces) for stage in STAGES) - 1,
+            public_piece_count() - 1,
         )
         piece = registry.select(VIEW_READY)[0]
         self.assertEqual(piece.origin, "builtin")
@@ -189,7 +199,7 @@ class ReadyCardTest(LibraryTestCase):
         self.assertEqual(len(registry.select(VIEW_READY)), 0)
         self.assertEqual(
             len(registry.select(VIEW_ALL)),
-            sum(len(stage.pieces) for stage in STAGES) + 1,
+            public_piece_count() + 1,
         )
         piece = registry.select(VIEW_ALL)[0]
         self.assertEqual(piece.status, "failed")
@@ -301,7 +311,7 @@ class ImportTest(LibraryTestCase):
         self.assertEqual(len(registry.select(VIEW_READY)), 0)
         self.assertEqual(
             len(registry.select(VIEW_ALL)),
-            sum(len(stage.pieces) for stage in STAGES) + 1,
+            public_piece_count() + 1,
         )
 
     def test_import_rejects_bad_sources(self) -> None:
@@ -406,6 +416,22 @@ class RemoveTest(LibraryTestCase):
 
 
 class RegistryTest(LibraryTestCase):
+    def test_missing_private_score_is_not_planned_or_warned_about(self) -> None:
+        # A public checkout omits private assets. The library must not leak
+        # the private title as a "planned" card or a missing-file warning.
+        with tempfile.TemporaryDirectory() as tmp:
+            builtin = Path(tmp) / "builtin"
+            builtin.mkdir()
+            registry = build_registry(builtin, Path(tmp) / "imports")
+
+        self.assertNotIn(
+            "梦中的婚礼 · 片段",
+            {piece.title for piece in registry.select(VIEW_PLANNED)},
+        )
+        joined = "\n".join(registry.warnings)
+        self.assertNotIn("梦中的婚礼", joined)
+        self.assertNotIn("mariage_fragment", joined)
+
     def test_default_view_and_filters(self) -> None:
         copy_sample(self.builtin)
         registry = self.registry()
@@ -415,7 +441,8 @@ class RegistryTest(LibraryTestCase):
             1
             for stage in STAGES
             for item in stage.pieces
-            if not (item.score and (self.builtin / item.score).is_file())
+            if item.visibility == "public"
+            and not (item.score and (self.builtin / item.score).is_file())
         )
         self.assertEqual(len(registry.select(VIEW_PLANNED)), expected_planned)
         planned_titles = {p.title for p in registry.select(VIEW_PLANNED)}
@@ -463,7 +490,7 @@ class RegistryTest(LibraryTestCase):
 
     def test_counts_are_derived(self) -> None:
         copy_sample(self.builtin)
-        planned = sum(len(stage.pieces) for stage in STAGES) - 1
+        planned = public_piece_count() - 1
         self.assertEqual(
             self.registry().counts(),
             {"ready": 1, "imported": 0, "planned": planned, "failed": 0, "all": planned + 1},
@@ -510,7 +537,7 @@ class RegistryTest(LibraryTestCase):
         self.assertEqual(registry.counts()["ready"], 1)
         self.assertEqual(
             registry.counts()["planned"],
-            sum(len(stage.pieces) for stage in STAGES) - 1,
+            public_piece_count() - 1,
         )
         piece = registry.select(VIEW_READY)[0]
         self.assertEqual(piece.badge, BADGE_MIDI)
@@ -578,7 +605,7 @@ class RegistryTest(LibraryTestCase):
         self.assertEqual(registry.counts()["ready"], 0)
         self.assertEqual(
             registry.counts()["planned"],
-            sum(len(stage.pieces) for stage in STAGES),
+            public_piece_count(),
         )
         joined = "\n".join(registry.warnings)
         self.assertIn("xiaoxingxing.musicxml", joined)

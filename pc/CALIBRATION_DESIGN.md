@@ -329,7 +329,7 @@ bool setElectrodeThreshold(TwoWire &wire, uint8_t addr, uint8_t electrode,
 > `c`/`T`/`Q`、校准页面/多指验证、`calibration.json` 自动下发/重连
 > 已实现；新增 54 项 PC 测试（`test_calibration.py` 24、
 > `test_serial_calibration.py` 6、`test_instrument_calibration.py` 5、
-> `test_calibration_page.py` 19），全套 **660 项通过**；
+> `test_calibration_page.py` 19），全套 **661 项通过**；
 > ESP32-S3 编译通过，COM5 固件冒烟通过（CAL 5 帧 × 32 值、T 写入后
 > Q 回读、三类 ERR、恢复默认），PC `SerialService` 真机写 `c` + 读 CAL
 > 通过；真机端到端自动下发 PASS（15/8 回读）。

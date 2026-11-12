@@ -11,7 +11,7 @@
 > + **P2-H2 剩余练习补齐（G/F、华尔兹、反向/平行、连奏/踏板/录音/弱起反复）**
 > + **H7a-P2 长谱分页** + **H9b-P2 性能后续**
 > + **H9c 英文界面第一切片 + P2-H8 四首入门曲**；
-> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **660 项通过**；
+> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **661 项通过**；
 > 曲库 **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；公开包 **146 个内容文件**。
 >
 > **2026-11-13 新阶段（A2 切片 1–4 已完成）：** 用户已确认仓库
@@ -37,7 +37,7 @@
 ## 0. 快速接手（5 分钟）
 
 1. 读 §1 基线 → **§1.1 新阶段任务** → §2.1 优先级 → §3.2 H7f 残留 / §3.4 H9。
-2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **660 通过**。
+2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **661 通过**。
 3. 启动真实应用：双击 `pc\run.cmd`（先关闭 PlatformIO 串口监视器；
    本机真机 COM5 + 0x5A/0x5C/0x5D）。
 4. **A1 仓库/CI 与 A2 校准已完成**；下一步从 **A3 首启向导/帮助**开始，
@@ -60,7 +60,7 @@
 | 曲库 | **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；磁盘派生；收藏/标签/最近/递归扫描/目录监视/图片与 PDF 仅显示 |
 | 考核 | **H7d**：阶段 1（20 音首答 ≥80%）、阶段 2（60 BPM/16 拍全中/平均偏差 <60 ms）；可选，不影响阶段通关 |
 | 启动 | 双击 `pc\run.cmd` 或 `python pc/app/main.py`；先关闭 PlatformIO 串口监视器；本机真机为 **COM5**（3 个 MPR121：0x5A/0x5C/0x5D） |
-| 测试 | **660 项通过**：`cd pc && python -m unittest discover -s tests -v` |
+| 测试 | **661 项通过**：`cd pc && python -m unittest discover -s tests -v` |
 | 公开版 | **H9a 已完成**：`python tools/build_public.py` 生成白名单压缩包；私有/用户数据/截图/日志被自动剔除 |
 | 无障碍 | **H9b 前五批已完成**：×/✓ + 文字对错反馈、`减少动效`、字号 小/标准/大（`accessibility.json`）、导航/设置/走带/音轨/键位页/学习卡键盘可达 |
 | 性能 | **H9b-P1/P2 已完成**：曲库解析缓存；硬件帧去抖、onset 扫描提前停止、字体 LRU、搜索 150 ms 防抖 |
@@ -73,7 +73,7 @@
 
 **A1 仓库安全初始化**与 **A2 切片 1–4**（纯逻辑/协议、固件 `CAL`/`T`/`Q`、
 校准页面 + 多指验证、`calibration.json` 启动/连接自动下发与重连恢复）
-已完成，基线 **660 项测试**（+54）；ESP32-S3 编译通过，COM5 真机冒烟通过。
+已完成，基线 **661 项测试**（+55）；ESP32-S3 编译通过，COM5 真机冒烟通过。
 公开仓库首提交 347 个文件、约 16 MB（含 vendor），`main` + `v0.1.0` 已推送。
 本轮实现 A1/A2 并同步以下文档：
 
@@ -91,7 +91,7 @@
    `.gitignore` 覆盖用户数据/日志/截图/构建产物/私有曲/第三方引脚图；
    公开包审计 146 个内容文件、无私有/用户数据；白名单提交 347 个文件
    （含 vendor），`main` + `v0.1.0` 已推送；CI 在 `windows-latest` 跑
-   660 项 unittest 与 `pio run -e esp32-s3-devkitc-1`（只编译）。
+   661 项 unittest 与 `pio run -e esp32-s3-devkitc-1`（只编译）。
    详见 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) §4。
 2. **A2 逐键校准页（4–6 天）**：**已完成（切片 1–4）**——纯逻辑 +
    `CAL`/`T` 协议 + 串口收发 + 固件 `c`/`T`/`Q` + 校准页面/多指验证 +
@@ -216,7 +216,7 @@
 **最近交接点（A1：公开仓库 + CI）文件**：
 
 - 新增：`.gitignore`（用户数据/日志/截图/`dist`/`.pio`/`backup`/私有曲/
-  第三方引脚图）、`.github/workflows/ci.yml`（`windows-latest`：660 项
+  第三方引脚图）、`.github/workflows/ci.yml`（`windows-latest`：661 项
   unittest + `pio run -e esp32-s3-devkitc-1`，不 upload）。
 - 提交：`471a058`（347 个文件、64,082 行、约 16 MB，含 vendor）；
   tag `v0.1.0`；remote `origin`；`main` 与 tag 已推送。
@@ -224,8 +224,11 @@
   `backup`、`tools/*.txt`、`pc/prototype/logs`、
   `ESP32-S3_DevKitC-1_pinlayout_v1.1.jpg`。
 - 验收：`git ls-files` 无私有/用户数据；公开包 **146 个内容文件**；
-  CI 配置已进入首提交。**未做**：GitHub Actions 首跑结果需在网页确认；
-  公开 README/许可展示属 H10。
+  CI 配置已进入首提交。
+- **CI 首跑失败修复**：公开 checkout 没有 `mariage_fragment`，书库与
+  测试不能假定它存在。缺失私有曲不再生成 planned 卡或缺失警告；
+  公开包审计仍按清单拒绝该路径；新增 1 项库测试，全套 **661 项**。
+- **未做**：公开 README/许可展示属 H10；Actions 重新跑后确认。
 
 **上一交接点（A2 切片 4：自动下发/重连，A2 完成）文件**：
 
@@ -1114,7 +1117,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 - 真机试弹（32 键 + 电脑键盘）；录音/分区等新交互必须真机验证。
   分区拖拽、白键 19 键、自动伴奏已做首次界面试弹；完整曲目跟弹仍建议
   每批人工确认。
-- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 660 项）；
+- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 661 项）；
   每批更新 `DESIGN_INDEX` 的“待做事项”、`app/README` 的内容清单与测试计数。
 - 公开构建：改动内容后跑 `python tools/build_public.py`（当前 **146 个内容
   文件**）；失败即停止，
@@ -1303,7 +1306,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 
 - [ ] 读本文 §1「最近交接点」、§2.1「剩余工作总览」、§3.2 H7f 残留、
   §3.4 H9 与 [DESIGN_INDEX.md](DESIGN_INDEX.md)「待做事项」。
-- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 660 项通过。
+- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 661 项通过。
 - [ ] 确认 `curriculum.STAGES` 的实际就绪数（不要相信文档里的硬编码）；
   当前应为阶段 0–8 全部 ready、合计 74/74。
 - [ ] 启动一次真实应用：`pc\run.cmd`；先关闭 PlatformIO 串口监视器；

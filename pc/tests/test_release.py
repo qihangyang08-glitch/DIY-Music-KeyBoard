@@ -266,9 +266,12 @@ class PublicArchiveTest(unittest.TestCase):
         ids = [item["content_id"] for item in exclusions["items"]]
         self.assertIn("stage6:梦中的婚礼 · 片段", ids)
         self.assertIn("梦中的婚礼 · 片段", content)
-        # The private score is untouched and still parses locally.
-        score = parse_score(SCORE_DIR / "mariage_fragment.musicxml")
-        self.assertEqual(len(score.notes), 26)
+        # The private score is untouched and still parses locally; a public
+        # checkout omits it, in which case only the exclusion entry remains.
+        private = SCORE_DIR / "mariage_fragment.musicxml"
+        if private.is_file():
+            score = parse_score(private)
+            self.assertEqual(len(score.notes), 26)
 
     def test_failed_plan_writes_no_archive(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

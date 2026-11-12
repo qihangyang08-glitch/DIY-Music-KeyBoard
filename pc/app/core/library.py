@@ -895,6 +895,10 @@ class _RegistryBuilder:
                     if stem in scanned_stems:
                         by_stem.setdefault(stem, []).append(ref)
                         continue
+                    # Private content is intentionally absent from a public
+                    # checkout; do not warn about a file that is not shipped.
+                    if item.visibility != "public":
+                        continue
                     if kind == "training":
                         self.warnings.append(
                             f"课程训练谱面缺失：{stage.name} · {item.name}（{item.score}）"
@@ -1037,6 +1041,10 @@ class _RegistryBuilder:
                         or PurePath(item.score).stem.casefold() in scanned_stems
                     )
                 if represented:
+                    continue
+                if item.visibility != "public":
+                    # A private item without its asset (public checkout) is
+                    # omitted rather than shown as a "planned" card.
                     continue
                 warning = ""
                 if item.score and path is not None:

@@ -330,9 +330,15 @@ class CurriculumTest(unittest.TestCase):
         for stage in STAGES:
             for item in stage.items:
                 if item.score is not None:
-                    self.assertIsNotNone(
-                        score_path(item.score), f"{stage.index}:{item.name}"
-                    )
+                    found = score_path(item.score) is not None
+                    if item.visibility != "public":
+                        # Private assets are intentionally absent from a
+                        # public checkout; readiness must follow the file.
+                        self.assertEqual(
+                            item.ready, found, f"{stage.index}:{item.name}"
+                        )
+                        continue
+                    self.assertTrue(found, f"{stage.index}:{item.name}")
                     self.assertTrue(item.ready)
                 if item.drill is not None:
                     self.assertIn(item.drill, DRILL_SPECS)

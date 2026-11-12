@@ -80,6 +80,9 @@
   `visibility: private`、`public_release: remove`；公开构建必须排除
   `mariage_fragment.musicxml` / `.mid` 与课程条目，私有版可保留。课程数据中
   该项已标 `PracticeItem.visibility = "private"`。
+- **公开 checkout 不携带 private 文件（2026-11-13）**：书库/测试不得把
+  缺失的 private 资产显示成 planned 卡或“资源缺失”警告；公开包审计仍按
+  `content_manifest` 拒绝该路径，两者不能互相替代。
 
 ---
 

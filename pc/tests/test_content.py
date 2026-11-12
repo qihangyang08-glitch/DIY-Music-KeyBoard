@@ -111,7 +111,11 @@ class ContentTest(unittest.TestCase):
             score, actual_stage, ready = found[title]
             self.assertEqual(score, filename)
             self.assertEqual(actual_stage, stage_index)
-            self.assertTrue(ready, title)
+            # A public checkout omits the private score; the item then stays
+            # planned instead of claiming readiness for a missing asset.
+            self.assertEqual(
+                ready, (SCORE_DIR / filename).is_file(), title
+            )
 
     def test_scale_exercise_has_eight_bars_and_c5_c6_range(self) -> None:
         item = next(
@@ -445,8 +449,13 @@ class ContentTest(unittest.TestCase):
         )
         self.assertEqual(item.visibility, "private")
         self.assertEqual(item.score, "mariage_fragment.musicxml")
+        path = SCORE_DIR / item.score
+        if not path.is_file():
+            # The public repository deliberately omits this private score.
+            self.assertFalse(item.ready)
+            return
         self.assertTrue(item.ready)
-        score = parse_score(SCORE_DIR / item.score)
+        score = parse_score(path)
         self.assertEqual(len(score.notes), 26)
         self.assertEqual(max(note.measure for note in score.notes), 8)
         self.assertEqual(
@@ -471,7 +480,9 @@ class ContentTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             registry = build_registry(SCORE_DIR, Path(tmp) / "imports")
             planned = {piece.title for piece in registry.select(VIEW_PLANNED)}
-            for title in EXPECTED:
+            for title, (filename, _stage) in EXPECTED.items():
+                if not (SCORE_DIR / filename).is_file():
+                    continue  # private content is absent from public checkouts
                 self.assertNotIn(title, planned)
 
 

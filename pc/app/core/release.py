@@ -251,6 +251,11 @@ def plan_public_build(
                 continue
         included.append(relative)
 
+    # A public checkout does not carry private files, but the exclusion list
+    # and the archive audit must still name them so a leaked copy is rejected.
+    for file, reason in private_files.items():
+        excluded.setdefault(file, reason)
+
     for entry in entries:
         if entry.action != "include":
             continue
