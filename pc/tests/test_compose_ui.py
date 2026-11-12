@@ -477,7 +477,9 @@ class ComposeWindowTest(unittest.TestCase):
         self.assertTrue(page.record_button.isVisible())
         self.assertTrue(page.add_track_button.isVisible())
         self.assertTrue(page.band.isVisible())
-        self.assertEqual(page.scroll.horizontalScrollBar().maximum(), 0)
+        # A 1 px rounding difference from another font/DPI is invisible and
+        # the horizontal bar is disabled; anything larger is a real overflow.
+        self.assertLessEqual(page.scroll.horizontalScrollBar().maximum(), 1)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ jobs:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: "utf-8"
       PYTHONFAULTHANDLER: "1"
+      QT_SCALE_FACTOR: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

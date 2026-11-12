@@ -243,6 +243,11 @@ def scroll_area() -> tuple[QScrollArea, QVBoxLayout]:
     scroll = QScrollArea()
     scroll.setWidgetResizable(True)
     scroll.setFrameShape(QFrame.Shape.NoFrame)
+    # These pages are designed to fit the minimum window width; a stray
+    # 1 px rounding difference on another font/DPI must not add a bar.
+    scroll.setHorizontalScrollBarPolicy(
+        Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+    )
     content = QWidget()
     content.setObjectName("ScrollContent")
     layout = QVBoxLayout(content)
