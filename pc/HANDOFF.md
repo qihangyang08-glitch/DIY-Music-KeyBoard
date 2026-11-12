@@ -91,7 +91,8 @@
    `.gitignore` 覆盖用户数据/日志/截图/构建产物/私有曲/第三方引脚图；
    公开包审计 146 个内容文件、无私有/用户数据；白名单提交 347 个文件
    （含 vendor），`main` + `v0.1.0` 已推送；CI 在 `windows-latest` 跑
-   661 项 unittest 与 `pio run -e esp32-s3-devkitc-1`（只编译）。
+   661 项 unittest 与 `pio run -e esp32-s3-devkitc-1`（只编译），
+   `pc-tests` 与 `firmware-build` 均已通过。
    详见 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) §4。
 2. **A2 逐键校准页（4–6 天）**：**已完成（切片 1–4）**——纯逻辑 +
    `CAL`/`T` 协议 + 串口收发 + 固件 `c`/`T`/`Q` + 校准页面/多指验证 +
@@ -224,11 +225,18 @@
   `backup`、`tools/*.txt`、`pc/prototype/logs`、
   `ESP32-S3_DevKitC-1_pinlayout_v1.1.jpg`。
 - 验收：`git ls-files` 无私有/用户数据；公开包 **146 个内容文件**；
-  CI 配置已进入首提交。
-- **CI 首跑失败修复**：公开 checkout 没有 `mariage_fragment`，书库与
-  测试不能假定它存在。缺失私有曲不再生成 planned 卡或缺失警告；
-  公开包审计仍按清单拒绝该路径；新增 1 项库测试，全套 **661 项**。
-- **未做**：公开 README/许可展示属 H10；Actions 重新跑后确认。
+  CI 配置已进入首提交；最终 `pc-tests` / `firmware-build` **success**。
+- **CI 首跑失败修复（最终全绿）**：
+  1. 公开 checkout 没有 `mariage_fragment`，书库/测试不再假定其存在；
+     缺失私有曲不生成 planned 卡/缺失警告，公开包审计仍拒绝该路径；
+     新增 1 项库测试，全套 **661 项**。
+  2. Windows Runner 临时目录可能返回 8.3 短路径（`RUNNER~1` vs
+     `runneradmin`）；库测试改为比较 `resolve()` 后的路径。
+  3. 合成页在不同字体/DPI 下出现 1 px 横向舍入溢出：禁用横向滚动条，
+     测试允许 1 px 容差（更大仍视为真实溢出）。
+  - 最终 `pc-tests` **success**、`firmware-build` **success**
+    （commit `1ccc220`，661 项）。
+- **未做**：公开 README/许可展示属 H10。
 
 **上一交接点（A2 切片 4：自动下发/重连，A2 完成）文件**：
 
