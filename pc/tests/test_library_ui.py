@@ -148,7 +148,12 @@ class LibraryWindowTest(unittest.TestCase):
         self.assertEqual(page.view, VIEW_IMPORTED)
         self.assertEqual(len(page.cards), 1)
         card = page.cards[0]
-        self.assertEqual(card.piece.primary.path.parent, self.root / "scores")
+        # Resolve both: Windows may hand out an 8.3 short temp path
+        # (RUNNER~1) while the library stores the long form.
+        self.assertEqual(
+            card.piece.primary.path.parent.resolve(),
+            (self.root / "scores").resolve(),
+        )
         card.activate()
         wait(100)
         self.assertIs(self.window.stack.currentWidget(), self.window.perform)
