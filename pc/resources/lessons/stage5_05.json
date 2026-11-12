@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l5",
+  "stage": "s5",
+  "index": 5,
+  "title": "左右手分区",
+  "objectives": [
+    "看懂分区范围标签。",
+    "低音区用左手、高音区用右手。",
+    "分区后仍会移动手位。"
+  ],
+  "prerequisites": ["s5-l4"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s5-l5-b1",
+      "type": "text",
+      "title": "分区映射",
+      "body": "32 键可以切成左右两区：低音区给左手，高音区给右手。当前「左右分区」按 16 键切分，左区 C3–D#4，右区 C5–D#6。分区后两只手不用抢同一个音域。"
+    },
+    {
+      "id": "s5-l5-b2",
+      "type": "text",
+      "title": "分区不是万能的",
+      "body": "分区只解决音域冲突，不改变指法。跨区的旋律仍要移动手；超出 32 键的曲子仍要简化或移调。先看顶部范围标签，确认两只手都在可达区。"
+    },
+    {
+      "id": "s5-l5-demo",
+      "type": "demo",
+      "score": "split_hands_8bars",
+      "tempo": 60,
+      "caption": "示范要点：听低音区与高音区分别由哪只手负责。"
+    },
+    {
+      "id": "s5-l5-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "打开「左右分区 · 8 小节」，看范围标签。",
+        "左手只弹低音区，右手只弹高音区。",
+        "慢速合手，确认没有跨区抢音。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "知道分区点在第几键吗？", "type": "self"},
+    {"question": "左手在高音区按到音了吗？", "type": "self"},
+    {"question": "超出范围会先看标签吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "左手跑到高音区——和右手抢音。",
+    "分区后不看范围——按到禁用音。"
+  ],
+  "practice": "左右分区 · 8 小节",
+  "next": "s5-l6",
+  "tags": ["分区", "映射"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

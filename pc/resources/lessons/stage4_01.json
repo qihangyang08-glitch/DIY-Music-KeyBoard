@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s4-l1",
+  "stage": "s4",
+  "index": 1,
+  "title": "低音谱号与左手位置",
+  "objectives": [
+    "在低音谱表找到 C3–C4。",
+    "知道左手 1 指在右侧、5 指在左侧。",
+    "低音稳定，不抢右手旋律。"
+  ],
+  "prerequisites": ["s3-l8"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s4-l1-b1",
+      "type": "text",
+      "title": "左手的位置",
+      "body": "左手在低音区。低音谱表从下往上五线是 G2、B2、D3、F3、A3；C3 在第二间，C4 在上方第一条加线。左手 1–5 指与右手相同，但方向相反：拇指在右，小指在左。"
+    },
+    {
+      "id": "s4-l1-b2",
+      "type": "text",
+      "title": "左手不是次要手",
+      "body": "左手负责低音与和声，决定音乐的骨架。练习时不要只求「按对」，要听低音是否稳定、是否与右手同时到达。左手声音通常比右手轻，但不能模糊。"
+    },
+    {
+      "id": "s4-l1-demo",
+      "type": "demo",
+      "score": "chords_cfg",
+      "tempo": 60,
+      "caption": "示范要点：左手从 C3 到 C4 逐音弹，听低音是否稳定。"
+    },
+    {
+      "id": "s4-l1-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "在低音谱表上找到 C3、D3、E3、F3、G3。",
+        "左手 5–4–3–2–1 指对应 C3–G3，逐个按响。",
+        "打开「低音谱号 · C3–C4」，做 10 题。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "C3 在低音谱表第几间？", "type": "self"},
+    {"question": "左手 1 指在哪一侧？", "type": "self"},
+    {"question": "低音听起来稳定吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "把低音谱表当高音谱表——音名全错。",
+    "左手压过右手——旋律被盖住。"
+  ],
+  "practice": "低音谱号 · C3–C4",
+  "next": "s4-l2",
+  "tags": ["低音谱号", "左手"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l4",
+  "stage": "s5",
+  "index": 4,
+  "title": "右手旋律 + 左手和弦",
+  "objectives": [
+    "左手和弦三个音同时落下。",
+    "和弦转换不抢拍。",
+    "右手旋律比伴奏清楚。"
+  ],
+  "prerequisites": ["s5-l3"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s5-l4-b1",
+      "type": "text",
+      "title": "和弦要同时落下",
+      "body": "左手和弦的三个音要同时按下，不能先后错开。先单独练和弦转换，确认每个和弦整齐，再把右手旋律加进来。"
+    },
+    {
+      "id": "s5-l4-b2",
+      "type": "text",
+      "title": "转换的时机",
+      "body": "和弦通常在每小节第一拍或每两拍换一次。转换要提前准备：在上一拍末尾把手移到下一个和弦的位置，拍点一到就落下。"
+    },
+    {
+      "id": "s5-l4-demo",
+      "type": "demo",
+      "score": "ode_to_joy_both_slow",
+      "tempo": 40,
+      "caption": "示范要点：听左手和弦是否整齐，右手旋律是否清楚。"
+    },
+    {
+      "id": "s5-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "左手单独练 C–F–G 和弦转换，每和弦两拍。",
+        "右手加旋律，先只对齐第一拍。",
+        "打开「慢速合手 · 50%」，慢速完整合手。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "和弦三个音同时落下吗？", "type": "self"},
+    {"question": "转换时抢拍吗？", "type": "self"},
+    {"question": "旋律比和弦清楚吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "和弦先后落下——听起来像琶音。",
+    "转换时停顿——拍子断掉。"
+  ],
+  "practice": "慢速合手 · 50%",
+  "next": "s5-l5",
+  "tags": ["和弦", "合手"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "title": "三轨小作品",
+  "tempo": 96.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "钢琴",
+      "program": 0,
+      "volume": 0.85,
+      "pan": 0.2,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    },
+    {
+      "name": "弦乐",
+      "program": 48,
+      "volume": 0.55,
+      "pan": -0.2,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    },
+    {
+      "name": "贝斯",
+      "program": 32,
+      "volume": 0.7,
+      "pan": -0.35,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}

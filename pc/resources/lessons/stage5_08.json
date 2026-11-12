@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l8",
+  "stage": "s5",
+  "index": 8,
+  "title": "完整双手演奏",
+  "objectives": [
+    "分段练熟再完整。",
+    "完整演奏不停顿。",
+    "速度稳定、句子清楚。"
+  ],
+  "prerequisites": ["s5-l7"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s5-l8-b1",
+      "type": "text",
+      "title": "先分段，再完整",
+      "body": "把曲子分成 4 小节一段，逐段练熟。每段连续 3 遍不错，再连下一段。最后完整走一遍，不要中途停下来改错。"
+    },
+    {
+      "id": "s5-l8-b2",
+      "type": "text",
+      "title": "完整的标准",
+      "body": "完整不是全对，而是不停、不散、速度稳定。错音只记一次未中；停下来重来会破坏整体。录一遍回听，先听节奏，再听错音。"
+    },
+    {
+      "id": "s5-l8-demo",
+      "type": "demo",
+      "score": "minuet_3_4",
+      "tempo": 60,
+      "caption": "示范要点：先听分段，再听完整演奏。"
+    },
+    {
+      "id": "s5-l8-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "把曲子分成 4 小节一段，逐段练。",
+        "每段连续 3 遍不错，再连下一段。",
+        "打开「小步舞曲」，完整跟弹一遍。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "每段都连续 3 遍不错吗？", "type": "self"},
+    {"question": "完整演奏时停下来了吗？", "type": "self"},
+    {"question": "速度稳定吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "没分段就直接完整——错误反复。",
+    "错音就停——完整度被破坏。"
+  ],
+  "practice": "小步舞曲",
+  "next": "s6-l1",
+  "tags": ["完整演奏", "双手"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

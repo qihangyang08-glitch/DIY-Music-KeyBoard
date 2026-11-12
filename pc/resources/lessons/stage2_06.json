@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s2-l6",
+  "stage": "s2",
+  "index": 6,
+  "title": "跟节拍器弹",
+  "objectives": [
+    "在 60、80、100 BPM 三层速度保持匀速。",
+    "开始前听满一小节预备拍。",
+    "乱拍时主动退回上一个速度。"
+  ],
+  "prerequisites": ["s2-l5"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s2-l6-b1",
+      "type": "text",
+      "title": "速度是练出来的",
+      "body": "节拍器不是考试，是帮你保持匀速。先从 60 BPM 开始，能连续四小节不抢不拖，再到 80、100。每次只升一点；如果开始追拍，就退回上一个速度。慢而稳比快而乱有用。"
+    },
+    {
+      "id": "s2-l6-b2",
+      "type": "text",
+      "title": "预备拍与进入",
+      "body": "开始前先听一小节预备拍，心里数「1 2 3 4」，到下一小节第一拍再进入。进入后不要每拍都看节拍器；用脚或身体感受拍点，眼睛留给谱面。"
+    },
+    {
+      "id": "s2-l6-demo",
+      "type": "demo",
+      "score": "xiaoxingxing",
+      "tempo": 60,
+      "caption": "示范要点：听 60 BPM 的预备拍，注意第一拍进入的时机。"
+    },
+    {
+      "id": "s2-l6-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "60 BPM 跟四小节四分音符，确认不抢不拖。",
+        "同一条换 80 BPM，再换 100 BPM；任何一层乱拍就退回。",
+        "打开「八分音符组合」，用 80 BPM 完整踩一遍。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能在 60 BPM 连续四小节不抢拍吗？", "type": "self"},
+    {"question": "知道预备拍要数满一小节吗？", "type": "self"},
+    {"question": "提速后乱拍会主动退回吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "一上来就 100 BPM——动作会变形。",
+    "盯着节拍器每一拍——眼睛离开谱面。"
+  ],
+  "practice": "八分音符组合",
+  "next": "s3-l1",
+  "tags": ["节拍器", "速度"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

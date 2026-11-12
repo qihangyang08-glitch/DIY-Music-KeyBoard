@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s7-l4",
+  "stage": "s7",
+  "index": 4,
+  "title": "音色与音量",
+  "objectives": [
+    "给每条轨选独立音色。",
+    "用音量与声像安排位置。",
+    "用静音/独奏单独检查。"
+  ],
+  "prerequisites": ["s7-l3"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s7-l4-b1",
+      "type": "text",
+      "title": "每轨独立音色",
+      "body": "每条轨道可以选不同 GM 音色。音色决定「像什么乐器」，音量与声像决定它在混音里的位置。先选音色，再调音量，不要用音量掩盖音色不合适。"
+    },
+    {
+      "id": "s7-l4-b2",
+      "type": "text",
+      "title": "音量与声像",
+      "body": "音量控制远近，声像控制左右。主旋律稍靠中、稍响；伴奏放轻、可以稍偏一侧。静音/独奏用来单独检查一条轨。"
+    },
+    {
+      "id": "s7-l4-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听同一段换音色、调音量/声像后的变化。"
+    },
+    {
+      "id": "s7-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "给两条轨选不同音色。",
+        "调音量与声像，让旋律清楚。",
+        "用静音/独奏单独检查每条轨。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "每条轨音色独立吗？", "type": "self"},
+    {"question": "旋律比伴奏清楚吗？", "type": "self"},
+    {"question": "声像没有把重要声部推到一边吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "所有轨同一音色——层次不清。",
+    "靠调大音量掩盖音色问题。"
+  ],
+  "practice": "三轨小作品",
+  "next": "s7-l5",
+  "tags": ["音色", "音量", "声像"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

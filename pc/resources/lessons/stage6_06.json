@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l6",
+  "stage": "s6",
+  "index": 6,
+  "title": "完整曲目分段",
+  "objectives": [
+    "给曲子做分段练习计划。",
+    "困难段单独循环。",
+    "完整演奏时不停顿。"
+  ],
+  "prerequisites": ["s6-l5"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s6-l6-b1",
+      "type": "text",
+      "title": "练习计划",
+      "body": "把曲子分成 4–8 小节一段，标出困难段。每天先练困难段，再连前后，最后完整走一遍。不要每次都从头弹。"
+    },
+    {
+      "id": "s6-l6-b2",
+      "type": "text",
+      "title": "完整的时机",
+      "body": "当每段都能连续 3 遍不错，再尝试完整。完整时允许小错，不停下来。录一遍回听，找出下一次要练的 1–2 个点。"
+    },
+    {
+      "id": "s6-l6-demo",
+      "type": "demo",
+      "score": "fur_elise_theme",
+      "tempo": 60,
+      "caption": "示范要点：先听分段，再听完整；注意困难段是否单独练过。"
+    },
+    {
+      "id": "s6-l6-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "把曲子分段并标出困难段。",
+        "困难段 50% 循环 5 遍。",
+        "打开「致爱丽丝 · 主题」，完整跟弹一遍。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "有分段计划吗？", "type": "self"},
+    {"question": "困难段单独练了吗？", "type": "self"},
+    {"question": "完整时能不停吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "没有计划——每次随机练。",
+    "完整时停下来改错。"
+  ],
+  "practice": "致爱丽丝 · 主题",
+  "next": "s6-l7",
+  "tags": ["分段", "完整曲"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

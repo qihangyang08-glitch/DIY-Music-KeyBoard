@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s1-l2",
+  "stage": "s1",
+  "index": 2,
+  "title": "高音谱号",
+  "objectives": [
+    "记住高音谱表五线 E4 G4 B4 D5 F5。",
+    "记住四个间 F4 A4 C5 E5。",
+    "找到 C4 的下方加线与 D4 的位置。"
+  ],
+  "prerequisites": ["s1-l1"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s1-l2-b1",
+      "type": "text",
+      "title": "线与间的音名",
+      "body": "高音谱表从下往上五条线是 E4、G4、B4、D5、F5；四个间是 F4、A4、C5、E5。可以用「Every Good Boy Does Fine」记线，用「FACE」记间。中央 C（C4）在谱表下方第一条加线，D4 在加线与第一线之间的间。"
+    },
+    {
+      "id": "s1-l2-b2",
+      "type": "text",
+      "title": "按线间交替推算",
+      "body": "先看音符在线上还是间里，再按「线间交替」推出音名：E（线）F（间）G（线）A（间）B（线）C（间）D（线）E（间）F（线）。慢一点，确认后再按光条。不要背整张表；用相邻关系推，错得更少。"
+    },
+    {
+      "id": "s1-l2-demo",
+      "type": "demo",
+      "score": "xiaoxingxing",
+      "tempo": 60,
+      "caption": "示范要点：先读 C4、D4、E4 三个位置，再在光条上按出来。"
+    },
+    {
+      "id": "s1-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "按顺序说出五条线的音名，再倒着说一遍。",
+        "在谱面上找到 C4、D4、E4，分别按对应光条。",
+        "打开「音名闪卡 · C4–C5」，做 10 题；错题回到谱面重新数。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能在 3 秒内说出第一线音名吗？", "type": "self"},
+    {"question": "C4 与 D4 的位置能分清吗？", "type": "self"},
+    {"question": "10 题中首次答对 ≥8 题吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "把第一线当成 C——高音谱表第一线是 E4。",
+    "把加线音当成第一线音——C4 在谱表下方。"
+  ],
+  "practice": "音名闪卡 · C4–C5",
+  "next": "s1-l3",
+  "tags": ["高音谱号", "音名"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

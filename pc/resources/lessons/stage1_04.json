@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "id": "s1-l4",
+  "stage": "s1",
+  "index": 4,
+  "title": "低音谱号",
+  "objectives": [
+    "记住低音谱表五线 G2 B2 D3 F3 A3。",
+    "记住四个间 A2 C3 E3 G3。",
+    "知道 C4 是低音谱表上方第一条加线。"
+  ],
+  "prerequisites": [
+    "s1-l3"
+  ],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s1-l4-b1",
+      "type": "text",
+      "title": "低音谱表的线与间",
+      "body": "低音谱表从下往上五条线是 G2、B2、D3、F3、A3；四个间是 A2、C3、E3、G3。可以用「Good Boys Do Fine Always」记线，用「All Cows Eat Grass」记间。C4 在低音谱表上方第一条加线，和中央 C 是同一个音。"
+    },
+    {
+      "id": "s1-l4-b2",
+      "type": "text",
+      "title": "大谱表怎么读",
+      "body": "钢琴谱常把高音谱表与低音谱表上下叠成一个大谱表：上面多给右手，下面多给左手。两个谱表之间的那条加线就是 C4。读谱时先看音符在哪个谱表，再用对应的线间表，不要把两套音名混在一起。"
+    },
+    {
+      "id": "s1-l4-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：在低音谱表上找 C3 与 C4，注意 C4 是上加线。"
+    },
+    {
+      "id": "s1-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "按顺序说出低音谱表五条线的音名。",
+        "找到 C3（第二间）与 C4（上加线）。",
+        "把大谱表上的 C4 指出来，确认上下两个谱表共用它。"
+      ]
+    }
+  ],
+  "check": [
+    {
+      "question": "低音谱表第一线是 G2 吗？",
+      "type": "self"
+    },
+    {
+      "question": "C3 在第二间吗？",
+      "type": "self"
+    },
+    {
+      "question": "能分清低音谱表与高音谱表的音名吗？",
+      "type": "self"
+    }
+  ],
+  "mistakes": [
+    "把低音谱表当高音谱表读——音名会整体错。",
+    "把 C3 与 C4 混为一个音——它们相差八度。"
+  ],
+  "practice": "低音谱号 · C3–C4",
+  "next": "s1-l5",
+  "tags": [
+    "低音谱号",
+    "大谱表"
+  ],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

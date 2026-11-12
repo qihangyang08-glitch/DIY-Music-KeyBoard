@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l5",
+  "stage": "s6",
+  "index": 5,
+  "title": "弱起、收尾、反复",
+  "objectives": [
+    "弱起不抢第一拍。",
+    "最后一个音收干净。",
+    "看懂反复记号的范围。"
+  ],
+  "prerequisites": ["s6-l4"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s6-l5-b1",
+      "type": "text",
+      "title": "弱起与收尾",
+      "body": "弱起从第一拍之前进入，不要把弱起当第一拍。收尾通常有长音或渐弱，最后一个音要收干净，不要提前松或拖太久。"
+    },
+    {
+      "id": "s6-l5-b2",
+      "type": "text",
+      "title": "反复记号",
+      "body": "反复记号让一段再来一次。先看反复从哪开始、到哪结束；第一/第二结尾不要弄混。练习时先不反复，把主体练熟再加。"
+    },
+    {
+      "id": "s6-l5-demo",
+      "type": "demo",
+      "score": "farewell",
+      "tempo": 60,
+      "caption": "示范要点：听弱起进入与最后一个音的收尾。"
+    },
+    {
+      "id": "s6-l5-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "数完整小节，再把弱起放进去。",
+        "最后一个音保持到拍点再松。",
+        "打开「弱起与反复 · 8 小节」，从第 4 拍进入，按反复记号走两遍。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "弱起当第一拍了吗？", "type": "self"},
+    {"question": "最后一个音收干净了吗？", "type": "self"},
+    {"question": "反复范围标对了吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "弱起抢拍——整段提前。",
+    "收尾拖太久——尾声不干净。"
+  ],
+  "practice": "弱起与反复 · 8 小节",
+  "next": "s6-l6",
+  "tags": ["弱起", "收尾", "反复"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

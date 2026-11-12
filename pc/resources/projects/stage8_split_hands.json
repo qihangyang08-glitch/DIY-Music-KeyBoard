@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "title": "左手贝斯 + 右手钢琴",
+  "tempo": 92.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "键盘",
+      "program": 0,
+      "volume": 0.85,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "layer": null,
+      "split": null,
+      "notes": [
+        {
+          "start": 0.0,
+          "midi": 48,
+          "duration": 1.0
+        },
+        {
+          "start": 1.0,
+          "midi": 52,
+          "duration": 1.0
+        },
+        {
+          "start": 2.0,
+          "midi": 55,
+          "duration": 1.0
+        },
+        {
+          "start": 3.0,
+          "midi": 60,
+          "duration": 1.0
+        },
+        {
+          "start": 4.0,
+          "midi": 48,
+          "duration": 1.0
+        },
+        {
+          "start": 5.0,
+          "midi": 52,
+          "duration": 1.0
+        },
+        {
+          "start": 6.0,
+          "midi": 55,
+          "duration": 1.0
+        },
+        {
+          "start": 7.0,
+          "midi": 60,
+          "duration": 1.0
+        },
+        {
+          "start": 8.0,
+          "midi": 84,
+          "duration": 1.0
+        },
+        {
+          "start": 9.0,
+          "midi": 86,
+          "duration": 1.0
+        },
+        {
+          "start": 10.0,
+          "midi": 87,
+          "duration": 1.0
+        },
+        {
+          "start": 11.0,
+          "midi": 84,
+          "duration": 1.0
+        },
+        {
+          "start": 12.0,
+          "midi": 86,
+          "duration": 1.0
+        },
+        {
+          "start": 13.0,
+          "midi": 87,
+          "duration": 1.0
+        },
+        {
+          "start": 14.0,
+          "midi": 84,
+          "duration": 1.0
+        },
+        {
+          "start": 15.0,
+          "midi": 87,
+          "duration": 2.0
+        }
+      ]
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes",
+  "reverb": 0.1,
+  "exported": false
+}

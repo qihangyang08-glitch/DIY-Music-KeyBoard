@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "id": "s4-l6",
+  "stage": "s4",
+  "index": 6,
+  "title": "3/4 华尔兹",
+  "objectives": [
+    "弹「低音–和弦–和弦」伴奏型。",
+    "第一拍重，后两拍轻。",
+    "合手时第一拍对齐。"
+  ],
+  "prerequisites": [
+    "s4-l5"
+  ],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s4-l6-b1",
+      "type": "text",
+      "title": "华尔兹伴奏型",
+      "body": "3/4 华尔兹常用「低音–和弦–和弦」：第一拍低音，第二、三拍轻和弦。以 C 为例：第一拍 C，第二、三拍 E–G。数「1 2 3」，第一拍重，后两拍轻。"
+    },
+    {
+      "id": "s4-l6-b2",
+      "type": "text",
+      "title": "左手与右手错位",
+      "body": "左手第一拍低音时，右手旋律可能在某拍进入。先分手练，确认各自拍点，再合。合手时以左手第一拍为锚，右手不要跟着左手的和弦走。"
+    },
+    {
+      "id": "s4-l6-score",
+      "type": "staff",
+      "score": "minuet_3_4",
+      "caption": "3/4 拍的「低音–和弦–和弦」",
+      "alt": "五线谱：3/4 拍，左手第一拍低音，后两拍和弦。"
+    },
+    {
+      "id": "s4-l6-demo",
+      "type": "demo",
+      "score": "minuet_3_4",
+      "tempo": 80,
+      "caption": "示范要点：听「嘭—恰—恰」，第一拍低音，后两拍轻。"
+    },
+    {
+      "id": "s4-l6-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "左手单独弹 C 低音 + E–G 和弦，数 1 2 3。",
+        "右手弹一条 3/4 旋律，先分手。",
+        "打开「3/4 华尔兹 · 左手」，先弹左手，再合手慢速对齐。"
+      ]
+    }
+  ],
+  "check": [
+    {
+      "question": "第一拍是低音吗？",
+      "type": "self"
+    },
+    {
+      "question": "后两拍是否更轻？",
+      "type": "self"
+    },
+    {
+      "question": "合手时第一拍对齐吗？",
+      "type": "self"
+    }
+  ],
+  "mistakes": [
+    "后两拍也弹重——失去华尔兹感觉。",
+    "合手时右手抢第一拍。"
+  ],
+  "practice": "3/4 华尔兹 · 左手",
+  "next": "s4-l7",
+  "tags": [
+    "3/4",
+    "华尔兹"
+  ],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

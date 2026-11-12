@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s7-l6",
+  "stage": "s7",
+  "index": 6,
+  "title": "保存/导出",
+  "objectives": [
+    "保存项目 JSON 并能重新打开。",
+    "导出 MIDI 保留所有轨。",
+    "外部播放器能播放导出结果。"
+  ],
+  "prerequisites": ["s7-l5"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s7-l6-b1",
+      "type": "text",
+      "title": "项目文件",
+      "body": "项目 JSON 保存轨道、音符、音色、音量、声像、循环等信息。保存前先命名；下次打开能继续编辑。项目文件不是音频，不能直接分享给普通听众。"
+    },
+    {
+      "id": "s7-l6-b2",
+      "type": "text",
+      "title": "导出 MIDI",
+      "body": "MIDI 导出保留音符、音色、音量、声像与混响，但不含音频波形。外部播放器需要音源才能发声。导出后先在应用内回放，再在外部打开确认。"
+    },
+    {
+      "id": "s7-l6-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听导出后的 MIDI 回放，确认音符与混音信息。"
+    },
+    {
+      "id": "s7-l6-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "保存项目 JSON，关闭再打开确认。",
+        "导出 MIDI，记录文件位置。",
+        "用外部播放器打开，确认能播放。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "项目 JSON 能重新打开吗？", "type": "self"},
+    {"question": "导出包含所有轨吗？", "type": "self"},
+    {"question": "外部能播放吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "把项目 JSON 当音频分享——对方打不开。",
+    "导出前没检查静音/独奏——漏轨。"
+  ],
+  "practice": "导出 MIDI",
+  "next": "s8-l1",
+  "tags": ["保存", "导出"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

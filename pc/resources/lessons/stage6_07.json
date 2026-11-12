@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l7",
+  "stage": "s6",
+  "index": 7,
+  "title": "录音与自评",
+  "objectives": [
+    "完整录一遍，不中途重来。",
+    "先听整体节奏，再听错音。",
+    "只定 1–2 个下次目标。"
+  ],
+  "prerequisites": ["s6-l6"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s6-l7-b1",
+      "type": "text",
+      "title": "录一遍",
+      "body": "录音只记录，不打断。按下录音后完整弹一遍，错了也继续。录完再回放，不要边录边改。"
+    },
+    {
+      "id": "s6-l7-b2",
+      "type": "text",
+      "title": "自评顺序",
+      "body": "回放先听整体：速度是否稳定、有没有停、句子是否清楚。再听细节：错音、漏音、踏板。最后只定 1–2 个下次要改的点。"
+    },
+    {
+      "id": "s6-l7-demo",
+      "type": "demo",
+      "score": "fur_elise_theme",
+      "tempo": 60,
+      "caption": "示范要点：听录音回放，先听节奏，再听错音。"
+    },
+    {
+      "id": "s6-l7-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "打开「录音自评」，完整录一遍，不停不重来。",
+        "回放，先记节奏问题，再记错音。",
+        "写下下次要改的 1–2 个点。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "录音时停下来了吗？", "type": "self"},
+    {"question": "先听整体再听细节吗？", "type": "self"},
+    {"question": "下次目标只有 1–2 个吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "边录边改——录不到完整演奏。",
+    "一次列太多问题——练不过来。"
+  ],
+  "practice": "录音自评",
+  "next": "s7-l1",
+  "tags": ["录音", "自评"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

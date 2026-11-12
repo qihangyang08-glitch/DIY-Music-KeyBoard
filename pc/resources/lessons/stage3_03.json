@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s3-l3",
+  "stage": "s3",
+  "index": 3,
+  "title": "C 大调音阶",
+  "objectives": [
+    "说出 C 大调音阶的所有音名。",
+    "上行穿指、下行跨指时不断音。",
+    "一个八度上下行速度均匀。"
+  ],
+  "prerequisites": ["s3-l2"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s3-l3-b1",
+      "type": "text",
+      "title": "C 大调没有升降",
+      "body": "C 大调音阶是 C D E F G A B C，全部白键，没有升降号。上行从 C 开始，到高八度 C；下行反过来。先一个八度，慢速，听每个音是否均匀。"
+    },
+    {
+      "id": "s3-l3-b2",
+      "type": "text",
+      "title": "穿指与跨指",
+      "body": "上行时，1 指从 3 指下面穿过去，接在 F 后面弹 G；下行时，3 指跨过 1 指。穿指时手腕保持平稳，不要抬高肘部。先分两段练：C–F 和 G–C，再连起来。"
+    },
+    {
+      "id": "s3-l3-demo",
+      "type": "demo",
+      "score": "scale_c_major_updown",
+      "tempo": 60,
+      "caption": "示范要点：一个八度上下行，注意穿指处不断音。"
+    },
+    {
+      "id": "s3-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "右手一个八度上行，慢速，穿指处停一下确认手型。",
+        "下行反过来，注意跨指。",
+        "打开「C 大调音阶上下行」跟弹 8 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能说出 C 大调音阶的所有音名吗？", "type": "self"},
+    {"question": "穿指时手腕平稳吗？", "type": "self"},
+    {"question": "上下行速度均匀吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "穿指时抬肘——声音会断。",
+    "越弹越快——跟节拍器。"
+  ],
+  "practice": "C 大调音阶上下行",
+  "next": "s3-l4",
+  "tags": ["音阶", "穿指"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

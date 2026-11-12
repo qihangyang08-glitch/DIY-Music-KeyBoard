@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "id": "s0-l2",
+  "stage": "s0",
+  "index": 2,
+  "title": "电脑键位与延音",
+  "objectives": [
+    "认识底部、中部、顶部三行默认键位。",
+    "按住 Shift 延音，松开后声音一起收掉。",
+    "知道 Esc 是全部静音。"
+  ],
+  "prerequisites": ["s0-l1"],
+  "duration_min": 4,
+  "blocks": [
+    {
+      "id": "s0-l2-b1",
+      "type": "text",
+      "title": "三行键位",
+      "body": "电脑键盘和实体琴共用同一台乐器。默认三行：最下面一行 Z X C…，中间一行 A S D…，上面一行 Q W E…；从左到右仍然是音高升高。记键位时记「物理位置」而不是字母：切换到中文输入法后，字母会变，但位置不变。按 Ctrl+Tab 可以在光条上显示当前键帽。"
+    },
+    {
+      "id": "s0-l2-b2",
+      "type": "text",
+      "title": "延音：按住，不是切换",
+      "body": "Shift 是延音。按住 Shift 再弹音，松开琴键后声音继续；松开 Shift，所有延音一起收掉。它像钢琴的右踏板，不是开关。练习时先把 Shift 按住，弹 3–4 个音，再松开，听声音一起结束。"
+    },
+    {
+      "id": "s0-l2-b3",
+      "type": "text",
+      "title": "全部静音",
+      "body": "Esc 是全部静音。出现卡音、按错或想立刻停止时，按 Esc，所有声音立刻停止。它不会改键位、也不会退出页面，只负责把声音收干净。停止以后可以直接继续弹。"
+    },
+    {
+      "id": "s0-l2-demo",
+      "type": "demo",
+      "score": "xiaoxingxing",
+      "tempo": 60,
+      "caption": "示范要点：按住 Shift 弹 C4–E4–G4，保持住，再松开 Shift 听声音一起收掉。"
+    },
+    {
+      "id": "s0-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "在键盘上找到 Z / A / Q 三个起点，各按一次，确认都能发声。",
+        "按住 Shift，慢速弹 C4–D4–E4；保持 Shift 两秒再松开。",
+        "按 Esc，确认所有声音立刻停止；再弹一个音确认乐器仍可用。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能闭眼找到 Z / A / Q 三个起点吗？", "type": "self"},
+    {"question": "按住 Shift 弹 4 个音后松开，声音是一起收掉的吗？", "type": "self"},
+    {"question": "出现卡音时，知道先按 Esc 吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "把 Shift 当成切换——它必须一直按住。",
+    "在搜索框或文本框里按琴键——输入框会优先接收文字，先点回页面再弹。"
+  ],
+  "practice": "延音与全部静音",
+  "next": "s0-l3",
+  "tags": ["上手", "键位", "延音"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

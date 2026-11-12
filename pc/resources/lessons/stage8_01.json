@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s8-l1",
+  "stage": "s8",
+  "index": 1,
+  "title": "音色叠加",
+  "objectives": [
+    "知道叠加是同一条轨两个音色。",
+    "两个音色音量平衡。",
+    "能听出叠加前后的厚度差别。"
+  ],
+  "prerequisites": ["s7-l6"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s8-l1-b1",
+      "type": "text",
+      "title": "叠加是什么",
+      "body": "叠加让同一条轨同时发两个音色，例如钢琴 + 弦乐。两个音色弹同一串音，听起来更厚。叠加不是多录一轨；它是一条轨的两个声部。"
+    },
+    {
+      "id": "s8-l1-b2",
+      "type": "text",
+      "title": "叠加的平衡",
+      "body": "两个音色音量要平衡：主音色稍响，副音色垫底。同音区叠加容易浑浊，可以给副音色换低八度或降低音量。"
+    },
+    {
+      "id": "s8-l1-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听单音色与叠加后的厚度差别。"
+    },
+    {
+      "id": "s8-l1-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "给一条轨开叠加，选第二个音色。",
+        "调两个音色的音量比例。",
+        "打开「双层音色」项目，完成叠加。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "叠加是两个音色同一条轨吗？", "type": "self"},
+    {"question": "两个音色平衡吗？", "type": "self"},
+    {"question": "同音区浑浊吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "叠加当成多录一轨——轨数浪费。",
+    "副音色太响——主音色不清。"
+  ],
+  "practice": "双层音色",
+  "next": "s8-l2",
+  "tags": ["音色叠加", "分层"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

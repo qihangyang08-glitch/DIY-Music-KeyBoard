@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s3-l5",
+  "stage": "s3",
+  "index": 5,
+  "title": "音程与跳进",
+  "objectives": [
+    "区分三度、五度与八度。",
+    "跳进时整只手移动，不只伸手指。",
+    "落键后稳定，不滑音。"
+  ],
+  "prerequisites": ["s3-l4"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s3-l5-b1",
+      "type": "text",
+      "title": "音程距离",
+      "body": "三度是隔一个音级，例如 C–E；五度是跨四个音级，例如 C–G；八度是同名音，例如 C4–C5。读谱时先看两个音相距几线几间，再决定手指跨度。"
+    },
+    {
+      "id": "s3-l5-b2",
+      "type": "text",
+      "title": "跳进的手型",
+      "body": "跳进时整只手移动，不要只伸某一个手指。三度用手位内的相邻手指；五度、八度需要手位移动或张开。跳之前眼睛先到目标音，手再过去；落键后立刻稳定，不要滑音。"
+    },
+    {
+      "id": "s3-l5-demo",
+      "type": "demo",
+      "score": "intervals_seconds_thirds",
+      "tempo": 60,
+      "caption": "示范要点：分别听三度、五度、八度，注意跨度越大手移动越多。"
+    },
+    {
+      "id": "s3-l5-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "在 C 位置弹 C–E（三度）、C–G（五度）、C–C（八度）。",
+        "打乱顺序，听到目标音再移动。",
+        "打开「二度与三度音程」跟弹 8 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能说出三度与五度的区别吗？", "type": "self"},
+    {"question": "跳进时是整只手移动吗？", "type": "self"},
+    {"question": "落键后有没有滑音？", "type": "self"}
+  ],
+  "mistakes": [
+    "只伸手指不移动手——容易按错。",
+    "跳之前不看目标——落点不准。"
+  ],
+  "practice": "二度与三度音程",
+  "next": "s3-l6",
+  "tags": ["音程", "跳进"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

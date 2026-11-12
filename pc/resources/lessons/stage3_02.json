@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "id": "s3-l2",
+  "stage": "s3",
+  "index": 2,
+  "title": "五指位置 G/F",
+  "objectives": [
+    "整只手平移到 G 或 F 位置。",
+    "移动时保持手型不变。",
+    "移动后不看手也能找到 1 指。"
+  ],
+  "prerequisites": [
+    "s3-l1"
+  ],
+  "duration_min": 4,
+  "blocks": [
+    {
+      "id": "s3-l2-b1",
+      "type": "text",
+      "title": "手位移动",
+      "body": "五指位置不是固定在 C。把整只手平移到 G，1–5 指就对应 G–D；平移到 F，就对应 F–C。移动时保持手型不变，拇指不要钻到手掌下面。先慢速找到新位置，再弹。"
+    },
+    {
+      "id": "s3-l2-b2",
+      "type": "text",
+      "title": "G 与 F 的位置",
+      "body": "G 五指位置：1 指 G，2 指 A，3 指 B，4 指 C，5 指 D。F 五指位置常用 F–G–A–B♭–C；如果谱面写 B♮，按谱面为准。先确认 1 指位置，再排其他手指。"
+    },
+    {
+      "id": "s3-l2-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：同一段五指练习从 C 移到 G，再移到 F。"
+    },
+    {
+      "id": "s3-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "在 C 位置弹 1–2–3–4–5，然后整体平移到 G 再弹一次。",
+        "平移到 F，确认 1 指在 F。",
+        "打开「五指位置 · G/F」，在 G 与 F 两个位置各弹 4 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {
+      "question": "移动时手型变了吗？",
+      "type": "self"
+    },
+    {
+      "question": "能快速找到 G 位置的 1 指吗？",
+      "type": "self"
+    },
+    {
+      "question": "F 位置的 4 指知道按哪个音吗？",
+      "type": "self"
+    }
+  ],
+  "mistakes": [
+    "移动时拇指钻到掌心——手型会变形。",
+    "只看手找位置——舞台上来不及。"
+  ],
+  "practice": "五指位置 · G/F",
+  "next": "s3-l3",
+  "tags": [
+    "五指位置",
+    "换位"
+  ],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

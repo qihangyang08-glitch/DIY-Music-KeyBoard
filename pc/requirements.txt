@@ -1,0 +1,6 @@
+# Desktop app dependencies (Python 3.11).
+# FluidSynth DLLs and the SoundFont are vendored under
+# pc/prototype/vendor (see app/README.md "运行").
+PySide6==6.12.0
+pyserial==3.5
+pyfluidsynth==1.4.0

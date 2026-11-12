@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s8-l3",
+  "stage": "s8",
+  "index": 3,
+  "title": "三轨编配",
+  "objectives": [
+    "给旋律、和声、低音分工。",
+    "每轨只做一件事。",
+    "避免频段互相打架。"
+  ],
+  "prerequisites": ["s8-l2"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s8-l3-b1",
+      "type": "text",
+      "title": "三个角色",
+      "body": "三轨常见分工：旋律（高音、突出）、和声（中音、铺底）、低音（低音、稳定）。每轨只做一件事，不要三轨都弹旋律。"
+    },
+    {
+      "id": "s8-l3-b2",
+      "type": "text",
+      "title": "频段与音量",
+      "body": "低音占低频，旋律占中高频，和声在中间。音量上旋律稍响、低音稳定、和声最轻。用静音/独奏检查每轨是否必要。"
+    },
+    {
+      "id": "s8-l3-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听三轨合起来是否层次清楚。"
+    },
+    {
+      "id": "s8-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "分别写旋律、和声、低音三轨。",
+        "给每轨选合适音色与音量。",
+        "打开「三轨编配」项目，完成三轨。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "三轨角色清楚吗？", "type": "self"},
+    {"question": "频段打架吗？", "type": "self"},
+    {"question": "每轨都必要吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "三轨都弹旋律——没有层次。",
+    "低音太轻——失去支撑。"
+  ],
+  "practice": "三轨编配",
+  "next": "s8-l4",
+  "tags": ["三轨", "编配"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

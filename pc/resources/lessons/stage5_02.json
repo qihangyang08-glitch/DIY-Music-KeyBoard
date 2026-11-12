@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "s5-l2",
+  "stage": "s5",
+  "index": 2,
+  "title": "双手同音/八度",
+  "objectives": [
+    "双手同音能同时到达。",
+    "八度时左手在低八度。",
+    "能听出两音是否整齐。"
+  ],
+  "prerequisites": ["s5-l1"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s5-l2-b1",
+      "type": "text",
+      "title": "同音与八度",
+      "body": "双手同音是左右手弹同一个音，八度是左手低八度、右手高八度。两种都要求两个音同时到达。先慢速，听两个音是否像一个音；如果听到「嗒嗒」两声，就是没对齐。"
+    },
+    {
+      "id": "s5-l2-b2",
+      "type": "text",
+      "title": "对齐的方法",
+      "body": "以左手或右手为锚，另一只手跟着。先每小节第一拍对齐，再对齐其他拍。不要两只手各自数拍；用同一套拍子。"
+    },
+    {
+      "id": "s5-l2-score",
+      "type": "staff",
+      "score": "ode_to_joy_both",
+      "caption": "双手同音与八度的谱面",
+      "alt": "五线谱：右手旋律，左手在下方低八度或同音。"
+    },
+    {
+      "id": "s5-l2-demo",
+      "type": "demo",
+      "score": "ode_to_joy_both",
+      "tempo": 60,
+      "caption": "示范要点：听双手同音是否像一个音，八度是否同时到达。"
+    },
+    {
+      "id": "s5-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "双手弹同一个 C，慢速对齐 8 次。",
+        "左手低八度、右手高八度，弹 C–G–C。",
+        "打开「欢乐颂 · 双手版」，找同音/八度处慢速对齐。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "两个音同时到达吗？", "type": "self"},
+    {"question": "能听出「嗒嗒」两声吗？", "type": "self"},
+    {"question": "八度时左手在低音吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "两手各自数拍——容易错位。",
+    "只对齐第一拍——后面散掉。"
+  ],
+  "practice": "欢乐颂 · 双手版",
+  "next": "s5-l3",
+  "tags": ["同音", "八度"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

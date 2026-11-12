@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "s3-l1",
+  "stage": "s3",
+  "index": 1,
+  "title": "五指位置 C",
+  "objectives": [
+    "知道 1–5 指对应 C–G。",
+    "保持放松的手型，手指能独立抬起。",
+    "在五指位置内弹清楚五个音。"
+  ],
+  "prerequisites": ["s2-l6"],
+  "duration_min": 4,
+  "blocks": [
+    {
+      "id": "s3-l1-b1",
+      "type": "text",
+      "title": "五个手指五个音",
+      "body": "右手五指位置：拇指 1 指放 C，食指 2 指 D，中指 3 指 E，无名指 4 指 F，小指 5 指 G。五个音刚好覆盖五条相邻的光条或白键。先不用移动手，把五个音逐个按响，确认每个手指都能独立抬起。"
+    },
+    {
+      "id": "s3-l1-b2",
+      "type": "text",
+      "title": "手型与用力",
+      "body": "手腕与琴面大致平行，手指自然弯曲，像握着一个小球。按键时手指向下，手腕不要塌下去，也不要抬肩。力度来自手指落下，不是压手腕；压得越重不会更响。"
+    },
+    {
+      "id": "s3-l1-figure",
+      "type": "image",
+      "src": "images/five_finger_c.png",
+      "caption": "右手五指位置",
+      "alt": "五个相邻白键 C4–G4，上方标着 1–5 指。"
+    },
+    {
+      "id": "s3-l1-demo",
+      "type": "demo",
+      "score": "xiaoxingxing",
+      "tempo": 60,
+      "caption": "示范要点：C–D–E–F–G 五个音逐个响，听每个音是否一样清楚。"
+    },
+    {
+      "id": "s3-l1-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "把 1–5 指分别放在 C–G 上，按顺序弹一遍。",
+        "倒序 G–F–E–D–C，保持手型不塌。",
+        "打开「五指位置 · C–G」，跟弹《小星星》片段。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "1 指与 5 指能独立抬起吗？", "type": "self"},
+    {"question": "手腕是否保持平稳？", "type": "self"},
+    {"question": "五个音是否一样清楚？", "type": "self"}
+  ],
+  "mistakes": [
+    "手腕塌下去用压的——手指会失去独立。",
+    "小指翘起不按键——5 指也要放松落下。"
+  ],
+  "practice": "五指位置 · C–G",
+  "next": "s3-l2",
+  "tags": ["五指位置", "右手"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

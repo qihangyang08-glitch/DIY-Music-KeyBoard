@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "title": "左手贝斯 + 右手钢琴",
+  "tempo": 92.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "左手贝斯",
+      "program": 32,
+      "volume": 0.7,
+      "pan": -0.35,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    },
+    {
+      "name": "右手钢琴",
+      "program": 0,
+      "volume": 0.85,
+      "pan": 0.25,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}

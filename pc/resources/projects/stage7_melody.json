@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "录一条旋律",
+  "tempo": 100.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "旋律",
+      "program": 0,
+      "volume": 0.9,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}

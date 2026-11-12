@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s1-l3",
+  "stage": "s1",
+  "index": 3,
+  "title": "音名与八度",
+  "objectives": [
+    "知道音名按 C D E F G A B 循环。",
+    "知道 C4 与 C5 相差八度，频率 ×2。",
+    "能在谱面与光条之间对应同名音。"
+  ],
+  "prerequisites": ["s1-l2"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s1-l3-b1",
+      "type": "text",
+      "title": "音名循环",
+      "body": "音名按 C D E F G A B 循环；到 B 之后又回到 C，但音高更高，这时叫高八度。C4 到 C5 是八度，频率正好翻倍。钢琴上每隔 12 个半音出现一次同名音，所以在 32 键光条上会看到同名音在不同位置重复。"
+    },
+    {
+      "id": "s1-l3-b2",
+      "type": "text",
+      "title": "中央 C 只是名字",
+      "body": "「中央 C」指 C4，是钢琴键盘中间附近的 C，不是最低或最高的 C。训练里 C4 可能被放在第 1 条光条，也可能因映射不同出现在别处；先看训练顶部的音名提示，再按。不要把「第 1 条」当成固定音名。"
+    },
+    {
+      "id": "s1-l3-demo",
+      "type": "demo",
+      "score": "xiaoxingxing",
+      "tempo": 60,
+      "caption": "示范要点：先弹 C4，再弹 C5，听同一个音名但更高。"
+    },
+    {
+      "id": "s1-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "在光条上找到两个 C，分别按下，听高低差别。",
+        "说出 C4 到 C5 中间经过的音名。",
+        "打开「八度上下行」，完成 10 题。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能说出 C4 与 C5 相差几度吗？", "type": "self"},
+    {"question": "能听出同名音的高八度吗？", "type": "self"},
+    {"question": "知道训练里的 C4 不一定总在第 1 条吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "把 C5 当成另一个音名——它仍是 C。",
+    "以为同名音频率相同——高八度是 ×2。"
+  ],
+  "practice": "八度上下行",
+  "next": "s1-l4",
+  "tags": ["八度", "音名"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

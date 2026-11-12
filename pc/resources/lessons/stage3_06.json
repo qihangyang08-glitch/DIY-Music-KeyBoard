@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s3-l6",
+  "stage": "s3",
+  "index": 6,
+  "title": "乐句与呼吸",
+  "objectives": [
+    "数出 4 小节一句。",
+    "句尾稍收，句头重新进入。",
+    "换句时拍子不停。"
+  ],
+  "prerequisites": ["s3-l5"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s3-l6-b1",
+      "type": "text",
+      "title": "乐句像说话",
+      "body": "乐句是旋律的句子，常见 4 小节一句。句尾通常有长音或停顿，句头重新进入。弹的时候不要每个音都一样重；句尾稍收，下一句再起来。先唱一遍，再弹。"
+    },
+    {
+      "id": "s3-l6-b2",
+      "type": "text",
+      "title": "呼吸点",
+      "body": "呼吸点通常在句尾的长音后。手上可以稍微抬腕或断开一点点，表示换句；但拍子不能停。先数拍找到句尾，再决定在哪里呼吸。"
+    },
+    {
+      "id": "s3-l6-demo",
+      "type": "demo",
+      "score": "ode_to_joy",
+      "tempo": 60,
+      "caption": "示范要点：听 4 小节一句，句尾收住，下一句重新进入。"
+    },
+    {
+      "id": "s3-l6-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "唱一遍旋律，标出每 4 小节的句尾。",
+        "弹一句，句尾稍收；第二句句头再起来。",
+        "打开「欢乐颂」跟弹，注意 4 小节乐句。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能数出 4 小节一句吗？", "type": "self"},
+    {"question": "句尾会稍收吗？", "type": "self"},
+    {"question": "换句时拍子停了吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "每个音一样重——听起来没有句子。",
+    "换句时停下来——拍子会丢。"
+  ],
+  "practice": "欢乐颂",
+  "next": "s3-l7",
+  "tags": ["乐句", "呼吸"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

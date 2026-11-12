@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "钢琴独奏",
+  "tempo": 100.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "钢琴",
+      "program": 0,
+      "volume": 0.9,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}

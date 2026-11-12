@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "title": "导出项目",
+  "tempo": 100.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "旋律",
+      "program": 0,
+      "volume": 0.85,
+      "pan": 0.15,
+      "mute": false,
+      "solo": false,
+      "notes": [
+        {
+          "start": 0.0,
+          "midi": 72,
+          "duration": 1.0
+        },
+        {
+          "start": 1.0,
+          "midi": 71,
+          "duration": 1.0
+        },
+        {
+          "start": 2.0,
+          "midi": 69,
+          "duration": 1.0
+        },
+        {
+          "start": 3.0,
+          "midi": 67,
+          "duration": 2.0
+        }
+      ]
+    },
+    {
+      "name": "低音",
+      "program": 32,
+      "volume": 0.7,
+      "pan": -0.25,
+      "mute": false,
+      "solo": false,
+      "notes": [
+        {
+          "start": 0.0,
+          "midi": 48,
+          "duration": 2.0
+        },
+        {
+          "start": 2.0,
+          "midi": 50,
+          "duration": 2.0
+        },
+        {
+          "start": 4.0,
+          "midi": 48,
+          "duration": 2.0
+        },
+        {
+          "start": 6.0,
+          "midi": 50,
+          "duration": 2.0
+        }
+      ]
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes",
+  "reverb": 0.15,
+  "exported": false
+}

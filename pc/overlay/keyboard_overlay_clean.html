@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>KeyBorad overlay — clean</title>
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #1a1a1a;
+    font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif; }
+  .page { position: relative; width: 210mm; height: 297mm; overflow: hidden;
+    page-break-after: always; background: #fff; }
+  .page:last-child { page-break-after: auto; }
+  .kb { position: absolute; top: 80mm; width: 380mm; height: 90mm; }
+  .kb1 { left: 10mm; }
+  .kb2 { left: -180mm; }
+  .h1 { position: absolute; left: 15mm; top: 15mm; font-size: 5.2mm; font-weight: 600;
+    letter-spacing: .06em; }
+  .h2 { position: absolute; left: 15mm; top: 24mm; font-size: 2.6mm; color: #666; }
+  .h2b { left: 25mm; }
+  .hint { position: absolute; left: 15mm; top: 63mm; font-size: 2.4mm; color: #555; }
+  .seam { position: absolute; top: 69mm; font-size: 2.5mm; color: #8a5a1d;
+    background: #fff7e8; border: 0.2mm solid #e3c48b; padding: 1.4mm 2.4mm; }
+  .seam1 { left: 140mm; }
+  .seam2 { left: 30mm; }
+  .mark { position: absolute; width: 6mm; height: 6mm; }
+  .mark::before, .mark::after { content: ""; position: absolute; background: #111; }
+  .mark::before { left: 2.9mm; top: 0; width: 0.25mm; height: 6mm; }
+  .mark::after { left: 0; top: 2.9mm; width: 6mm; height: 0.25mm; }
+  .alignline { position: absolute; top: 74mm; height: 102mm; border-left: 0.2mm dashed #999; }
+  .ruler { position: absolute; top: 42mm; }
+  .steps { position: absolute; left: 15mm; top: 186mm; width: 180mm; font-size: 2.35mm;
+    line-height: 1.72; color: #444; }
+  .steps b { color: #111; }
+  .note { position: absolute; left: 15mm; top: 258mm; width: 180mm; font-size: 2.2mm;
+    color: #666; line-height: 1.65; }
+  .cutlabel { position: absolute; left: 15mm; top: 183mm; font-size: 2.7mm; font-weight: 600; }
+  .foot { position: absolute; left: 15mm; bottom: 7mm; font-size: 2.0mm; color: #888; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="h1">KeyBorad · 32 键面板 · 1:1</div>
+  <div class="h2">第 1 / 2 张 · A4 竖向 210 × 297 mm · 实际大小 100%（不要选“适应页面”）</div>
+  <div class="ruler" style="left:15mm"><svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="8mm" viewBox="0 0 100 8"><line x1="0" y1="8" x2="100" y2="8" stroke="#333" stroke-width="0.3"/><line x1="0" y1="8" x2="0" y2="4.8" stroke="#333" stroke-width="0.25"/><text x="0.4" y="3.2" text-anchor="start" font-size="2.2" fill="#555">0</text><line x1="10" y1="8" x2="10" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="20" y1="8" x2="20" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="30" y1="8" x2="30" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="40" y1="8" x2="40" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="50" y1="8" x2="50" y2="4.8" stroke="#333" stroke-width="0.25"/><text x="50" y="3.2" text-anchor="middle" font-size="2.2" fill="#555">50</text><line x1="60" y1="8" x2="60" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="70" y1="8" x2="70" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="80" y1="8" x2="80" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="90" y1="8" x2="90" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="100" y1="8" x2="100" y2="4.8" stroke="#333" stroke-width="0.25"/><text x="99.6" y="3.2" text-anchor="end" font-size="2.2" fill="#555">100</text></svg></div>
+  <div class="hint">用尺量上面这段应为 100 mm；不对就重打。</div>
+
+  <div class="kb kb1"><svg xmlns="http://www.w3.org/2000/svg" width="380mm" height="90mm" viewBox="0 0 380 90"><rect x="36.0" y="0" width="308" height="40" fill="none" stroke="#c7c2b6" stroke-width="0.25"/><line x1="0" y1="40" x2="380" y2="40" stroke="#b8b3a7" stroke-width="0.25"/><rect x="0" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="20" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="40" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="60" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="80" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="100" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="120" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="140" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="160" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="180" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="200" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="220" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="240" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="260" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="280" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="300" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="320" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="340" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="360" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="36.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="60.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="84.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="108.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="132.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="156.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="180.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="204.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="228.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="252.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="276.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="300.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="324.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="0.15" y="0.15" width="379.7" height="89.7" fill="none" stroke="#1a1a1a" stroke-width="0.3"/></svg></div>
+
+  <div class="alignline" style="left:200mm"></div>
+  <div class="mark" style="left:197mm;top:74mm"></div>
+  <div class="mark" style="left:197mm;top:170mm"></div>
+  <div class="seam seam1">接缝：与第 2 张重叠 20 mm，对齐虚线</div>
+
+  <div class="cutlabel">可选：黑色键帽片 20 × 40 mm × 13</div>
+  <div style="position:absolute;left:15mm;top:188mm;font-size:2.1mm;color:#666">剪下后垫在对应黑键上，可获得 1–2 mm 高度。</div>
+  <div style="position:absolute;left:23.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">1</div><div style="position:absolute;left:47.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">2</div><div style="position:absolute;left:71.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">3</div><div style="position:absolute;left:95.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">4</div><div style="position:absolute;left:119.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">5</div><div style="position:absolute;left:143.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">6</div><div style="position:absolute;left:167.0mm;top:194mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">7</div><div style="position:absolute;left:35.0mm;top:240mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">8</div><div style="position:absolute;left:59.0mm;top:240mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">9</div><div style="position:absolute;left:83.0mm;top:240mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">10</div><div style="position:absolute;left:107.0mm;top:240mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">11</div><div style="position:absolute;left:131.0mm;top:240mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">12</div><div style="position:absolute;left:155.0mm;top:240mm;width:20mm;height:40mm;background:#101010;border:0.3mm dashed #ffffff;box-sizing:border-box;color:#d9cdb6;font-size:2.2mm;text-align:center;padding-top:34mm">13</div>
+
+  <div class="foot">第 1 张：裁左、上、下三边；右边是接缝，不要裁。第 2 张：保留左侧 20 mm 重叠区，只裁上、下、右三边。<br>
+  接缝在 A5 / B5 之间，且落在 G#5 / A#5 的黑键白缝里。建议 100–150 g 哑光纸或薄 PVC；覆盖后请重新校准阈值。此图只含 32 个琴键。</div>
+</div>
+
+<div class="page">
+  <div class="h1">KeyBorad · 32 键面板 · 1:1</div>
+  <div class="h2 h2b">第 2 / 2 张 · A4 竖向 210 × 297 mm · 左侧 20 mm 重叠</div>
+  <div class="ruler" style="left:100mm"><svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="8mm" viewBox="0 0 100 8"><line x1="0" y1="8" x2="100" y2="8" stroke="#333" stroke-width="0.3"/><line x1="0" y1="8" x2="0" y2="4.8" stroke="#333" stroke-width="0.25"/><text x="0.4" y="3.2" text-anchor="start" font-size="2.2" fill="#555">0</text><line x1="10" y1="8" x2="10" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="20" y1="8" x2="20" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="30" y1="8" x2="30" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="40" y1="8" x2="40" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="50" y1="8" x2="50" y2="4.8" stroke="#333" stroke-width="0.25"/><text x="50" y="3.2" text-anchor="middle" font-size="2.2" fill="#555">50</text><line x1="60" y1="8" x2="60" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="70" y1="8" x2="70" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="80" y1="8" x2="80" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="90" y1="8" x2="90" y2="6.2" stroke="#333" stroke-width="0.25"/><line x1="100" y1="8" x2="100" y2="4.8" stroke="#333" stroke-width="0.25"/><text x="99.6" y="3.2" text-anchor="end" font-size="2.2" fill="#555">100</text></svg></div>
+  <div class="hint">键盘部分：0–200 mm；右侧 10 mm 留白可裁掉。</div>
+
+  <div class="kb kb2"><svg xmlns="http://www.w3.org/2000/svg" width="380mm" height="90mm" viewBox="0 0 380 90"><rect x="36.0" y="0" width="308" height="40" fill="none" stroke="#c7c2b6" stroke-width="0.25"/><line x1="0" y1="40" x2="380" y2="40" stroke="#b8b3a7" stroke-width="0.25"/><rect x="0" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="20" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="40" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="60" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="80" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="100" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="120" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="140" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="160" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="180" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="200" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="220" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="240" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="260" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="280" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="300" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="320" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="340" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="360" y="40" width="20" height="50" fill="#fcfbf7" stroke="#1a1a1a" stroke-width="0.25"/><rect x="36.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="60.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="84.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="108.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="132.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="156.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="180.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="204.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="228.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="252.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="276.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="300.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="324.0" y="0" width="20" height="40" fill="#101010" stroke="#000000" stroke-width="0.2"/><rect x="0.15" y="0.15" width="379.7" height="89.7" fill="none" stroke="#1a1a1a" stroke-width="0.3"/></svg></div>
+
+  <div class="alignline" style="left:10mm"></div>
+  <div class="mark" style="left:7mm;top:74mm"></div>
+  <div class="mark" style="left:7mm;top:170mm"></div>
+  <div class="seam seam2">← 重叠区 20 mm：对齐虚线 / 上下十字</div>
+
+  <div class="steps">
+    <b>拼接步骤</b><br>
+    1. 两页都按 100% 打印，先用 100 mm 校准尺核对。<br>
+    2. 第 1 张裁左、上、下；右边是接缝，不要裁。第 2 张保留左侧 20 mm，只裁上、下、右。<br>
+    3. 把第 2 张左侧 20 mm 叠到第 1 张右侧，让虚线 + 上下十字重合。<br>
+    4. 从背面胶带固定；接缝在 A5 / B5 之间，黑键白缝处。<br>
+    5. 可选：把第 1 张下方的 13 个黑键片剪下，垫高 1–2 mm。<br>
+    6. 覆盖后跑一次阈值校准（静置 / 悬停 / 逐键）。
+  </div>
+
+  <div class="note">
+    尺寸：白键 20 × 50 mm × 19；黑键 20 × 40 mm × 13，白缝 4 mm；总宽 380 mm，总深 90 mm。<br>
+    下排白键 19 个连续排列；上排黑键单独一排，居中放置，同组不再相接。<br>
+    黑键排与白键排分开；黑键白缝宽度可改成 3–5 mm（改脚本里的 BLACK_GAP 后重新生成）。
+  </div>
+
+  <div class="foot">第 2 张 · 与第 1 张重叠 20 mm · 接缝对齐后从背面固定</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run KeyBorad PC",
+      "type": "shell",
+      "command": "python",
+      "args": ["pc/app/main.py"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test KeyBorad PC",
+      "type": "shell",
+      "command": "python",
+      "args": ["-m", "unittest", "discover", "-s", "tests", "-v"],
+      "options": { "cwd": "${workspaceFolder}/pc" },
+      "problemMatcher": []
+    }
+  ]
+}

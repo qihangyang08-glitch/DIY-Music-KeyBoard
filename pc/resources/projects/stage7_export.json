@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "title": "导出 MIDI",
+  "tempo": 96.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "旋律",
+      "program": 0,
+      "volume": 0.9,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": [
+        {"start": 0.0, "midi": 60, "duration": 0.5},
+        {"start": 1.0, "midi": 62, "duration": 0.5},
+        {"start": 2.0, "midi": 64, "duration": 0.5},
+        {"start": 3.0, "midi": 65, "duration": 0.5},
+        {"start": 4.0, "midi": 67, "duration": 0.5},
+        {"start": 5.0, "midi": 69, "duration": 0.5},
+        {"start": 6.0, "midi": 71, "duration": 0.5},
+        {"start": 7.0, "midi": 72, "duration": 1.0}
+      ]
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes",
+  "reverb": 0.0,
+  "exported": false,
+  "quantize_grid": 0.0,
+  "count_in_used": false,
+  "metronome_used": false
+}

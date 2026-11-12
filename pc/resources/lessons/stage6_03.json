@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l3",
+  "stage": "s6",
+  "index": 3,
+  "title": "连奏/断奏/重音",
+  "objectives": [
+    "区分连奏、断奏与重音。",
+    "重音靠触键，不砸键。",
+    "按谱面记号切换奏法。"
+  ],
+  "prerequisites": ["s6-l2"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s6-l3-b1",
+      "type": "text",
+      "title": "三种奏法",
+      "body": "连奏不断开，断奏短促，重音是某个音更突出。重音靠触键速度和前臂重量，不是砸键；重音之后立刻回到正常音量。"
+    },
+    {
+      "id": "s6-l3-b2",
+      "type": "text",
+      "title": "按谱面切换",
+      "body": "谱面的连音线、圆点、重音记号决定奏法。先看记号，再决定手指动作。同一段可以先用连奏练熟，再按记号切换。"
+    },
+    {
+      "id": "s6-l3-demo",
+      "type": "demo",
+      "score": "legato_staccato",
+      "tempo": 60,
+      "caption": "示范要点：听同一段连奏、断奏、加重音三种效果。"
+    },
+    {
+      "id": "s6-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "同一段分别用连奏、断奏各弹一遍。",
+        "在指定音上加轻微重音，不砸键。",
+        "打开「连奏/断奏/重音」，按谱面切换奏法。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "三种奏法能区分吗？", "type": "self"},
+    {"question": "重音后回到正常音量吗？", "type": "self"},
+    {"question": "会先看谱面记号吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "重音砸键——声音刺耳。",
+    "全曲一种奏法——没有表情。"
+  ],
+  "practice": "连奏/断奏/重音",
+  "next": "s6-l4",
+  "tags": ["连奏", "断奏", "重音"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

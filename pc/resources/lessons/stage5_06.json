@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l6",
+  "stage": "s5",
+  "index": 6,
+  "title": "反向/平行进行",
+  "objectives": [
+    "区分平行同向与反向进行。",
+    "合手时两只手方向正确。",
+    "慢速保持拍点稳定。"
+  ],
+  "prerequisites": ["s5-l5"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s5-l6-b1",
+      "type": "text",
+      "title": "平行与反向",
+      "body": "平行进行是两只手朝同一方向移动，反向进行是朝相反方向。平行容易听出同步，反向更考验协调。先慢速，眼睛看两只手的方向，不要只看一只手。"
+    },
+    {
+      "id": "s5-l6-b2",
+      "type": "text",
+      "title": "协调的练法",
+      "body": "先分手确认各自方向，再合手。合手时以拍点为锚，不要跟着某一只手走。反向进行可以先只弹每小节第一拍，再补中间音。"
+    },
+    {
+      "id": "s5-l6-demo",
+      "type": "demo",
+      "score": "ode_to_joy_both",
+      "tempo": 60,
+      "caption": "示范要点：听两只手是同向还是反向。"
+    },
+    {
+      "id": "s5-l6-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "右手上行、左手上行，弹平行音阶 4 小节。",
+        "右手上行、左手下行，弹反向 4 小节。",
+        "打开「反向与平行 · 8 小节」，先分手确认方向，再合手。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能听出平行与反向吗？", "type": "self"},
+    {"question": "合手时两只手方向对吗？", "type": "self"},
+    {"question": "慢速时拍点稳定吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "只看一只手——另一只手会跟错。",
+    "反向时两手同时抢拍。"
+  ],
+  "practice": "反向与平行 · 8 小节",
+  "next": "s5-l7",
+  "tags": ["平行", "反向"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

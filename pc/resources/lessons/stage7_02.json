@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s7-l2",
+  "stage": "s7",
+  "index": 2,
+  "title": "叠录",
+  "objectives": [
+    "知道叠录不覆盖旧音符。",
+    "先录右手，再叠低音或伴奏。",
+    "两层都能单独听清。"
+  ],
+  "prerequisites": ["s7-l1"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s7-l2-b1",
+      "type": "text",
+      "title": "叠录是什么",
+      "body": "叠录是在已有轨道上继续录，新音符并入同一条轨道，不覆盖旧内容。先录右手旋律，再开叠录弹左手或伴奏。叠录前确认循环与速度一致。"
+    },
+    {
+      "id": "s7-l2-b2",
+      "type": "text",
+      "title": "分层的顺序",
+      "body": "先录节奏稳定的声部（低音或伴奏），再叠旋律；或者先录旋律，再叠伴奏。无论顺序，先录的声部要能单独听清，叠加后不要互相盖住。"
+    },
+    {
+      "id": "s7-l2-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：先听单轨，再听叠录后的两层。"
+    },
+    {
+      "id": "s7-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "录 4 小节右手旋律。",
+        "开叠录，补一条低音或伴奏。",
+        "回放，分别静音一条轨，确认两层都完整。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "叠录覆盖旧音符了吗？", "type": "self"},
+    {"question": "两层都能单独听清吗？", "type": "self"},
+    {"question": "速度/循环一致吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "叠录时循环变了——两层错位。",
+    "后录的太响——盖住先录的。"
+  ],
+  "practice": "叠录低音",
+  "next": "s7-l3",
+  "tags": ["叠录", "分层"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

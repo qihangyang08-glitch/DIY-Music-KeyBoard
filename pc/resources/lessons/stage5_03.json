@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l3",
+  "stage": "s5",
+  "index": 3,
+  "title": "右手旋律 + 左手长音",
+  "objectives": [
+    "左手长音保持住。",
+    "右手在长音之上独立移动。",
+    "听出旋律与底色两个层次。"
+  ],
+  "prerequisites": ["s5-l2"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s5-l3-b1",
+      "type": "text",
+      "title": "最简单的合手",
+      "body": "左手只按长音（全音符或二分音符），右手弹旋律。左手按住不放，右手在它上面移动。先确认左手的音不抖、不提前松，再让右手进入。"
+    },
+    {
+      "id": "s5-l3-b2",
+      "type": "text",
+      "title": "听两个层次",
+      "body": "左手是底色，右手是线条。左手音量放轻，右手稍突出。合手时先听左手是否稳定，再听右手是否清楚；两边都清楚才算合好。"
+    },
+    {
+      "id": "s5-l3-demo",
+      "type": "demo",
+      "score": "fixed_accompaniment",
+      "tempo": 60,
+      "caption": "示范要点：左手长音保持四拍，右手在之上弹四个音。"
+    },
+    {
+      "id": "s5-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "左手按住一个长音，右手弹 4 个音。",
+        "换和弦，左手重新按，右手继续。",
+        "打开「固定伴奏型」，慢速合手 4 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "左手长音保持住了吗？", "type": "self"},
+    {"question": "右手能独立移动吗？", "type": "self"},
+    {"question": "两个层次都清楚吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "左手跟着右手动——长音会断。",
+    "左手太响——旋律被盖住。"
+  ],
+  "practice": "固定伴奏型",
+  "next": "s5-l4",
+  "tags": ["长音", "合手"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

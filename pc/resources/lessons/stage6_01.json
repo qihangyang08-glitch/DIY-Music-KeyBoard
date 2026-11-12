@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l1",
+  "stage": "s6",
+  "index": 1,
+  "title": "速度与稳定",
+  "objectives": [
+    "用 50/75/100% 三档练习。",
+    "每档连续四小节不抢不拖。",
+    "乱拍时主动退回上一档。"
+  ],
+  "prerequisites": ["s5-l8"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s6-l1-b1",
+      "type": "text",
+      "title": "三档速度",
+      "body": "先 50% 把音与指法固定，再 75% 检查衔接，最后 100% 完整。每一档都要连续 4 小节不抢不拖，才升下一档。速度是结果，不是起点。"
+    },
+    {
+      "id": "s6-l1-b2",
+      "type": "text",
+      "title": "稳定比快重要",
+      "body": "加速后如果开始追拍、错音增多，就退回上一档。慢而稳的完整演奏，比快而乱的片段更有价值。用节拍器或脚打拍确认。"
+    },
+    {
+      "id": "s6-l1-demo",
+      "type": "demo",
+      "score": "tempo_ladder_60",
+      "tempo": 60,
+      "caption": "示范要点：听同一段 50%、75%、100% 三档，注意速度变化但节奏不变。"
+    },
+    {
+      "id": "s6-l1-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "50% 连续 4 小节，确认不抢不拖。",
+        "升到 75%，再升 100%；乱拍就退回。",
+        "打开「速度阶梯 60→100%」，按三档练。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "每档都连续 4 小节稳定吗？", "type": "self"},
+    {"question": "乱拍会主动退回吗？", "type": "self"},
+    {"question": "速度变了节奏还在吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "一上来就原速——动作变形。",
+    "越快越乱还继续——错误固化。"
+  ],
+  "practice": "速度阶梯 60→100%",
+  "next": "s6-l2",
+  "tags": ["速度", "稳定"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

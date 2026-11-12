@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s3-l8",
+  "stage": "s3",
+  "index": 8,
+  "title": "视奏与完整曲",
+  "objectives": [
+    "先分段练，再完整弹。",
+    "困难小节单独循环。",
+    "完整跟弹时错音不停。"
+  ],
+  "prerequisites": ["s3-l7"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s3-l8-b1",
+      "type": "text",
+      "title": "完整曲的顺序",
+      "body": "先看谱号、调号、拍号，再找第一句。分段练：4 小节一段，熟了再连。不要每次都从头弹；把困难小节单独循环。最后再按原速完整走一遍。"
+    },
+    {
+      "id": "s3-l8-b2",
+      "type": "text",
+      "title": "跟弹时的注意力",
+      "body": "跟弹看下一键高亮，不要回头检查已弹过的音。错音只记一次未中，继续往下走。眼睛提前一个音，手跟上；速度稳定比全对更重要。"
+    },
+    {
+      "id": "s3-l8-demo",
+      "type": "demo",
+      "score": "jingle_bells",
+      "tempo": 60,
+      "caption": "示范要点：先听完整曲，再分段练习。"
+    },
+    {
+      "id": "s3-l8-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "把曲子分成 4 小节一段，逐段慢速练。",
+        "把最难的 1–2 小节单独循环 3 遍。",
+        "打开「铃儿响叮当」完整跟弹一遍，错音不停。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能说出曲子的调号与拍号吗？", "type": "self"},
+    {"question": "困难小节单独练过吗？", "type": "self"},
+    {"question": "完整跟弹时能不停下来吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "每次从头弹——困难段永远不熟。",
+    "错音就停——破坏完整度。"
+  ],
+  "practice": "铃儿响叮当",
+  "next": "s4-l1",
+  "tags": ["视奏", "完整曲"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

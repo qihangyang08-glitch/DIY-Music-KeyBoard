@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "循环 4 小节",
+  "tempo": 100.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "循环",
+      "program": 0,
+      "volume": 0.9,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}

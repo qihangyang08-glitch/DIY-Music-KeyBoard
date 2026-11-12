@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s8-l5",
+  "stage": "s8",
+  "index": 5,
+  "title": "导出与复盘",
+  "objectives": [
+    "导出前检查静音/独奏。",
+    "导出 MIDI 并应用内回放。",
+    "复盘只记 1–2 个点。"
+  ],
+  "prerequisites": ["s8-l4"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s8-l5-b1",
+      "type": "text",
+      "title": "导出前检查",
+      "body": "导出前确认没有误开静音/独奏，所有需要的轨都在。检查音量、声像、混响是否与试听一致。导出 MIDI 后先在应用内回放。"
+    },
+    {
+      "id": "s8-l5-b2",
+      "type": "text",
+      "title": "复盘",
+      "body": "导出后回听：结构清楚吗？旋律突出吗？低音稳定吗？只记 1–2 个下次要改的点。项目 JSON 保留，方便继续编辑。"
+    },
+    {
+      "id": "s8-l5-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听导出结果，检查结构与平衡。"
+    },
+    {
+      "id": "s8-l5-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "检查静音/独奏与所有轨。",
+        "导出 MIDI，应用内回放。",
+        "写下 1–2 个复盘点。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "静音/独奏都关了吗？", "type": "self"},
+    {"question": "导出包含所有轨吗？", "type": "self"},
+    {"question": "复盘点只有 1–2 个吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "误开独奏——导出漏轨。",
+    "复盘列太多——无法执行。"
+  ],
+  "practice": "导出项目",
+  "next": "曲谱库 · 挑一首完整曲目",
+  "tags": ["导出", "复盘"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

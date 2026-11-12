@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l4",
+  "stage": "s6",
+  "index": 4,
+  "title": "延音踏板",
+  "objectives": [
+    "知道 Shift 延音是按住。",
+    "换和弦时换踏板。",
+    "和声不糊成一片。"
+  ],
+  "prerequisites": ["s6-l3"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s6-l4-b1",
+      "type": "text",
+      "title": "延音像右踏板",
+      "body": "按住 Shift 是延音，松开一起收掉。它让声音延续，但踩太久会把不同和弦混在一起。一个和弦一换，或每小节一换。"
+    },
+    {
+      "id": "s6-l4-b2",
+      "type": "text",
+      "title": "换踏板的时机",
+      "body": "在下一个和弦落下前的一瞬间松开再踩，避免旧和弦拖进新和弦。先慢速，听和声是否干净；糊了就提前换。"
+    },
+    {
+      "id": "s6-l4-demo",
+      "type": "demo",
+      "score": "fixed_accompaniment",
+      "tempo": 60,
+      "caption": "示范要点：听一个和弦一换踏板与一直踩的区别。"
+    },
+    {
+      "id": "s6-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "弹 C 和弦，按住 Shift 两拍后松开。",
+        "和弦转换时先松再踩，听是否干净。",
+        "打开「延音踏板 · 和弦转换」，每小节换一次延音。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "知道 Shift 是按住不是切换吗？", "type": "self"},
+    {"question": "换和弦时会换踏板吗？", "type": "self"},
+    {"question": "和声听起来糊吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "一直踩着不放——和声糊成一片。",
+    "换踏板太晚——旧和弦拖进来。"
+  ],
+  "practice": "延音踏板 · 和弦转换",
+  "next": "s6-l5",
+  "tags": ["延音", "踏板"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

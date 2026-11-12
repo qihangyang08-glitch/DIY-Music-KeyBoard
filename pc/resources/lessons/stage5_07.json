@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l7",
+  "stage": "s5",
+  "index": 7,
+  "title": "困难小节循环",
+  "objectives": [
+    "找出 1–2 小节难点。",
+    "循环到稳定再连接。",
+    "每遍只改一个问题。"
+  ],
+  "prerequisites": ["s5-l6"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s5-l7-b1",
+      "type": "text",
+      "title": "只练困难小节",
+      "body": "不要每次从头弹。把最难的 1–2 小节圈出来，单独循环 5–10 遍，速度从 50% 开始。稳定后再把前后各一小节接进来。"
+    },
+    {
+      "id": "s5-l7-b2",
+      "type": "text",
+      "title": "循环不是机械重复",
+      "body": "每遍都要听同一个问题：错音、节奏、指法还是手位。改一个点，再循环。如果连续 3 遍都对，才加速或扩大范围。"
+    },
+    {
+      "id": "s5-l7-demo",
+      "type": "demo",
+      "score": "fixed_accompaniment",
+      "tempo": 50,
+      "caption": "示范要点：听困难小节单独循环，再听它与前后连接。"
+    },
+    {
+      "id": "s5-l7-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "圈出最难的 1–2 小节。",
+        "50% 速度循环 5 遍，每遍只改一个问题。",
+        "接上前一小节与后一小节，再循环 3 遍。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能指出困难小节吗？", "type": "self"},
+    {"question": "每遍只改一个点吗？", "type": "self"},
+    {"question": "连接前后还稳定吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "每次从头弹——难点没练到。",
+    "循环太快——错误固化。"
+  ],
+  "practice": "困难小节循环 · 小步舞曲",
+  "next": "s5-l8",
+  "tags": ["循环", "练习方法"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

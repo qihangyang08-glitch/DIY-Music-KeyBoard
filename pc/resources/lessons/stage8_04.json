@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s8-l4",
+  "stage": "s8",
+  "index": 4,
+  "title": "混音基础",
+  "objectives": [
+    "先调音量平衡，再加效果。",
+    "用声像安排左右位置。",
+    "混响适量，不掩盖问题。"
+  ],
+  "prerequisites": ["s8-l3"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s8-l4-b1",
+      "type": "text",
+      "title": "先平衡，再加效果",
+      "body": "混音先调音量：旋律清楚、低音稳定、和声不抢。音量平衡后再调声像，最后加少量混响。不要用混响掩盖音量问题。"
+    },
+    {
+      "id": "s8-l4-b2",
+      "type": "text",
+      "title": "声像与混响",
+      "body": "声像把声部放到左/中/右；重要声部放中间，伴奏可以稍偏。混响给空间感，但太多会糊。先干声确认平衡，再加 10–20% 混响。"
+    },
+    {
+      "id": "s8-l4-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听干声与加混响后的空间感。"
+    },
+    {
+      "id": "s8-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "调三轨音量，确认旋律清楚。",
+        "调声像，重要声部放中间。",
+        "加少量混响，对比干声。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "音量平衡了吗？", "type": "self"},
+    {"question": "声像把旋律推偏了吗？", "type": "self"},
+    {"question": "混响太多吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "先加混响——平衡问题被掩盖。",
+    "所有声部都放中间——拥挤。"
+  ],
+  "practice": "音量与声像",
+  "next": "s8-l5",
+  "tags": ["混音", "声像", "混响"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

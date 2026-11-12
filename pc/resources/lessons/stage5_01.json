@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s5-l1",
+  "stage": "s5",
+  "index": 1,
+  "title": "分手复习",
+  "objectives": [
+    "左右手都能单独完整弹一遍。",
+    "分手时节奏稳定、不错音。",
+    "找出合手前需要单独练的小节。"
+  ],
+  "prerequisites": ["s4-l8"],
+  "duration_min": 4,
+  "blocks": [
+    {
+      "id": "s5-l1-b1",
+      "type": "text",
+      "title": "为什么先分手",
+      "body": "合手前，左右手都要能单独完整弹一遍。分手不是浪费时间：先把每只手的指法、节奏、困难小节固定下来，合手时才不会互相拖累。右手先练旋律，左手再练伴奏。"
+    },
+    {
+      "id": "s5-l1-b2",
+      "type": "text",
+      "title": "分手的标准",
+      "body": "分手不是「能弹下来」就算过。要能在慢速下不错音、不停顿、节奏稳定。录音听一遍，确认没有抢拍或漏音，再开始合手。"
+    },
+    {
+      "id": "s5-l1-demo",
+      "type": "demo",
+      "score": "twinkle_auto_accompaniment",
+      "tempo": 60,
+      "caption": "示范要点：先听右手单独，再听左手单独，最后听合手。"
+    },
+    {
+      "id": "s5-l1-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "右手单独弹旋律一遍，慢速不停。",
+        "左手单独弹伴奏一遍，拍点稳定。",
+        "打开「小星星 · 自动左手」，先只弹右手。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "左右手都能单独弹完吗？", "type": "self"},
+    {"question": "分手时节奏稳定吗？", "type": "self"},
+    {"question": "困难小节标出来了吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "分手只弹一遍就合——问题没暴露。",
+    "左手随便按——合手时拖累右手。"
+  ],
+  "practice": "小星星 · 自动左手",
+  "next": "s5-l2",
+  "tags": ["分手", "合手预备"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

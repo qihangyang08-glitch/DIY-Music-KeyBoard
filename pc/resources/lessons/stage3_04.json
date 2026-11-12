@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s3-l4",
+  "stage": "s3",
+  "index": 4,
+  "title": "连奏与断奏",
+  "objectives": [
+    "连奏时音与音之间不断开。",
+    "断奏短促、有间隙。",
+    "能听辨两种奏法的差别。"
+  ],
+  "prerequisites": ["s3-l3"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s3-l4-b1",
+      "type": "text",
+      "title": "连奏 legato",
+      "body": "连奏是前一个音还没完全松开，后一个音已经按下，听起来不断开。练习时手指贴键，重心从一个手指移到下一个，像走路换脚。谱面上常用连音线或 legato 标记。"
+    },
+    {
+      "id": "s3-l4-b2",
+      "type": "text",
+      "title": "断奏 staccato",
+      "body": "断奏是每个音短促、音与音之间有明显的空隙。手指快速落下再抬起，不要压住。谱面上用音符上方或下方的小圆点表示。断奏不是砸键，音量仍然可控。"
+    },
+    {
+      "id": "s3-l4-demo",
+      "type": "demo",
+      "score": "legato_staccato",
+      "tempo": 60,
+      "caption": "示范要点：先听 4 小节连奏，再听 4 小节断奏，比较音与音之间是否断开。"
+    },
+    {
+      "id": "s3-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "用 5 个音弹连奏，感受重心转移。",
+        "同一组音弹断奏，每个音后立刻抬指。",
+        "打开「连奏与断奏对比」，跟弹前 4 小节连奏、后 4 小节断奏。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "连奏时音与音之间有缝吗？", "type": "self"},
+    {"question": "断奏时每个音都短促吗？", "type": "self"},
+    {"question": "能听出两种奏法的差别吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "连奏时每个音都抬指——会断。",
+    "断奏时压住不放——不够短。"
+  ],
+  "practice": "连奏与断奏对比",
+  "next": "s3-l5",
+  "tags": ["连奏", "断奏"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

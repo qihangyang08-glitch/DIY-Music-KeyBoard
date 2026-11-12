@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "title": "叠录低音",
+  "tempo": 92.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "旋律",
+      "program": 0,
+      "volume": 0.9,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    },
+    {
+      "name": "低音",
+      "program": 48,
+      "volume": 0.75,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s4-l7",
+  "stage": "s4",
+  "index": 7,
+  "title": "4/4 进行曲",
+  "objectives": [
+    "弹「低音–和弦–低音–和弦」伴奏型。",
+    "第一、三拍低音，速度稳定。",
+    "右手进入时左手不抢。"
+  ],
+  "prerequisites": ["s4-l6"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s4-l7-b1",
+      "type": "text",
+      "title": "进行曲伴奏",
+      "body": "4/4 进行曲常用「低音–和弦–低音–和弦」或每两拍一个低音。第一、三拍低音，第二、四拍和弦。速度稳定、重拍清楚，像走路。"
+    },
+    {
+      "id": "s4-l7-b2",
+      "type": "text",
+      "title": "与旋律配合",
+      "body": "右手旋律可能在弱拍进入。左手保持进行曲的稳定，不要跟着旋律加速。先数四拍，再把旋律放进去。"
+    },
+    {
+      "id": "s4-l7-demo",
+      "type": "demo",
+      "score": "canon_easy",
+      "tempo": 60,
+      "caption": "示范要点：听 4/4 的「低音—和弦—低音—和弦」。"
+    },
+    {
+      "id": "s4-l7-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "左手弹 C 低音 + E–G 和弦，两拍一组。",
+        "右手加简单旋律，保持四拍。",
+        "打开「卡农片段 · 简易版」慢速跟弹。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "第一、三拍是低音吗？", "type": "self"},
+    {"question": "速度稳定吗？", "type": "self"},
+    {"question": "右手进入时左手不抢吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "低音与和弦不分——进行曲感消失。",
+    "右手一快左手跟着快。"
+  ],
+  "practice": "卡农片段 · 简易版",
+  "next": "s4-l8",
+  "tags": ["4/4", "进行曲"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

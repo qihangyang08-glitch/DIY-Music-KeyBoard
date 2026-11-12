@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s4-l4",
+  "stage": "s4",
+  "index": 4,
+  "title": "根音+五度",
+  "objectives": [
+    "知道空五度没有三音。",
+    "能弹 C–G、F–C、G–D 三个空五度。",
+    "低音留白，不盖住旋律。"
+  ],
+  "prerequisites": ["s4-l3"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s4-l4-b1",
+      "type": "text",
+      "title": "空五度",
+      "body": "只弹根音与五度，就得到空五度。它没有三音，所以不分大小调，适合做低音框架。C 的空五度是 C–G；F 是 F–C；G 是 G–D。左手先练这个框架，再加三音。"
+    },
+    {
+      "id": "s4-l4-b2",
+      "type": "text",
+      "title": "低音的节奏",
+      "body": "低音不需要每拍都弹。4/4 常见是每小节第一拍根音、第三拍五度，或每两拍一个音。留白让右手旋律更清楚。先数拍，再决定低音落在哪一拍。"
+    },
+    {
+      "id": "s4-l4-demo",
+      "type": "demo",
+      "score": "chords_cfg",
+      "tempo": 60,
+      "caption": "示范要点：听低音只弹根音与五度，旋律是否更清楚。"
+    },
+    {
+      "id": "s4-l4-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "左手弹 C–G、F–C、G–D 三个空五度。",
+        "每个和弦按两拍，保持低音稳定。",
+        "打开「C–F–G 和弦」只弹低音声部。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "空五度有几个音？", "type": "self"},
+    {"question": "低音落在第几拍？", "type": "self"},
+    {"question": "留白时拍子还在吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "空五度弹成三和弦——低音太厚。",
+    "低音每拍都弹——盖住旋律。"
+  ],
+  "practice": "C–F–G 和弦",
+  "next": "s4-l5",
+  "tags": ["空五度", "低音"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

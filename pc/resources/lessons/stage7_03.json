@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s7-l3",
+  "stage": "s7",
+  "index": 3,
+  "title": "循环与量化",
+  "objectives": [
+    "设置 4 小节循环。",
+    "知道量化只改时间。",
+    "听出量化前后的差别。"
+  ],
+  "prerequisites": ["s7-l2"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s7-l3-b1",
+      "type": "text",
+      "title": "循环录音",
+      "body": "循环让 4 小节反复播放，适合叠录和练习。录音时循环折回，新音符落在对应的小节位置。先确认循环区间是 4 小节，再开始录。"
+    },
+    {
+      "id": "s7-l3-b2",
+      "type": "text",
+      "title": "量化",
+      "body": "量化把音符起点对齐到网格（当前 1/8），只改时间，不改音高和时长。量化能让节奏更整齐，但过度量化会损失演奏感。先听原版，再对比量化版。"
+    },
+    {
+      "id": "s7-l3-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听同一段量化前/后的节奏差别。"
+    },
+    {
+      "id": "s7-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "设 4 小节循环，录一条节奏。",
+        "打开量化 1/8，对比前后。",
+        "打开「循环 4 小节」项目，完成循环叠录。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "循环区间是 4 小节吗？", "type": "self"},
+    {"question": "量化只改时间吗？", "type": "self"},
+    {"question": "能听出量化前后的差别吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "循环区间不对——音符落错小节。",
+    "量化当成万能——演奏感变机械。"
+  ],
+  "practice": "循环 4 小节",
+  "next": "s7-l4",
+  "tags": ["循环", "量化"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

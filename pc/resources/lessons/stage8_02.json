@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s8-l2",
+  "stage": "s8",
+  "index": 2,
+  "title": "键盘分区",
+  "objectives": [
+    "知道分区按音高切两段。",
+    "低区与高区可设不同音色。",
+    "能说出分区与叠加的区别。"
+  ],
+  "prerequisites": ["s8-l1"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s8-l2-b1",
+      "type": "text",
+      "title": "分区怎么工作",
+      "body": "分区按音高把键盘切成两段：低区一个音色，高区另一个。例如低区贝斯、高区钢琴。分区点决定切在哪里；分区后两只手各管一段。"
+    },
+    {
+      "id": "s8-l2-b2",
+      "type": "text",
+      "title": "分区与叠加的区别",
+      "body": "叠加是同音区两个音色一起响；分区是不同音区不同音色。分区可以做出「左手贝斯 + 右手钢琴」的效果，叠加则让同一个音更厚。"
+    },
+    {
+      "id": "s8-l2-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听低区与高区的音色切换。"
+    },
+    {
+      "id": "s8-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "给一条轨开分区，设分区点。",
+        "低区选贝斯，高区选钢琴。",
+        "打开「左右分区」项目，完成分区。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "分区点在哪里？", "type": "self"},
+    {"question": "低区/高区音色不同吗？", "type": "self"},
+    {"question": "能说出分区与叠加的区别吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "分区点设错——音色切在旋律中间。",
+    "把分区当叠加——同音区没有两个音色。"
+  ],
+  "practice": "左右分区",
+  "next": "s8-l3",
+  "tags": ["键盘分区", "音色"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s4-l3",
+  "stage": "s4",
+  "index": 3,
+  "title": "I–IV–V",
+  "objectives": [
+    "知道 C 大调 I=C、IV=F、V=G。",
+    "能按出三个正三和弦。",
+    "转换时三个音同时到位。"
+  ],
+  "prerequisites": ["s4-l2"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s4-l3-b1",
+      "type": "text",
+      "title": "三个正三和弦",
+      "body": "C 大调的 I 级是 C（C–E–G），IV 级是 F（F–A–C），V 级是 G（G–B–D）。这三个和弦能伴奏大量简单旋律。先记根音 C–F–G，再补三音与五音。"
+    },
+    {
+      "id": "s4-l3-b2",
+      "type": "text",
+      "title": "和弦转换",
+      "body": "转换时找共同音，手位移动最小。C 到 F 可以保留 C，移动 E→F、G→A；F 到 G 没有共同音，整只手平移。先慢速，确保三个音同时到位。"
+    },
+    {
+      "id": "s4-l3-demo",
+      "type": "demo",
+      "score": "chords_cfg",
+      "tempo": 60,
+      "caption": "示范要点：听 C–F–G–C 进行，注意每个和弦是否整齐。"
+    },
+    {
+      "id": "s4-l3-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "分别按 C、F、G 三个和弦，确认音。",
+        "慢速做 C–F–G–C，每个和弦保持两拍。",
+        "打开「C–F–G 和弦」跟弹 8 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能说出 I–IV–V 的根音吗？", "type": "self"},
+    {"question": "转换时三个音同时到位吗？", "type": "self"},
+    {"question": "能听出和弦进行吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "只按根音——和声不完整。",
+    "转换时抢拍——和弦不齐。"
+  ],
+  "practice": "C–F–G 和弦",
+  "next": "s4-l4",
+  "tags": ["和弦进行", "I–IV–V"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s4-l2",
+  "stage": "s4",
+  "index": 2,
+  "title": "大三和弦",
+  "objectives": [
+    "说出根音、三音、五音。",
+    "能按出 C 大三和弦 C–E–G。",
+    "三个音同时落下，不先后错开。"
+  ],
+  "prerequisites": ["s4-l1"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s4-l2-b1",
+      "type": "text",
+      "title": "三和弦的构造",
+      "body": "大三和弦由根音、三音、五音组成。以 C 为例：根音 C，三音 E（根音上方大三度），五音 G（根音上方纯五度）。三个音同时按下是柱式和弦，分开弹是分解和弦。"
+    },
+    {
+      "id": "s4-l2-b2",
+      "type": "text",
+      "title": "听三音",
+      "body": "大三和弦听起来明亮，小三和弦听起来柔和；差别主要在三音。先弹根音与五音（空五度），再补三音，听色彩变化。补三音时手指要同时落下，不要先后错开太多。"
+    },
+    {
+      "id": "s4-l2-demo",
+      "type": "demo",
+      "score": "chords_cfg",
+      "tempo": 60,
+      "caption": "示范要点：先弹 C–G 空五度，再补 E，听和弦变完整。"
+    },
+    {
+      "id": "s4-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "分别弹 C、E、G，再三个一起按。",
+        "先按 C–G，再补 E，听变化。",
+        "打开「C–F–G 和弦」跟弹前 4 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能说出 C 大三和弦的三个音吗？", "type": "self"},
+    {"question": "三音是哪个音？", "type": "self"},
+    {"question": "三个音同时落下了吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "三音偏低或偏高——和弦会走音。",
+    "三个音先后落下——听起来像琶音。"
+  ],
+  "practice": "C–F–G 和弦",
+  "next": "s4-l3",
+  "tags": ["和弦", "三音"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

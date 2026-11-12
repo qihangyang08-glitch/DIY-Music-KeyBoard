@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s4-l8",
+  "stage": "s4",
+  "index": 8,
+  "title": "左手与旋律的配合",
+  "objectives": [
+    "左右手先各自独立弹熟。",
+    "合手时速度减半，第一拍对齐。",
+    "旋律比伴奏清楚。"
+  ],
+  "prerequisites": ["s4-l7"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s4-l8-b1",
+      "type": "text",
+      "title": "先分手，再合手",
+      "body": "合手前，左右手都要能单独完整弹一遍。合手时速度减半，先对齐每小节第一拍，再对齐其他拍。不要一开始就原速合手，错位会形成习惯。"
+    },
+    {
+      "id": "s4-l8-b2",
+      "type": "text",
+      "title": "平衡",
+      "body": "右手旋律稍突出，左手伴奏放轻。左手不是越响越好；它提供和声与节奏。录音回听时，如果听不清旋律，就是左手太重。"
+    },
+    {
+      "id": "s4-l8-demo",
+      "type": "demo",
+      "score": "farewell",
+      "tempo": 60,
+      "caption": "示范要点：先听左手单独，再听合手，注意旋律是否清楚。"
+    },
+    {
+      "id": "s4-l8-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "左手单独弹伴奏一遍，右手单独弹旋律一遍。",
+        "慢速合手，只对齐每小节第一拍。",
+        "打开「送别」完整跟弹，错音不停。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "左右手都能单独弹完吗？", "type": "self"},
+    {"question": "合手时第一拍对齐吗？", "type": "self"},
+    {"question": "旋律比伴奏清楚吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "没分手就直接合——错位难改。",
+    "左手太响——旋律被盖住。"
+  ],
+  "practice": "送别",
+  "next": "s5-l1",
+  "tags": ["合手", "平衡"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

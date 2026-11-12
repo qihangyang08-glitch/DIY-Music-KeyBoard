@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "s7-l5",
+  "stage": "s7",
+  "index": 5,
+  "title": "结构",
+  "objectives": [
+    "认识 8 小节与 AABA 结构。",
+    "重复段保持相似，变化段有对比。",
+    "能数出段落边界。"
+  ],
+  "prerequisites": ["s7-l4"],
+  "duration_min": 6,
+  "blocks": [
+    {
+      "id": "s7-l5-b1",
+      "type": "text",
+      "title": "8 小节与 AABA",
+      "body": "8 小节常是 4+4 两句；AABA 是四段，每段 8 小节，A 重复、B 对比。结构让听众有「熟悉—变化—回归」的感觉。先数小节，再标段落。"
+    },
+    {
+      "id": "s7-l5-b2",
+      "type": "text",
+      "title": "重复与对比",
+      "body": "重复段可以保持旋律，变化段换音区、节奏或和声。不要每段都完全不同，也不要完全一样。用 1–2 个元素变化就够。"
+    },
+    {
+      "id": "s7-l5-demo",
+      "type": "demo",
+      "tempo": 60,
+      "caption": "示范要点：听 AABA 的重复与对比段。"
+    },
+    {
+      "id": "s7-l5-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "把 16 小节标成 AABA 四段。",
+        "A 段保持相似，B 段换一个元素。",
+        "打开「16 小节 AABA」项目，完成结构。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能数出 8 小节一段吗？", "type": "self"},
+    {"question": "A 段重复、B 段对比吗？", "type": "self"},
+    {"question": "结构听起来清楚吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "没有结构——像随机拼接。",
+    "每段都变——听众抓不住。"
+  ],
+  "practice": "16 小节 AABA",
+  "next": "s7-l6",
+  "tags": ["结构", "AABA"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

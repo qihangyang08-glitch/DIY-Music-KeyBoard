@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "s6-l2",
+  "stage": "s6",
+  "index": 2,
+  "title": "乐句与呼吸",
+  "objectives": [
+    "区分 4 小节与 8 小节乐句。",
+    "句尾稍收，句头重新进入。",
+    "呼吸时拍子不停。"
+  ],
+  "prerequisites": ["s6-l1"],
+  "duration_min": 5,
+  "blocks": [
+    {
+      "id": "s6-l2-b1",
+      "type": "text",
+      "title": "长句与短句",
+      "body": "乐句有 4 小节，也有 8 小节。先找句尾的长音或停顿，再决定呼吸点。句尾稍收，句头重新进入；中间不要每小节都断。"
+    },
+    {
+      "id": "s6-l2-b2",
+      "type": "text",
+      "title": "呼吸不占拍",
+      "body": "呼吸是语气，不是停顿。手上可以抬腕或轻断，但拍子继续。先用嘴唱，找到自然的呼吸，再用手指表达。"
+    },
+    {
+      "id": "s6-l2-demo",
+      "type": "demo",
+      "score": "phrasing_8bars",
+      "tempo": 60,
+      "caption": "示范要点：听 4 小节与 8 小节乐句的句尾。"
+    },
+    {
+      "id": "s6-l2-steps",
+      "type": "steps",
+      "title": "练习步骤",
+      "items": [
+        "标出每 4 小节与 8 小节的句尾。",
+        "弹一句，句尾稍收；下一句句头再起。",
+        "打开「乐句起落」，跟弹 8 小节。"
+      ]
+    }
+  ],
+  "check": [
+    {"question": "能区分 4/8 小节乐句吗？", "type": "self"},
+    {"question": "句尾会稍收吗？", "type": "self"},
+    {"question": "呼吸时拍子停了吗？", "type": "self"}
+  ],
+  "mistakes": [
+    "每小节都断——句子碎掉。",
+    "呼吸时停拍——节奏丢。"
+  ],
+  "practice": "乐句起落",
+  "next": "s6-l3",
+  "tags": ["乐句", "呼吸"],
+  "status": "ready",
+  "visibility": "public",
+  "public_release": "yes"
+}

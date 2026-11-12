@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "弦乐铺底",
+  "tempo": 80.0,
+  "time_signature": [
+    4,
+    4
+  ],
+  "loop": null,
+  "tracks": [
+    {
+      "name": "弦乐铺底",
+      "program": 48,
+      "volume": 0.6,
+      "pan": 0.0,
+      "mute": false,
+      "solo": false,
+      "notes": []
+    }
+  ],
+  "visibility": "public",
+  "public_release": "yes"
+}
