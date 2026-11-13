@@ -37,14 +37,16 @@ from ..core.project import (
     Track,
     default_project_dir,
 )
+from ..core.programs import fallback_notice, index_for_gm, label_for_gm
 from ..core.project_task import ProjectTask
 from ..core.synth_service import (
+    CLICK_ACCENT_MIDI,
     CLICK_CHANNEL,
+    CLICK_MIDI,
     LAYER_CHANNEL,
     PROGRAMS,
     SPLIT_LEFT_CHANNEL,
     SPLIT_RIGHT_CHANNEL,
-    program_label_cn,
 )
 from .learning_page import clear_layout, scroll_area
 from .light_bar import LightBarBand
@@ -56,18 +58,25 @@ from .widgets import CardFrame, GlassFrame
 VOLUME_STEP = 0.1
 
 
-def _program_name(program: int) -> str:
-    for gm, name in PROGRAMS:
-        if gm == program:
-            return program_label_cn(name)
-    return f"GM {program}"
+def _fallback_notices(project: Project) -> list[str]:
+    """One notice per substituted sound, in track order, without duplicates."""
+    notices: list[str] = []
+    for track in project.tracks:
+        programs = [track.program]
+        if track.layer is not None:
+            programs.append(track.layer.program)
+        if track.split is not None:
+            programs.extend([track.split.left_program, track.split.right_program])
+        for program in programs:
+            notice = fallback_notice(program)
+            if notice and notice not in notices:
+                notices.append(notice)
+    return notices
 
 
 def _program_index(program: int) -> int:
-    for index, (gm, _name) in enumerate(PROGRAMS):
-        if gm == program:
-            return index
-    return 0
+    index = index_for_gm(program)
+    return 0 if index is None else index
 
 
 def _pan_text(pan: float) -> str:
@@ -257,7 +266,7 @@ class TrackRow(CardFrame):
     def refresh(self, track: Track, current: bool) -> None:
         self.select_button.setText(f"音轨 {self.index + 1} · {track.name}")
         self.select_button.setChecked(current)
-        self.program_button.setText(_program_name(track.program))
+        self.program_button.setText(label_for_gm(track.program))
         self.program_button.setToolTip(f"GM {track.program} · 点击切换")
         self.volume_label.setText(f"{round(track.volume * 100)}%")
         self.notes_label.setText(f"{len(track.notes)} 音")
@@ -268,7 +277,7 @@ class TrackRow(CardFrame):
             self.layer_button.setChecked(track.layer is not None)
         if track.layer is not None:
             self.layer_button.setToolTip(
-                f"叠加中 · {_program_name(track.layer.program)}（点击关闭）"
+                f"叠加中 · {label_for_gm(track.layer.program)}（点击关闭）"
             )
         else:
             self.layer_button.setToolTip("一键双音色 · 叠加第二音色")
@@ -277,8 +286,8 @@ class TrackRow(CardFrame):
         if track.split is not None:
             self.split_button.setToolTip(
                 "分区中 · 低音 "
-                f"{_program_name(track.split.left_program)} / 高音 "
-                f"{_program_name(track.split.right_program)}"
+                f"{label_for_gm(track.split.left_program)} / 高音 "
+                f"{label_for_gm(track.split.right_program)}"
             )
         else:
             self.split_button.setToolTip("键盘分区 · 低音区/高音区不同音色")
@@ -487,6 +496,8 @@ class CreationPage(GlassFrame):
         self._session_path = Path(save_path) if save_path is not None else None
         self._loaded = True
         self._render()
+        for notice in _fallback_notices(project):
+            self.message.emit(notice)
         if task is not None:
             self.set_learning_task(task)
         else:
@@ -884,14 +895,14 @@ class CreationPage(GlassFrame):
             self.stop_metronome()
 
     def _play_click(self, accent: bool) -> None:
-        midi = 96 if accent else 84
+        midi = CLICK_ACCENT_MIDI if accent else CLICK_MIDI
         self._click_midi = midi
         self.instrument.synth.note_on(midi, 100, channel=CLICK_CHANNEL)
         self._click_off_timer.start()
 
     def _stop_click_notes(self) -> None:
         self._click_off_timer.stop()
-        for midi in (84, 96):
+        for midi in (CLICK_MIDI, CLICK_ACCENT_MIDI):
             self.instrument.synth.note_off(midi, channel=CLICK_CHANNEL)
         self._click_midi = None
 
@@ -1289,6 +1300,8 @@ class CreationPage(GlassFrame):
         self.editor.set_project(self.session.project, self.session.track_index)
         self._render()
         self.message.emit(f"已载入 · {path.name}")
+        for notice in _fallback_notices(self.session.project):
+            self.message.emit(notice)
         return True
 
     # -- 32-key band ------------------------------------------------------

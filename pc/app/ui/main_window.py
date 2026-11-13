@@ -1096,6 +1096,8 @@ class MainWindow(QMainWindow):
 
     def _map_chip_text(self) -> str:
         inst = self.instrument
+        if inst.drums_enabled:
+            return f"{tr('映射')} · {tr('鼓垫')} · 32 键"
         preset = inst.current_preset
         map_name = (
             f"{tr('自动跟随')} · {tr(preset.label_cn)}"
@@ -1124,6 +1126,10 @@ class MainWindow(QMainWindow):
         self.perform.refresh()
 
     def _on_next_note(self, note) -> None:
+        if self.instrument.drums_enabled:
+            self.perform.set_next_key(None, None)
+            self.next_status_value.setText(tr("鼓垫模式 · 不参与判定"))
+            return
         if self.drill_page.is_active:
             # A generated drill is not the loaded score; do not show its next
             # key in the status/guide while the drill page owns the input.
@@ -1149,13 +1155,15 @@ class MainWindow(QMainWindow):
     def _on_follow_state(self) -> None:
         f = self.follow
         index = f.next_note_index
+        drums = self.instrument.drums_enabled
         self.perform.set_follow_state(
             f.position,
             f.index if index is None else index,
             f.hits,
             f.misses,
             f.playing,
-            f.next_note,
+            None if drums else f.next_note,
+            drums,
         )
 
     def _on_judged(self, hit: bool, expected) -> None:
@@ -1221,6 +1229,7 @@ class MainWindow(QMainWindow):
         self.perform.refresh()
         if hasattr(self, "follow"):
             self._on_next_note(self.follow.next_note)
+            self._on_follow_state()
         self.device_page.refresh()
         self.sound_page.refresh()
         self.keybindings_page.refresh()

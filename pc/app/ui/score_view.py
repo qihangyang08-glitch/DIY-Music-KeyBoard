@@ -75,6 +75,7 @@ class ScoreCanvas(QWidget):
         self._misses = 0
         self._next_note: Optional[ScoreNote] = None
         self._follow_playing = False
+        self._drums = False
         self.setMinimumHeight(220)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
@@ -120,6 +121,7 @@ class ScoreCanvas(QWidget):
         misses: int,
         playing: bool,
         next_note: Optional[ScoreNote],
+        drums: bool = False,
     ) -> None:
         self._follow_position = position
         self._expected_index = expected_index
@@ -127,6 +129,7 @@ class ScoreCanvas(QWidget):
         self._misses = misses
         self._follow_playing = playing
         self._next_note = next_note
+        self._drums = drums
         if self._layout is not None and self._layout.systems:
             self.set_page(self._page_for_position(position))
         self.update()
@@ -708,30 +711,38 @@ class ScoreCanvas(QWidget):
 
         p.setPen(t.muted)
         p.setFont(self._theme.font(9))
-        p.drawText(
-            QRectF(left, bottom + 8, 220, 18),
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
-            f"{tr('命中')} {self._hits} · {tr('未中')} {self._misses}"
-            + (f" · {tr('示范播放中')}" if self._follow_playing else ""),
-        )
-        if self._next_note is not None:
-            if language() == "en":
-                text = (
-                    f"Next {self._next_note.name} · "
-                    f"Bar {self._next_note.measure}"
-                )
-            else:
-                text = (
-                    f"下一键 {self._next_note.name} · "
-                    f"第 {self._next_note.measure} 小节"
-                )
+        if self._drums:
+            text = tr("鼓垫模式 · 不参与判定")
+            p.drawText(
+                QRectF(left, bottom + 8, right - left, 18),
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                text,
+            )
         else:
-            text = tr("已完成 · 按“重来”或空格示范")
-        p.drawText(
-            QRectF(left + 220, bottom + 8, right - left - 220, 18),
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
-            text,
-        )
+            p.drawText(
+                QRectF(left, bottom + 8, 220, 18),
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                f"{tr('命中')} {self._hits} · {tr('未中')} {self._misses}"
+                + (f" · {tr('示范播放中')}" if self._follow_playing else ""),
+            )
+            if self._next_note is not None:
+                if language() == "en":
+                    text = (
+                        f"Next {self._next_note.name} · "
+                        f"Bar {self._next_note.measure}"
+                    )
+                else:
+                    text = (
+                        f"下一键 {self._next_note.name} · "
+                        f"第 {self._next_note.measure} 小节"
+                    )
+            else:
+                text = tr("已完成 · 按“重来”或空格示范")
+            p.drawText(
+                QRectF(left + 220, bottom + 8, right - left - 220, 18),
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                text,
+            )
 
     def _draw_parsed_placeholder(self, p: QPainter) -> None:
         score = self._score
@@ -966,9 +977,10 @@ class ScoreView(GlassFrame):
         misses: int,
         playing: bool,
         next_note: Optional[ScoreNote],
+        drums: bool = False,
     ) -> None:
         self.canvas.set_follow_state(
-            position, expected_index, hits, misses, playing, next_note
+            position, expected_index, hits, misses, playing, next_note, drums
         )
 
     @property

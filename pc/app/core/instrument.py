@@ -19,6 +19,7 @@ from typing import Optional
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
+from .drums import DRUM_CHANNEL, DRUM_KITS, drum_for_key
 from .mapping import (
     KEY_COUNT,
     MapPreset,
@@ -63,6 +64,10 @@ class Instrument(QObject):
         self.auto_follow = False
         self._auto_follow_octave: int | None = None
         self.program_index = 0
+        # B9b: the 32 bars act as drum pads on channel 9 / bank 128. Drum
+        # hits deliberately do not reach the follow/learning/recorder paths.
+        self.drums_enabled = False
+        self.drum_kit_index = 0
         self.muted = False
         self.sustain = False
         self._stale = False
@@ -187,12 +192,24 @@ class Instrument(QObject):
         )
 
     def key_enabled(self, key_no: int) -> bool:
+        if self.drums_enabled:
+            return drum_for_key(key_no) is not None
         return self.current_preset.is_enabled(key_no)
 
     def note_for_key(self, key_no: int) -> str:
+        if self.drums_enabled:
+            pad = drum_for_key(key_no)
+            return pad.label if pad is not None else "—"
         if not self.key_enabled(key_no):
             return "—"
         return _midi_name(self.midi_for_key(key_no))
+
+    def display_midi(self, key_no: int) -> int:
+        """MIDI used for colour/name display (the drum pad when active)."""
+        if self.drums_enabled:
+            pad = drum_for_key(key_no)
+            return pad.midi if pad is not None else 0
+        return self.midi_for_key(key_no)
 
     def bar_for_midi(self, midi: int) -> int | None:
         """First physical bar that currently plays this MIDI note."""
@@ -207,6 +224,8 @@ class Instrument(QObject):
         return sorted(v.key for v in self.engine.voices.values())
 
     def active_notes(self) -> list[str]:
+        if self.drums_enabled:
+            return [self.note_for_key(v.key) for v in self.engine.active_list()]
         return [v.note for v in self.engine.active_list()]
 
     def polyphony(self) -> int:
@@ -556,6 +575,30 @@ class Instrument(QObject):
     def cycle_program(self) -> None:
         self.set_program(self.program_index + 1)
 
+    def set_drums(self, enabled: bool) -> None:
+        """Turn the 32 bars into GM drum pads (bank 128, channel 10)."""
+        if self.calibration_active or enabled == self.drums_enabled:
+            return
+        self.panic()
+        self.drums_enabled = bool(enabled)
+        if self.drums_enabled:
+            self.synth.set_drum_kit(DRUM_KITS[self.drum_kit_index].program)
+        self.stateChanged.emit()
+
+    def set_drum_kit(self, index: int) -> None:
+        if self.calibration_active:
+            return
+        self.drum_kit_index = index % len(DRUM_KITS)
+        if self.drums_enabled:
+            self.synth.set_drum_kit(DRUM_KITS[self.drum_kit_index].program)
+        self.stateChanged.emit()
+
+    def drum_kit_label(self) -> str:
+        return DRUM_KITS[self.drum_kit_index].label
+
+    def drum_kit_name(self) -> str:
+        return DRUM_KITS[self.drum_kit_index].name
+
     def synth_programs(self):
         from .synth_service import PROGRAMS
 
@@ -581,7 +624,13 @@ class Instrument(QObject):
     def panic(self) -> None:
         now = time.monotonic()
         for event in self.engine.panic(now):
-            if event.kind == "off":
+            if event.kind != "off":
+                continue
+            if self.drums_enabled:
+                pad = drum_for_key(event.key)
+                if pad is not None:
+                    self.synth.note_off(pad.midi, channel=DRUM_CHANNEL)
+            else:
                 self.synth.note_off(event.midi)
         self.synth.panic()
         if self.sustain:
@@ -630,14 +679,28 @@ class Instrument(QObject):
         new_events = self.engine.update(frame)
         new_events += self.engine.tick(now)
 
-        for event in new_events:
-            if event.kind == "on":
-                self.synth.note_on(event.midi, event.velocity)
-            else:
-                self.synth.note_off(event.midi)
+        if self.drums_enabled:
+            # Drum hits go to the percussion channel and never become melody
+            # events, so follow/learning/recording cannot judge them.
+            for event in new_events:
+                pad = drum_for_key(event.key)
+                if pad is None:
+                    continue
+                if event.kind == "on":
+                    self.synth.note_on(
+                        pad.midi, event.velocity, channel=DRUM_CHANNEL
+                    )
+                else:
+                    self.synth.note_off(pad.midi, channel=DRUM_CHANNEL)
+        else:
+            for event in new_events:
+                if event.kind == "on":
+                    self.synth.note_on(event.midi, event.velocity)
+                else:
+                    self.synth.note_off(event.midi)
 
-        if new_events:
-            self.events.emit(new_events)
+            if new_events:
+                self.events.emit(new_events)
         self._publish_active(now)
         sources = self.input_sources()
         if sources != self._last_sources:

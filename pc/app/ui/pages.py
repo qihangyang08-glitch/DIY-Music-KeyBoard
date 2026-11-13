@@ -11,17 +11,21 @@ from PySide6.QtCore import QSignalBlocker, Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPushButton,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
 
 from ..core.accessibility import FONT_SCALE_PRESETS
+from ..core.drums import DRUM_KITS
 from ..core.instrument import Instrument
-from ..core.synth_service import program_label_cn
+from ..core.programs import CATALOG, CATEGORIES
 from .i18n_ui import tr
 from .theme import Theme, set_scaled_font
 from .widgets import CardFrame, GlassFrame, ToggleSwitch
@@ -146,13 +150,20 @@ class SoundPage(GlassFrame):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(30, 26, 30, 26)
         outer.setSpacing(0)
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         holder = QWidget()
+        holder.setObjectName("ScrollContent")
         holder.setMaximumWidth(820)
         layout = QVBoxLayout(holder)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 0, 6, 8)
         layout.setSpacing(10)
-        outer.addWidget(holder, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        outer.addStretch(1)
+        self.scroll.setWidget(holder)
+        outer.addWidget(self.scroll)
 
         heading = QLabel("音色")
         set_scaled_font(heading, self._theme, 24, QFont.Weight.DemiBold)
@@ -176,26 +187,96 @@ class SoundPage(GlassFrame):
             layout.addWidget(audio)
         layout.addSpacing(6)
 
-        grid = QGridLayout()
-        grid.setSpacing(8)
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("搜索音色、英文名或 GM 编号")
+        self.search_edit.setClearButtonEnabled(True)
+        self.search_edit.textChanged.connect(self.set_search)
+        layout.addWidget(self.search_edit)
+
+        filters = QHBoxLayout()
+        filters.setSpacing(6)
+        self.category_buttons: dict[str, QPushButton] = {}
+        self._category_group = QButtonGroup(self)
+        self._category_group.setExclusive(True)
+        for name in ("全部",) + CATEGORIES:
+            chip = QPushButton(name)
+            chip.setCheckable(True)
+            chip.setProperty("role", "chip")
+            chip.setCursor(Qt.CursorShape.PointingHandCursor)
+            chip.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+            chip.setMinimumHeight(30)
+            chip.setChecked(name == "全部")
+            value = None if name == "全部" else name
+            chip.clicked.connect(
+                lambda checked=False, category=value: self.set_category(category)
+            )
+            filters.addWidget(chip)
+            self._category_group.addButton(chip)
+            self.category_buttons[name] = chip
+        filters.addStretch(1)
+        layout.addLayout(filters)
+        layout.addSpacing(4)
+        self._filter_category: str | None = None
+        self._filter_text = ""
+
+        self._grid = QGridLayout()
+        self._grid.setSpacing(8)
         self._group = QButtonGroup(self)
         self._group.setExclusive(True)
         self._buttons: list[QPushButton] = []
-        for index, (program, name) in enumerate(instrument.synth_programs()):
-            btn = QPushButton(program_label_cn(name))
-            btn.setToolTip(f"{name} · GM {program}")
+        for index, program in enumerate(CATALOG):
+            btn = QPushButton(program.label)
+            btn.setToolTip(f"{program.name} · GM {program.gm}")
             btn.setCheckable(True)
             btn.setProperty("role", "chip")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
             btn.setMinimumHeight(38)
             btn.setMaximumWidth(240)
-            btn.clicked.connect(lambda checked=False, i=index: instrument.set_program(i))
+            btn.clicked.connect(
+                lambda checked=False, i=index: instrument.set_program(i)
+            )
             self._group.addButton(btn, index)
             self._buttons.append(btn)
-            grid.addWidget(btn, index // 3, index % 3)
-        layout.addLayout(grid)
+        layout.addLayout(self._grid)
+        self._apply_filter()
         layout.addSpacing(10)
+
+        drum_head = QHBoxLayout()
+        drum_title = QLabel("鼓组 · 专用通道 9")
+        set_scaled_font(drum_title, self._theme, 14, QFont.Weight.DemiBold)
+        drum_head.addWidget(drum_title)
+        drum_head.addStretch(1)
+        drum_label = QLabel("鼓垫模式")
+        drum_label.setProperty("role", "muted")
+        drum_head.addWidget(drum_label)
+        self.drum_switch = ToggleSwitch(theme)
+        self.drum_switch.toggled.connect(self._set_drums)
+        drum_head.addWidget(self.drum_switch)
+        layout.addLayout(drum_head)
+
+        kit_grid = QGridLayout()
+        kit_grid.setSpacing(6)
+        self.kit_buttons: list[QPushButton] = []
+        for index, kit in enumerate(DRUM_KITS):
+            chip = QPushButton(kit.label)
+            chip.setToolTip(f"{kit.name} · bank 128 / {kit.program}")
+            chip.setCheckable(True)
+            chip.setProperty("role", "chip")
+            chip.setCursor(Qt.CursorShape.PointingHandCursor)
+            chip.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+            chip.setMinimumHeight(34)
+            chip.clicked.connect(
+                lambda checked=False, i=index: instrument.set_drum_kit(i)
+            )
+            kit_grid.addWidget(chip, index // 4, index % 4)
+            self.kit_buttons.append(chip)
+        layout.addLayout(kit_grid)
+        drum_note = QLabel("鼓垫模式：32 键显示鼓件名，不参与跟弹/学习判定。")
+        drum_note.setProperty("role", "faint")
+        drum_note.setWordWrap(True)
+        layout.addWidget(drum_note)
+        layout.addSpacing(6)
 
         mute_row = QHBoxLayout()
         mute_text = QLabel("静音")
@@ -219,6 +300,11 @@ class SoundPage(GlassFrame):
         if on != self.instrument.muted:
             self.instrument.toggle_mute()
 
+    def _set_drums(self, on: bool) -> None:
+        if on != self.instrument.drums_enabled:
+            self.instrument.set_drums(on)
+            self.refresh()
+
     def set_theme(self, theme: Theme) -> None:
         self._theme = theme
         self.mute_switch.set_theme(theme)
@@ -228,10 +314,55 @@ class SoundPage(GlassFrame):
             else:
                 self._audio_label.setStyleSheet(f"color: {theme.danger.name()};")
 
+    def set_category(self, category: str | None) -> None:
+        """Show only one category; ``None`` means 全部."""
+        self._filter_category = category
+        name = "全部" if category is None else category
+        button = self.category_buttons[name]
+        with QSignalBlocker(button):
+            button.setChecked(True)
+        self._apply_filter()
+
+    def set_search(self, text: str) -> None:
+        """Filter by Chinese label, English GM name or GM number."""
+        self._filter_text = text
+        self._apply_filter()
+
+    def _visible_indices(self) -> list[int]:
+        text = self._filter_text.strip().lower()
+        visible: list[int] = []
+        for index, program in enumerate(CATALOG):
+            if (
+                self._filter_category is not None
+                and program.category != self._filter_category
+            ):
+                continue
+            if text and not (
+                text in program.label.lower()
+                or text in program.name.lower()
+                or text == str(program.gm)
+            ):
+                continue
+            visible.append(index)
+        return visible
+
+    def _apply_filter(self) -> None:
+        for button in self._buttons:
+            self._grid.removeWidget(button)
+            button.hide()
+        for slot, index in enumerate(self._visible_indices()):
+            self._grid.addWidget(self._buttons[index], slot // 3, slot % 3)
+            self._buttons[index].show()
+
     def refresh(self) -> None:
         for index, btn in enumerate(self._buttons):
             with QSignalBlocker(btn):
                 btn.setChecked(index == self.instrument.program_index)
+        for index, btn in enumerate(self.kit_buttons):
+            with QSignalBlocker(btn):
+                btn.setChecked(index == self.instrument.drum_kit_index)
+        with QSignalBlocker(self.drum_switch):
+            self.drum_switch.setChecked(self.instrument.drums_enabled)
         with QSignalBlocker(self.mute_switch):
             self.mute_switch.setChecked(self.instrument.muted)
 

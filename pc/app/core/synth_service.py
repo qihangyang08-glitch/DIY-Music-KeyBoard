@@ -15,25 +15,22 @@ import os
 from pathlib import Path
 from typing import Optional
 
-PC = Path(__file__).resolve().parents[2]
+from .drums import DRUM_CHANNEL
+from .programs import CATALOG, PROGRAMS
 
-PROGRAMS = (
-    (0, "Piano 1"),
-    (4, "E.Piano 1"),
-    (16, "Drawbar Organ"),
-    (24, "Nylon Guitar"),
-    (48, "Strings 1"),
-    (80, "Square Lead"),
-    (32, "Acoustic Bass"),
-)
+PC = Path(__file__).resolve().parents[2]
 
 # The demo player uses its own MIDI channel so a demo note-off can never stop
 # a note the user is holding on channel 0.
 DEMO_CHANNEL = 15
 
 # The rhythm drill's metronome uses a third channel so its short note-offs do
-# not cut a learner's held note.
+# not cut a learner's held note. It keeps its own GM program: switching the
+# main sound must never turn the click into a saxophone.
 CLICK_CHANNEL = 14
+CLICK_PROGRAM = 115  # GM 115 Woodblock
+CLICK_MIDI = 76      # low woodblock
+CLICK_ACCENT_MIDI = 77  # high woodblock (bar accent)
 
 # Live layer/split auditions use their own channel so the base key (channel 0)
 # and the demo/metronome channels never cut each other.
@@ -47,15 +44,7 @@ SPLIT_RIGHT_CHANNEL = 12
 ACCOMPANIMENT_CHANNEL = 10
 
 # Chinese-first labels; the English GM name stays in the tooltip.
-PROGRAM_CN = {
-    "Piano 1": "钢琴 1",
-    "E.Piano 1": "电钢琴 1",
-    "Drawbar Organ": "拉杆风琴",
-    "Nylon Guitar": "尼龙吉他",
-    "Strings 1": "弦乐合奏 1",
-    "Square Lead": "方波主音",
-    "Acoustic Bass": "低音贝斯",
-}
+PROGRAM_CN = {program.name: program.label for program in CATALOG}
 
 
 def program_label_cn(name: str) -> str:
@@ -88,6 +77,9 @@ class NullSynth:
         return PROGRAMS[index % len(PROGRAMS)][1]
 
     def program_on(self, channel: int, program: int) -> None:
+        pass
+
+    def set_drum_kit(self, program: int) -> None:
         pass
 
     def channel_volume(self, channel: int, volume: float) -> None:
@@ -156,15 +148,21 @@ class FluidSynthBackend:
         for channel in (
             self.channel,
             DEMO_CHANNEL,
-            CLICK_CHANNEL,
             ACCOMPANIMENT_CHANNEL,
         ):
             self.fs.program_select(channel, self.sfid, 0, program)
+        self.fs.program_select(CLICK_CHANNEL, self.sfid, 0, CLICK_PROGRAM)
         return name
 
     def program_on(self, channel: int, program: int) -> None:
         self.fs.program_select(
             channel, self.sfid, 0, max(0, min(127, int(program)))
+        )
+
+    def set_drum_kit(self, program: int) -> None:
+        """GM drum kits live in bank 128 on MIDI channel 10."""
+        self.fs.program_select(
+            DRUM_CHANNEL, self.sfid, 128, max(0, min(127, int(program)))
         )
 
     def channel_volume(self, channel: int, volume: float) -> None:

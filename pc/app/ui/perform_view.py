@@ -324,39 +324,61 @@ class PerformView(QWidget):
         preset = inst.current_preset
         with QSignalBlocker(self.auto_switch):
             self.auto_switch.setChecked(inst.auto_follow)
-        program_name = inst.synth_programs()[inst.program_index][1]
-        self.sound_value.setText(program_label_cn(program_name))
-        self.sound_value.setToolTip(program_name)
-        if inst.auto_follow:
-            self.map_name.setText(f"自动跟随 · {preset.label_cn}")
-            detail = self._window_info or f"{preset.range_label(inst.offset)} · 音域适配"
-            self.map_range.setText(detail)
-        else:
-            self.map_name.setText(preset.label_cn)
-            self.map_range.setText(preset.range_label(inst.offset))
-        self.map_label.setText(f"{tr('范围')} {preset.range_label(inst.offset)}")
-        split = preset.split
-        if split is not None:
-            self.split_hint.setText(
-                f"分区 {split.bar} · 拖动光条琥珀线调整"
-            )
-            self.split_hint.show()
-            self.split_reset.show()
-        else:
+        if inst.drums_enabled:
+            self.sound_value.setText(inst.drum_kit_label())
+            self.sound_value.setToolTip(f"{inst.drum_kit_name()} · bank 128")
+            self.map_name.setText("鼓垫 · 32 键")
+            self.map_range.setText("专用通道 9 · 不参与跟弹判定")
+            self.map_label.setText(f"{tr('范围')} 32 键鼓垫")
             self.split_hint.clear()
             self.split_hint.hide()
             self.split_reset.hide()
-        current_key = preset.key
-        # An exclusive QButtonGroup refuses to uncheck its current button, so
-        # a content mapping ("content", no chip) would leave the old preset
-        # highlighted. Drop exclusivity for the refresh, then restore it.
-        self._preset_group.setExclusive(False)
-        try:
-            for index, btn in enumerate(self._preset_buttons):
-                with QSignalBlocker(btn):
-                    btn.setChecked(PRESETS[index].key == current_key)
-        finally:
-            self._preset_group.setExclusive(True)
+            self._preset_group.setExclusive(False)
+            try:
+                for btn in self._preset_buttons:
+                    with QSignalBlocker(btn):
+                        btn.setChecked(False)
+            finally:
+                self._preset_group.setExclusive(True)
+        else:
+            program_name = inst.synth_programs()[inst.program_index][1]
+            self.sound_value.setText(program_label_cn(program_name))
+            self.sound_value.setToolTip(program_name)
+            if inst.auto_follow:
+                self.map_name.setText(f"自动跟随 · {preset.label_cn}")
+                detail = (
+                    self._window_info
+                    or f"{preset.range_label(inst.offset)} · 音域适配"
+                )
+                self.map_range.setText(detail)
+            else:
+                self.map_name.setText(preset.label_cn)
+                self.map_range.setText(preset.range_label(inst.offset))
+            self.map_label.setText(
+                f"{tr('范围')} {preset.range_label(inst.offset)}"
+            )
+            split = preset.split
+            if split is not None:
+                self.split_hint.setText(
+                    f"分区 {split.bar} · 拖动光条琥珀线调整"
+                )
+                self.split_hint.show()
+                self.split_reset.show()
+            else:
+                self.split_hint.clear()
+                self.split_hint.hide()
+                self.split_reset.hide()
+            current_key = preset.key
+            # An exclusive QButtonGroup refuses to uncheck its current button,
+            # so a content mapping ("content", no chip) would leave the old
+            # preset highlighted. Drop exclusivity for the refresh, restore.
+            self._preset_group.setExclusive(False)
+            try:
+                for index, btn in enumerate(self._preset_buttons):
+                    with QSignalBlocker(btn):
+                        btn.setChecked(PRESETS[index].key == current_key)
+            finally:
+                self._preset_group.setExclusive(True)
         self.octave_value.setText(f"{inst.octave:+d}")
         self.transpose_value.setText(f"{inst.transpose:+d}")
         self.band.set_sustain(inst.sustain)
@@ -388,6 +410,14 @@ class PerformView(QWidget):
         self.guide.set_active(keys)
 
     def set_next_key(self, bar: int | None, note) -> None:
+        if self.instrument.drums_enabled:
+            # A pad is not a melody target: no next-key prompt and no follow
+            # judgment while drums are active.
+            self.band.set_next_key(None)
+            self.guide.set_next_key(None)
+            self.next_value.setText("鼓垫模式")
+            self.follow_label.setText(tr("敲击发声 · 不参与判定"))
+            return
         self.band.set_next_key(bar)
         self.guide.set_next_key(bar)
         if note is None:
@@ -408,9 +438,10 @@ class PerformView(QWidget):
         misses: int,
         playing: bool,
         next_note,
+        drums: bool = False,
     ) -> None:
         self.score.set_follow_state(
-            position, expected_index, hits, misses, playing, next_note
+            position, expected_index, hits, misses, playing, next_note, drums
         )
 
     def set_score(self, score) -> None:

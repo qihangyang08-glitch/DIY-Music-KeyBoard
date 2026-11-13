@@ -23,7 +23,12 @@ from PySide6.QtWidgets import QApplication
 from app.core.note_engine import NoteEvent as RuntimeNoteEvent
 from app.core.project import LoopRegion, NoteEvent, Project
 from app.core.score import parse_score
-from app.core.synth_service import CLICK_CHANNEL, NullSynth
+from app.core.synth_service import (
+    CLICK_ACCENT_MIDI,
+    CLICK_CHANNEL,
+    CLICK_MIDI,
+    NullSynth,
+)
 from app.ui.main_window import MainWindow
 
 
@@ -375,12 +380,12 @@ class ComposeWindowTest(unittest.TestCase):
         page.tick_metronome(100.01)
         page.tick_metronome(100.6)
 
-        self.assertIn(("on", CLICK_CHANNEL, 96), synth.events)
-        self.assertIn(("on", CLICK_CHANNEL, 84), synth.events)
+        self.assertIn(("on", CLICK_CHANNEL, CLICK_ACCENT_MIDI), synth.events)
+        self.assertIn(("on", CLICK_CHANNEL, CLICK_MIDI), synth.events)
 
         page.stop_metronome()
         self.assertFalse(page.metronome.running)
-        self.assertIn(("off", CLICK_CHANNEL, 84), synth.events)
+        self.assertIn(("off", CLICK_CHANNEL, CLICK_MIDI), synth.events)
 
     def test_count_in_ignores_notes_before_the_bar(self) -> None:
         page = self.open_compose()

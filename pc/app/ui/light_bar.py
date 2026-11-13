@@ -224,8 +224,9 @@ class LightBarBand(QWidget):
         return [QRectF(x0 + i * (width + gap), 2, width, 16) for i in range(4)]
 
     def _midi(self, bar: int) -> int:
-        preset = self.instrument.current_preset
-        return max(0, min(127, preset.midi_for_key(bar) + self.instrument.offset))
+        # Drum mode colours pads by their GM percussion note, not by the
+        # melody mapping.
+        return max(0, min(127, self.instrument.display_midi(bar)))
 
     def _note(self, bar: int) -> str:
         return self.instrument.note_for_key(bar)
@@ -535,7 +536,10 @@ class LightBarBand(QWidget):
         elif bar is not None:
             split = self.instrument.current_preset.split
             split_bar = split.bar if split is not None else 16
-            hand = "左手" if bar <= split_bar else "右手"
+            if self.instrument.drums_enabled:
+                hand = "鼓垫"
+            else:
+                hand = "左手" if bar <= split_bar else "右手"
             keycap = self.bindings.keycap(bar)
             key_text = f"电脑键 {keycap}" if keycap != "—" else "电脑键未绑定"
             if not self.instrument.key_enabled(bar):

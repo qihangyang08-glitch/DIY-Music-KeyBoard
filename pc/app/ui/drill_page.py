@@ -39,7 +39,7 @@ from ..core.drill import (
 from ..core.exam import evaluate, exam_by_key
 from ..core.note_engine import midi_name
 from ..core.rhythm import RhythmSession
-from ..core.synth_service import CLICK_CHANNEL
+from ..core.synth_service import CLICK_ACCENT_MIDI, CLICK_CHANNEL, CLICK_MIDI
 from .light_bar import pitch_color, with_alpha
 from .rhythm_view import RhythmCanvas
 from .theme import Theme, set_scaled_font
@@ -910,13 +910,13 @@ class DrillPage(GlassFrame):
         self._rhythm_status.setText(text)
 
     def _play_click(self, accent: bool) -> None:
-        midi = 96 if accent else 84
+        midi = CLICK_ACCENT_MIDI if accent else CLICK_MIDI
         self.instrument.synth.note_on(midi, 100, channel=CLICK_CHANNEL)
         self._click_off_timer.start()
 
     def _stop_click_notes(self) -> None:
         self._click_off_timer.stop()
-        for midi in (84, 96):
+        for midi in (CLICK_MIDI, CLICK_ACCENT_MIDI):
             self.instrument.synth.note_off(midi, channel=CLICK_CHANNEL)
 
     # -- input ------------------------------------------------------------

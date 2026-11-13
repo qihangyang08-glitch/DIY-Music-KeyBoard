@@ -11,7 +11,7 @@
 > + **P2-H2 剩余练习补齐（G/F、华尔兹、反向/平行、连奏/踏板/录音/弱起反复）**
 > + **H7a-P2 长谱分页** + **H9b-P2 性能后续**
 > + **H9c 英文界面第一切片 + P2-H8 四首入门曲**；
-> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **684 项通过**；
+> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **713 项通过**；
 > 曲库 **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；公开包 **146 个内容文件**。
 >
 > **2026-11-13 新阶段（A1–A3 已完成）：** 用户已确认仓库
@@ -19,8 +19,8 @@
 > A2 逐键校准（纯逻辑/固件/页面/多指验证/自动下发）与 A3 首启向导/帮助
 > 已全部完成。A3 完成后的文档提交 `307dcc9` 已打 tag **v0.1.1** 并推送；
 > 最后一次全量 CI 在 `a341f5f`（代码）：`pc-tests` / `firmware-build` 均
-> **success**；tag 提交本身为文档 `[skip ci]`。工作树干净，测试 **684 项**。
-> 下一步做 **B9 GM 音色扩展（7 → 30+）**，随后 **B3 20 首新曲**。校准设计见
+> **success**；tag 提交本身为文档 `[skip ci]`。工作树干净，测试 **713 项**。
+> **B9 GM 音色扩展与鼓组已完成（2026-11-14）**，下一步 **B3 20 首新曲**。校准设计见
 > [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)，批次与仓库见
 > [ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
 >
@@ -39,7 +39,7 @@
 ## 0. 快速接手（5 分钟）
 
 1. 读 §1 基线 → **§1.1 新阶段任务** → §2.1 优先级 → §3.2 H7f 残留 / §3.4 H9。
-2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **684 通过**。
+2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **713 通过**。
 3. 启动真实应用：双击 `pc\run.cmd`（先关闭 PlatformIO 串口监视器；
    本机真机 COM5 + 0x5A/0x5C/0x5D）。
 4. **A1 仓库/CI、A2 校准与 A3 首启向导/帮助已完成**；下一步从
@@ -61,11 +61,12 @@
 | 曲库 | **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；磁盘派生；收藏/标签/最近/递归扫描/目录监视/图片与 PDF 仅显示 |
 | 考核 | **H7d**：阶段 1（20 音首答 ≥80%）、阶段 2（60 BPM/16 拍全中/平均偏差 <60 ms）；可选，不影响阶段通关 |
 | 启动 | 双击 `pc\run.cmd` 或 `python pc/app/main.py`；先关闭 PlatformIO 串口监视器；本机真机为 **COM5**（3 个 MPR121：0x5A/0x5C/0x5D） |
-| 测试 | **684 项通过**：`cd pc && python -m unittest discover -s tests -v` |
+| 测试 | **713 项通过**：`cd pc && python -m unittest discover -s tests -v` |
 | 公开版 | **H9a 已完成**：`python tools/build_public.py` 生成白名单压缩包；私有/用户数据/截图/日志被自动剔除 |
 | 无障碍 | **H9b 已完成（K1/K2/P2 已补）**：×/✓ + 文字对错反馈、`减少动效`、字号 小/标准/大（`accessibility.json`）、导航/设置/走带/音轨/键位页/学习卡键盘可达 |
 | 性能 | **H9b-P1/P2 已完成**：曲库解析缓存；硬件帧去抖、onset 扫描提前停止、字体 LRU、搜索 150 ms 防抖 |
-| 下一步 | **A1、A2、A3 已完成**；接下来 **B9 GM 音色扩展 → B3 20 首新曲 → A4/A5/A7**。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
+| 音色 | **B9 已完成**：目录 48 音色/5 分类/分类 chip + 搜索（中文名/英文名/GM 编号）；前 7 项索引不变；未知 GM 回退钢琴并提示；节拍器固定 GM 115 木鱼（76/77）；鼓组 8 套（bank 128/通道 9），32 键鼓垫显示鼓件名、不参与跟弹判定；项目仍存 GM 编号 |
+| 下一步 | **A1–A3、B9 已完成**；接下来 **B3 20 首新曲 → A4/A5/A7**。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
 | 私有内容 | `mariage_fragment`（梦中的婚礼 · 片段）标 `visibility="private"`；本机可用，已在 `.gitignore` 与公开构建中剔除 |
 | 工作树 | 已初始化 git，`origin` = 上述公开仓库；`main` 工作树干净；tag `v0.1.0` = 初始快照 `471a058`，**`v0.1.1` = `307dcc9`**（A3 完成 + CI 修复后的文档提交）。交接前先跑全套测试，不留下临时 mockup/`.tmp` |
 | CI | `.github/workflows/ci.yml`；最后一次全量运行 commit `a341f5f`，`pc-tests` / `firmware-build` 均 **success**。`v0.1.1` 指向的 `307dcc9` 及后续文档提交均为 `[skip ci]`（不改代码） |
@@ -104,7 +105,12 @@ vendor），`main` + `v0.1.0` 已推送（A1 阶段；现由 **`v0.1.1` = `307dc
 3. **A3 首启向导 + 侧边栏“帮助”（2–3 天）**：**已完成**——导航第 7 项、
    四步向导、`onboarding.json`、帮助页/键位图/故障排查，F1 与顶栏/设置
    入口；23 项新测试。见下。
-4. **B9 GM 音色扩展（3–5 天）**：现有 7 个扩到 30+。
+4. **B9 GM 音色扩展（3–5 天）**：**已完成（2026-11-13/14）**——
+   `app/core/programs.py` 目录 48 个 GM 音色、5 分类、中文标签；前 7 项
+   保持旧顺序/索引；音色页按目录生成 chip，分类 chip + 搜索过滤；
+   未知 GM 回退钢琴并提示；节拍器固定 GM 115 木鱼（76/77）。
+   **B9b**：`app/core/drums.py` 8 套 GM 鼓组（bank 128 / 通道 9），
+   32 键映射 GM 35–66 并显示鼓件名，鼓击不参与跟弹/学习判定。
 5. **B3 新增 20 首曲目（批次 4）**：公有领域优先，XML+MIDI 同源。
 
 #### A2：逐键校准页（必须先做）
@@ -187,14 +193,20 @@ vendor），`main` + `v0.1.0` 已推送（A1 阶段；现由 **`v0.1.1` = `307dc
 
 **建议切片（B9）**：
 
-1. **B9a-1 音色目录纯逻辑**：`app/core/programs.py` 增加分类/名称/GM
-   编号的目录，前 7 项索引不变；音色页只读目录生成 chip；缺音色回退
-   钢琴并提示。先写目录完整性、索引兼容、回退测试。
-2. **B9a-2 音色页分类/搜索**：分类 chip + 分页或搜索，切换仍写回
-   `program_index`；节拍器固定打击音色，不受主音色影响（加回归测试）。
-3. **B9a-3 项目/导出兼容**：项目文件继续存 GM 编号，不存列表索引；
-   导出 MIDI 的 program 与目录一致。
-4. **B9b 鼓组**：bank 128、通道 9，32 键显示鼓件名，不参与旋律判定。
+1. **B9a-1 音色目录纯逻辑**：**已完成（2026-11-13）**——`app/core/programs.py`
+   提供 48 个分类/名称/GM 编号的目录，前 7 项索引不变；
+   `synth_service.PROGRAMS` 与音色页都从目录派生；未知/缺失音色经
+   `resolve_gm` 回退钢琴，`fallback_notice` 生成提示，创作页载入时提示一次。
+2. **B9a-2 音色页分类/搜索**：**已完成（2026-11-13）**——分类 chip
+   （全部 + 5 类）与搜索框（中文名/英文名/GM 编号）组合过滤；切换仍写回
+   `program_index`；节拍器固定 GM 115 Woodblock，`program()` 不再改
+   `CLICK_CHANNEL`，点击音改用 76/77 两个木鱼键。
+3. **B9a-3 项目/导出兼容**：**无需额外改动**——项目文件继续存 GM
+   编号、不存列表索引，MIDI 导出 program 与目录一致；既有
+   `test_project` / `test_midi_export` 已覆盖。
+4. **B9b 鼓组**：**已完成（2026-11-14）**——8 套 GM 鼓组走 bank 128 /
+   通道 9；32 键映射 GM 35–66，光条显示鼓件名；鼓击不发旋律事件，
+   顶栏与谱面页显示「鼓垫模式 · 不参与判定」。
 
 #### B3：20 首新曲（批次 4）
 
@@ -239,7 +251,65 @@ vendor），`main` + `v0.1.0` 已推送（A1 阶段；现由 **`v0.1.1` = `307dc
   volta、项目浏览器/重命名、按考核结果硬性解锁（产品上刻意不做）。
 - **体验待确认**：黑键暗色强度、分区持久化 +「重置」的文案是否清楚。
 
-**最近交接点（A3：首启向导 + 帮助页）文件**：
+**最近交接点（B9b：GM 鼓组）文件**：
+
+- 新增：`app/core/drums.py`（`DrumKit` / `DrumPad`、8 套 bank 128 鼓组、
+  32 键 → GM 35–66 的鼓垫表、`drum_for_key` / `drum_label`）、
+  `tests/test_drums.py`（11 项：目录、bank/通道、乐器直连、UI、光条）。
+- 修改：`app/core/synth_service.py`（`set_drum_kit` 写 bank 128 / 通道 9）、
+  `app/core/instrument.py`（`set_drums` / `set_drum_kit`；鼓垫模式键位
+  翻译到通道 9，且**不发** `events`，所以跟弹/学习/录音都不判定；
+  `note_for_key` / `display_midi` / `active_notes` 显示鼓件名）、
+  `app/ui/pages.py`（音色页鼓组开关 + 8 个鼓组 chip）、
+  `app/ui/perform_view.py`（音色卡显示鼓组；无下一键提示）、
+  `app/ui/light_bar.py`（鼓件名、鼓垫颜色与 tooltip）、
+  `app/ui/score_view.py`（`drums` 标志：页脚「鼓垫模式 · 不参与判定」）、
+  `app/ui/main_window.py`（映射 chip、状态栏、跟随状态传鼓组标志）。
+- 契约：8 套鼓组 = GM bank 128 preset 0/8/16/24/25/32/40/48；32 键 →
+  GM 35–66（每键唯一）；鼓击只发通道 9，不发旋律事件；开关鼓组先 panic，
+  关闭后恢复原映射/音色；校准期间不能切换。
+- 验收：**713 项测试通过**；截图 `pc/mockups/p13_drums_perform.png`、
+  `p13_drums_sound.png`。
+- 未做：鼓击录入项目/MIDI 导出、逐键鼓件重排、鼓组模式与鼓组的跨重启
+  记忆；鼓件名用 GM 标准英文/中文，不随鼓组变体变化；训练/练习进行中
+  切到鼓组没有提示或禁用（会覆盖该次练习的判定，需手动关闭）。
+
+**最近交接点（B9a-2：音色分类/搜索 + 节拍器固定音色）文件**：
+
+- 新增测试：`tests/test_program_ui.py` +5（分类 chip、搜索、组合过滤、
+  过滤下选择仍写回 `program_index`、目录滚动）、`tests/test_programs.py`
+  +2（节拍器通道固定、木鱼键位）。
+- 修改：`app/ui/pages.py`（搜索框、分类 chip、`set_category` /
+  `set_search` / `_apply_filter` 重新排布可见 chip；`全部` + 5 类）、
+  `app/core/synth_service.py`（`CLICK_PROGRAM = 115`、`CLICK_MIDI = 76`、
+  `CLICK_ACCENT_MIDI = 77`；`program()` 只改主/示范/伴奏通道，节拍器
+  始终是木鱼）、`app/ui/creation_page.py` / `app/ui/drill_page.py`
+  （点击音改用上述常量）、`tests/test_compose_ui.py`（断言改用常量）。
+- 契约：分类与搜索是 AND 关系；空搜索/「全部」恢复 48 项；搜索匹配
+  中文标签、英文 GM 名与 GM 编号；切换主音色后 `CLICK_CHANNEL`
+  仍是 GM 115，点击音为 76/77；过滤状态下选中音色仍写回索引。
+- 验收：**702 项测试通过**；截图 `pc/mockups/p12_sound_catalog.png`、
+  `p12_sound_wind.png`、`p12_sound_search.png`。
+- 未做：B9b bank 128 鼓组与 32 键鼓垫名；分类 chip 的方向键循环
+  （当前 Tab/Enter 可达）。
+
+**最近交接点（B9a-1：GM 音色目录）文件**：
+
+- 新增：`app/core/programs.py`（`Program`、`CATEGORIES`、48 项 `CATALOG`、
+  `PROGRAMS` 兼容元组、`program_for_gm` / `index_for_gm` / `resolve_gm` /
+  `label_for_gm` / `fallback_notice`）、`tests/test_programs.py`（8 项）、
+  `tests/test_program_ui.py`（3 项）。
+- 修改：`app/core/synth_service.py`（`PROGRAMS` / `PROGRAM_CN` 从目录派生）、
+  `app/ui/creation_page.py`（音色名走 `label_for_gm`；载入/打开项目时对
+  回退音色提示一次）。
+- 契约：目录 ≥30（现 48）、GM 编号唯一且在 0–127、5 个分类均非空；
+  前 7 项顺序/索引与 P1 完全一致；音色页 chip 数与顺序 = 目录；项目文件
+  继续存 GM 编号；未知 GM 显示/回退钢琴并给出 `fallback_notice`。
+- 验收：**695 项测试通过**；前 7 项索引、项目回退提示、音色页点击
+  追加音色均有测试。
+- 未做：B9a-2 分类 chip/搜索与节拍器固定打击音色；B9b bank 128 鼓组。
+
+**上一交接点（A3：首启向导 + 帮助页）文件**：
 
 - 新增：`app/core/onboarding.py`（`OnboardingState` 容错载入/原子写）、
   `app/ui/onboarding.py`（四步向导）、`app/ui/help_page.py`（页面索引、
@@ -721,7 +791,7 @@ C ≈ B + H8（14–20）= **23–36**。
 | **P1c** | H9c 打包/i18n | ~~界面字符串抽取~~、~~首启 ≤5 分钟~~（A3）、~~真实阈值校准~~（A2）已完成；**剩余 Windows 安装包、完整英文目录** | 2–4 | UI §19、RELEASE_POLICY |
 | **P1d** | A2 逐键校准页 | **已完成（切片 1–4）**：纯逻辑/协议 + 固件 + 页面/多指验证 + 自动下发/重连 | 4–6 | [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md) |
 | **P1e** | A3 首启向导 + 帮助页 | **已完成**：导航第 7 项、四步向导、`onboarding.json`、帮助页/键位图/故障排查、F1/顶栏/设置入口 | ~~2–3~~ | UI §14、§23.2 |
-| **P1f** | B9 GM 音色扩展 | 7 → 30+，分类展示；节拍器固定打击音色 | 3–5 | ROADMAP §6 |
+| **P1f** | B9 GM 音色扩展 | **已完成**（48 音色目录、旧索引兼容、分类 chip + 搜索、回退提示、节拍器固定木鱼、8 套鼓组/32 键鼓垫） | ~~3–5~~ | ROADMAP §6 |
 | **P1g** | A1 仓库 + CI | **已完成**：白名单首提交 347 文件、公开包审计、CI、`main` + `v0.1.0` 已推送 | ~~0.5–1~~ | ROADMAP §4 |
 | **P2** | H8 内容批次 | 约 135 项（45 曲 + ~49 谱面训练 + ~41 生成训练）；8–12 项/次 | 14–20 | §3.3 |
 | **P2-G** | ~~指导书内容~~ | **已完成（2026-11-10）**：57/57 节正文、五段式课程页、每课练习绑定、课次引用标题、公开版过滤；后续能力缺口见 §3.3.1 | ~~7–10~~ | §3.3.1、TEACHING §22B、UI §9.2–9.3 |
@@ -1174,7 +1244,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 - 真机试弹（32 键 + 电脑键盘）；录音/分区等新交互必须真机验证。
   分区拖拽、白键 19 键、自动伴奏已做首次界面试弹；完整曲目跟弹仍建议
   每批人工确认。
-- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 684 项）；
+- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 713 项）；
   每批更新 `DESIGN_INDEX` 的“待做事项”、`app/README` 的内容清单与测试计数。
 - 公开构建：改动内容后跑 `python tools/build_public.py`（当前 **146 个内容
   文件**）；失败即停止，
@@ -1370,7 +1440,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 
 - [ ] 读本文 §1「最近交接点」、§2.1「剩余工作总览」、§3.2 H7f 残留、
   §3.4 H9 与 [DESIGN_INDEX.md](DESIGN_INDEX.md)「待做事项」。
-- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 684 项通过
+- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 713 项通过
   （基线 tag `v0.1.1` = `307dcc9`；最后一次全量 CI `a341f5f` 全绿）。
 - [ ] 确认 `curriculum.STAGES` 的实际就绪数（不要相信文档里的硬编码）；
   当前应为阶段 0–8 全部 ready、合计 74/74。
