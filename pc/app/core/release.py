@@ -51,9 +51,11 @@ FORBIDDEN_DIRS = frozenset(
 FORBIDDEN_NAMES = frozenset(
     {
         "accessibility.json",
+        "calibration.json",
         "keybindings.json",
         "learning.json",
         "library_meta.json",
+        "onboarding.json",
         "score_prefs.json",
     }
 )

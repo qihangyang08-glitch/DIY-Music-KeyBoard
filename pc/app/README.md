@@ -647,6 +647,7 @@ pc/app/
     metronome.py           # 运输节拍器：每拍/重拍、显式时钟、可停止重启（纯逻辑）
     score_prefs.py         # 按曲目的用户偏好（拖拽分区点），容错载入/原子写
     calibration.py         # 逐键校准：CAL/T 协议、曲线/自动停止/建议/校验、方案 JSON（纯逻辑）
+    onboarding.py          # 首启向导状态：onboarding.json 容错载入/原子写
     instrument.py          # AppState：串口/电脑键盘 -> NoteEngine -> synth，pads，映射，内容映射覆盖/恢复
     serial_service.py      # QThread 串口读取、CAL/状态行分发、send_line 写入、自动重连
     synth_service.py       # FluidSynth / 静音降级
@@ -663,6 +664,8 @@ pc/app/
     keybindings_page.py    # 设置 → 键位：32 音符键 + 功能键改绑
     score_view.py          # 谱面容器：图片/自绘谱表/落键、播放头、跟弹状态
     calibration_page.py    # 设备 → 校准：曲线/阈值点选/应用/保存/32 格多指验证
+    help_page.py           # 帮助：7 页索引、键位图、功能键、故障排查、重开向导
+    onboarding.py          # 四步首启向导：连接/校准/页面地图/第一课
     creation_page.py       # 创作页：走带/轨道/录音叠录循环/保存载入/32 键光条
     piano_roll.py          # 钢琴卷帘画布：网格/音符块/循环区/播放头/鼠标编辑
     project_player.py      # 回放 QTimer：按计划发 note-on/off、循环、播放头位置
@@ -731,6 +734,9 @@ pc/tests/
   test_serial_calibration.py # 串口分发：CAL -> calibrationFrame、send_line、状态行/坏行不串线
   test_instrument_calibration.py # 校准模式：吞 note、锁定控件、键盘/踏板忽略、恢复
   test_calibration_page.py # 校准页：开始/曲线/自动停止、阈值、应用/保存、多指验证、离开
+  test_onboarding.py      # 首启状态：容错载入/完成/跳过/原子写
+  test_help_page.py       # 帮助页：7 页索引、键位图/功能键、底部动作、主题切换
+  test_onboarding_ui.py   # 向导四步/设备/校准状态、首启一次、重开、跳转阶段 0/校准
 ```
 
 串口、音频、渲染都不在 UI 线程；所有状态经 Qt signal/slot 回到主线程。
@@ -742,15 +748,19 @@ pc/tests/
 无头 + 截图测试过的路径：
 
 - 电脑键盘：按键 → 光条、和弦、松开、重复键忽略。
-- `Shift` 延音、`Ctrl+Tab` 标签、`Ctrl+M/P/[ ]/-/=`、`Ctrl+1…6` 页面、
-  `Space` 播放、`Esc` 全部静音、`F1` 帮助文本；`Tab`/`Shift+Tab` 焦点遍历、
+- `Shift` 延音、`Ctrl+Tab` 标签、`Ctrl+M/P/[ ]/-/=`、`Ctrl+1…7` 页面、
+  `Space` 播放、`Esc` 全部静音、`F1` 帮助页；`Tab`/`Shift+Tab` 焦点遍历、
   方向键在导航与设置 chip 行内移动、`Enter`/`Space` 激活焦点控件。
 - 切页自动释放按住的电脑键；点击光条不发声；功能胶囊（延音/八度/映射）有效。
 - 状态条来源：`琴` / `电脑键盘` / `琴 + 电脑键盘` / `无`。
 - 实体琴：串口 COM5（`VID:PID=303A:1001`）连接、3 模块心跳；用合成 Frame
   验证通道→光条映射、硬件按键、pad 33 延音、断线释放；电脑键盘与硬件同按
   同一光条时，单方松开不断音。
-- 导航：6 个入口、`Ctrl+1…6`、设置→键位/音色、设备→校准。
+- 导航：7 个入口、`Ctrl+1…7`、设置→键位/音色、设备→校准；帮助页
+  含 7 页索引、键位图、故障排查与「重新打开首启向导」。
+- 首启向导：首次启动自动出现一次，四步（连接/校准/页面地图/第一课），
+  可跳过；完成或跳过后写 `onboarding.json`，可从帮助页重开。
+  `--no-onboarding` 可跳过本次启动。
 - 键位页：改绑音符与功能键立即生效；JSON 保存/重新加载；清除；恢复默认；
   冲突检测；导入格式校验（模型层）。
 - 解析器：样曲 MusicXML 与 MIDI 各解析出 42 个音，音高/起始/时值完全一致；
@@ -828,7 +838,7 @@ pc/tests/
 - 和弦/双手判定：同一 onset 的多个音可任意顺序按下，全部匹配后只推进一次；
   按错/重复按已匹配音记一次未中；《欢乐颂 · 双手版》第一拍 G4 + E5 的
   双手判定在纯逻辑和曲库 UI 测试中均通过。
-- `python -m unittest discover -s tests -v`：661 项通过（原有 42 项 +
+- `python -m unittest discover -s tests -v`：684 项通过（原有 42 项 +
   可选考核 35 项 + 课程就绪检查 1 项 + 曲库 29 项纯逻辑 + 曲库页 23 项 +
   自动换窗回归 2 项 +
   内容资产 4 项 + 和弦/双手判定 5 项 + 左右分区 8 项 + 节奏休止/附点 5 项 +
@@ -904,7 +914,8 @@ pc/tests/
   A2 校准 54 项：`CAL`/`T`/`Q` 解析与回读/噪声底/建图与预录/自动停止与
   卡键/建议与校验/方案 JSON 容错/串口发送/校准模式吞音符与锁定/页面流程/
   点选阈值/应用与保存/32 格多指验证/自动下发与超时/坏文件与无方案 +
-  公开仓库缺私有曲 1 项：库不显示 planned 卡或缺失警告）。
+  公开仓库缺私有曲 1 项：库不显示 planned 卡或缺失警告 +
+  A3 23 项：onboarding 状态 5/帮助页 5/向导与首启入口 13）。
 - 1120×760 下学习页与曲谱库无横向溢出，阶段页可纵向滚动；识谱与节奏训练在
   1120×760 与 1440×900 下均可用。
 - 纸白、暗场、键帽/音名、设置、键位、学习、曲库、音色、设备、跟弹渲染图在 `pc/mockups/`；

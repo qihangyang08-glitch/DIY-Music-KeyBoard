@@ -11,15 +11,14 @@
 > + **P2-H2 剩余练习补齐（G/F、华尔兹、反向/平行、连奏/踏板/录音/弱起反复）**
 > + **H7a-P2 长谱分页** + **H9b-P2 性能后续**
 > + **H9c 英文界面第一切片 + P2-H8 四首入门曲**；
-> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **661 项通过**；
+> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **684 项通过**；
 > 曲库 **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；公开包 **146 个内容文件**。
 >
-> **2026-11-13 新阶段（A2 切片 1–4 已完成）：** 用户已确认仓库
-> `git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`；逐键校准的
-> 纯逻辑/协议、固件 `CAL`/`T`/`Q`、校准页面/多指验证与
-> `calibration.json` 自动下发/重连已全部完成（A2 完成）。随后做
-> **首启向导 + 侧边栏“帮助”**、GM 音色扩展与 20 首新曲。校准完整设计见
-> [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)，批次与仓库安全初始化见
+> **2026-11-13 新阶段（A1–A3 已完成）：** 用户已确认仓库
+> `git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`；A1 仓库/CI、
+> A2 逐键校准（纯逻辑/固件/页面/多指验证/自动下发）与 A3 首启向导/帮助
+> 已全部完成。随后做 GM 音色扩展与 20 首新曲。校准设计见
+> [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)，批次与仓库见
 > [ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
 >
 > 本文只回答「还剩什么、按什么顺序、大概几次、怎么验收」，不重复设计细节。
@@ -37,12 +36,11 @@
 ## 0. 快速接手（5 分钟）
 
 1. 读 §1 基线 → **§1.1 新阶段任务** → §2.1 优先级 → §3.2 H7f 残留 / §3.4 H9。
-2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **661 通过**。
+2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **684 通过**。
 3. 启动真实应用：双击 `pc\run.cmd`（先关闭 PlatformIO 串口监视器；
    本机真机 COM5 + 0x5A/0x5C/0x5D）。
-4. **A1 仓库/CI 与 A2 校准已完成**；下一步从 **A3 首启向导/帮助**开始，
-   先读 [UI_DESIGN_V3.md](UI_DESIGN_V3.md) §14 与
-   [ROADMAP_NEXT.md](ROADMAP_NEXT.md) §5，再写测试。
+4. **A1 仓库/CI、A2 校准与 A3 首启向导/帮助已完成**；下一步从
+   **B9 GM 音色扩展**开始，先读 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) §6。
 5. 选一个纵向切片或一批内容，先写测试；完成后同步 `DESIGN_INDEX`、
    `app/README`、测试计数，并跑全套回归。
 
@@ -60,22 +58,23 @@
 | 曲库 | **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；磁盘派生；收藏/标签/最近/递归扫描/目录监视/图片与 PDF 仅显示 |
 | 考核 | **H7d**：阶段 1（20 音首答 ≥80%）、阶段 2（60 BPM/16 拍全中/平均偏差 <60 ms）；可选，不影响阶段通关 |
 | 启动 | 双击 `pc\run.cmd` 或 `python pc/app/main.py`；先关闭 PlatformIO 串口监视器；本机真机为 **COM5**（3 个 MPR121：0x5A/0x5C/0x5D） |
-| 测试 | **661 项通过**：`cd pc && python -m unittest discover -s tests -v` |
+| 测试 | **684 项通过**：`cd pc && python -m unittest discover -s tests -v` |
 | 公开版 | **H9a 已完成**：`python tools/build_public.py` 生成白名单压缩包；私有/用户数据/截图/日志被自动剔除 |
 | 无障碍 | **H9b 前五批已完成**：×/✓ + 文字对错反馈、`减少动效`、字号 小/标准/大（`accessibility.json`）、导航/设置/走带/音轨/键位页/学习卡键盘可达 |
 | 性能 | **H9b-P1/P2 已完成**：曲库解析缓存；硬件帧去抖、onset 扫描提前停止、字体 LRU、搜索 150 ms 防抖 |
-| 下一步 | **A1 与 A2 已完成**；接下来 **A3 首启向导/帮助 → B9 音色扩展 → B3 20 首新曲**。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
+| 下一步 | **A1、A2、A3 已完成**；接下来 **B9 GM 音色扩展 → B3 20 首新曲 → A4/A5/A7**。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
 | 私有内容 | `mariage_fragment`（梦中的婚礼 · 片段）标 `visibility="private"`；本机可用，已在 `.gitignore` 与公开构建中剔除 |
 | 工作树 | 已初始化 git，`origin` = 上述公开仓库；`main` + `v0.1.0` 已推送。交接前先跑全套测试，不留下临时 mockup/`.tmp` |
 | 关键约定 | TDD / 纵向切片；未就绪内容只显示“制作中”；每次切片同步 `DESIGN_INDEX`、`app/README`、测试计数 |
 
-### 1.1 新阶段任务（2026-11-13，A1 + A2 已完成）
+### 1.1 新阶段任务（2026-11-13，A1 + A2 + A3 已完成）
 
-**A1 仓库安全初始化**与 **A2 切片 1–4**（纯逻辑/协议、固件 `CAL`/`T`/`Q`、
-校准页面 + 多指验证、`calibration.json` 启动/连接自动下发与重连恢复）
-已完成，基线 **661 项测试**（+55）；ESP32-S3 编译通过，COM5 真机冒烟通过。
-公开仓库首提交 347 个文件、约 16 MB（含 vendor），`main` + `v0.1.0` 已推送。
-本轮实现 A1/A2 并同步以下文档：
+**A1 仓库安全初始化**、**A2 切片 1–4**（纯逻辑/协议、固件 `CAL`/`T`/`Q`、
+校准页面 + 多指验证、`calibration.json` 启动/连接自动下发）与 **A3
+首启向导 + 第 7 个“帮助”入口**（四步向导、`onboarding.json`、帮助页、
+F1/顶栏/设置入口）已完成，基线 **684 项测试**（+78）；ESP32-S3 编译通过，
+COM5 真机冒烟通过，CI 全绿。公开仓库首提交 347 个文件、约 16 MB（含
+vendor），`main` + `v0.1.0` 已推送。本轮实现 A1/A2/A3 并同步以下文档：
 
 - 新增 [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)：逐键校准页的完整
   交互、固件协议、数据格式与验收。
@@ -97,7 +96,9 @@
 2. **A2 逐键校准页（4–6 天）**：**已完成（切片 1–4）**——纯逻辑 +
    `CAL`/`T` 协议 + 串口收发 + 固件 `c`/`T`/`Q` + 校准页面/多指验证 +
    `calibration.json` 启动/连接自动下发，54 项测试 + 真机冒烟。见下。
-3. **A3 首启向导 + 侧边栏“帮助”（2–3 天）**：见下。
+3. **A3 首启向导 + 侧边栏“帮助”（2–3 天）**：**已完成**——导航第 7 项、
+   四步向导、`onboarding.json`、帮助页/键位图/故障排查，F1 与顶栏/设置
+   入口；23 项新测试。见下。
 4. **B9 GM 音色扩展（3–5 天）**：现有 7 个扩到 30+。
 5. **B3 新增 20 首曲目（批次 4）**：公有领域优先，XML+MIDI 同源。
 
@@ -150,6 +151,13 @@
 普通演奏。四个切片（纯逻辑 → 固件 → 页面 → 持久化/重连）已全部完成。
 
 #### A3：首启向导 + 侧边栏“帮助”
+
+**已完成（2026-11-13）**：`app/core/onboarding.py`（`onboarding.json`
+容错载入/原子写）、`app/ui/onboarding.py`（四步向导）、
+`app/ui/help_page.py`（7 页索引/键位图/故障排查/底部动作）；
+导航 7 项、F1、`Ctrl+7`、顶栏 `?`、设置“怎么用”均进入帮助页；
+`onboarding.json` 已加入 `.gitignore` 与公开包禁止名单。截图：
+`pc/mockups/p11_help_page.png`、`p11_onboarding.png`。
 
 - 导航从 6 项变 7 项：演奏 / 学习 / 曲谱 / 创作 / 设备 / 设置 / **帮助**
   （`?`，`Ctrl+7`）。
@@ -214,7 +222,26 @@
   volta、项目浏览器/重命名、按考核结果硬性解锁（产品上刻意不做）。
 - **体验待确认**：黑键暗色强度、分区持久化 +「重置」的文案是否清楚。
 
-**最近交接点（A1：公开仓库 + CI）文件**：
+**最近交接点（A3：首启向导 + 帮助页）文件**：
+
+- 新增：`app/core/onboarding.py`（`OnboardingState` 容错载入/原子写）、
+  `app/ui/onboarding.py`（四步向导）、`app/ui/help_page.py`（页面索引、
+  键位图、功能键、故障排查、底部动作）、`tests/test_onboarding.py`（5 项）、
+  `tests/test_help_page.py`（5 项）、`tests/test_onboarding_ui.py`（13 项）。
+- 修改：`app/ui/main_window.py`（7 项导航、`Ctrl+7`、F1/顶栏 `?`/设置
+  入口、首启/重开/跳转、`auto_onboarding`/`onboarding_path`）、
+  `app/ui/keybindings.py`（`page_7`）、`app/ui/i18n_ui.py`（帮助/怎么用）、
+  `app/main.py`（`--no-onboarding`、首启自动）、`app/core/release.py`
+  （`calibration.json`/`onboarding.json` 禁止进入公开包）、`.gitignore`。
+- 契约：首次启动自动出现一次；跳过/完成/去校准/打开阶段 0 都写
+  `onboarding.json`，之后不再自动弹；帮助页底部可强制重开；帮助页是
+  7 页索引 + 键位图 + 故障排查，每条 1–2 行；F1、顶栏 `?`、设置
+  “怎么用”、`Ctrl+7` 都进入帮助页。
+- 验收：**684 项测试通过**（Windows 与 offscreen）；截图
+  `pc/mockups/p11_help_page.png`、`p11_onboarding.png`。
+- 未做：英文帮助正文（界面 chrome 已部分英文化）；公开 README/许可属 H10。
+
+**上一交接点（A1：公开仓库 + CI）文件**：
 
 - 新增：`.gitignore`（用户数据/日志/截图/`dist`/`.pio`/`backup`/私有曲/
   第三方引脚图）、`.github/workflows/ci.yml`（`windows-latest`：661 项
@@ -324,8 +351,8 @@
   《友谊地久天长》《勃拉姆斯摇篮曲》（阶段 3），MusicXML + MIDI 同源。
 - 验收：**606 项测试通过**；学习路径 **74/74**；公开包 **146 个内容文件**；
   截图 `pc/mockups/p9_english_perform.png`、`p9_english_settings.png`。
-- 未做：完整英文目录（toast/长句/课程正文）；H9c 安装包、首启向导、
-  真实校准。
+- 未做：完整英文目录（toast/长句/课程正文）；H9c 安装包。
+- 已完成：真实校准（A2）、首启向导/帮助（A3）。
 
 **上一交接点（H7a-P2：长谱分页）文件**：
 
@@ -673,7 +700,7 @@ C ≈ B + H8（14–20）= **23–36**。
 | **P1b** | H9b 无障碍/性能 | **已完成**：×/✓ + 文字对错反馈、减少动效、字号缩放、曲库解析缓存、键盘可达、硬件帧去抖、onset 扫描、字体 LRU、搜索防抖、长谱分页 | 1 | UI §19 P6 |
 | **P1c** | H9c 打包/i18n/向导/校准 | ~~界面字符串抽取~~ 第一切片已完成；剩余 Windows 安装包、完整英文目录、首启 ≤5 分钟、真实阈值校准 | 3–6 | UI §19、RELEASE_POLICY |
 | **P1d** | A2 逐键校准页 | **已完成（切片 1–4）**：纯逻辑/协议 + 固件 + 页面/多指验证 + 自动下发/重连 | 4–6 | [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md) |
-| **P1e** | A3 首启向导 + 帮助页 | 设计定稿；导航第 7 项、`onboarding.json`、F1 入口 | 2–3 | UI §14、§23.2 |
+| **P1e** | A3 首启向导 + 帮助页 | **已完成**：导航第 7 项、四步向导、`onboarding.json`、帮助页/键位图/故障排查、F1/顶栏/设置入口 | ~~2–3~~ | UI §14、§23.2 |
 | **P1f** | B9 GM 音色扩展 | 7 → 30+，分类展示；节拍器固定打击音色 | 3–5 | ROADMAP §6 |
 | **P1g** | A1 仓库 + CI | **已完成**：白名单首提交 347 文件、公开包审计、CI、`main` + `v0.1.0` 已推送 | ~~0.5–1~~ | ROADMAP §4 |
 | **P2** | H8 内容批次 | 约 135 项（45 曲 + ~49 谱面训练 + ~41 生成训练）；8–12 项/次 | 14–20 | §3.3 |
@@ -1125,7 +1152,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 - 真机试弹（32 键 + 电脑键盘）；录音/分区等新交互必须真机验证。
   分区拖拽、白键 19 键、自动伴奏已做首次界面试弹；完整曲目跟弹仍建议
   每批人工确认。
-- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 661 项）；
+- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 684 项）；
   每批更新 `DESIGN_INDEX` 的“待做事项”、`app/README` 的内容清单与测试计数。
 - 公开构建：改动内容后跑 `python tools/build_public.py`（当前 **146 个内容
   文件**）；失败即停止，
@@ -1298,9 +1325,16 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 37. **A1 公开仓库 + CI** —— **已完成（2026-11-13）**：
     `.gitignore` 与 CI 工作流；白名单首提交 347 个文件（含 vendor，
     排除私有曲/用户数据/日志/截图/构建产物/第三方引脚图）；
-    `main` + `v0.1.0` 已推送。**A1 完成。**
+    `main` + `v0.1.0` 已推送；CI `pc-tests` + `firmware-build` 全绿。
+    **A1 完成。**
 
-**下一项：A3 首启向导/帮助 → B9 音色扩展 → B3 20 首新曲。**
+38. **A3 首启向导 + 帮助页** —— **已完成（2026-11-13）**：
+    `OnboardingState`/`onboarding.json`、四步向导、第 7 个“帮助”入口、
+    7 页索引/键位图/故障排查、F1/顶栏/设置/`Ctrl+7` 入口；新增 23 项
+    测试，全套 **684 项**；截图 `p11_help_page.png`、`p11_onboarding.png`。
+    **A3 完成。**
+
+**下一项：B9 GM 音色扩展 → B3 20 首新曲 → A4/A5/A7。**
 具体优先级与批次见 §2.1、[ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
 
 之后按 B 场景补齐 H9，再按 C 场景分批生产内容；
@@ -1314,7 +1348,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 
 - [ ] 读本文 §1「最近交接点」、§2.1「剩余工作总览」、§3.2 H7f 残留、
   §3.4 H9 与 [DESIGN_INDEX.md](DESIGN_INDEX.md)「待做事项」。
-- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 661 项通过。
+- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 684 项通过。
 - [ ] 确认 `curriculum.STAGES` 的实际就绪数（不要相信文档里的硬编码）；
   当前应为阶段 0–8 全部 ready、合计 74/74。
 - [ ] 启动一次真实应用：`pc\run.cmd`；先关闭 PlatformIO 串口监视器；
@@ -1344,19 +1378,16 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 
 1. ~~**范围**~~ **已定（2026-11-12）**：下一阶段按
    **A1 仓库 → A2 校准 → A3 向导/帮助 → B9 音色 → B3 新曲** 推进；
-   **A1/A2 已完成（2026-11-13）**，下一步 A3。校准交互、固件协议、
+   **A1/A2/A3 已完成（2026-11-13）**，下一步 B9。校准交互、固件协议、
    数据格式见 [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)。
-   仓库远端已确认；**首次提交前必须完成私有内容隔离**（用户需确认
-   仓库可公开，并提供可用的 SSH 凭据）。
+   公开仓库已初始化并推送；私有内容未进入历史。
 2. **体验确认**：黑键暗色强度是否合适；分区点按曲目持久化 +「重置」的
    行为/文案是否清楚；自动跟随的 tooltip/范围行是否足够。确认后再决定
    是否继续微调。
 3. ~~**五线谱引擎**~~ —— 已定：Qt `QPainter` 自绘（H7a），无第三方依赖。
-4. **公开发布时间**：公开仓库已定
-   `git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`。
-   首次提交前先按 `RELEASE_POLICY`/`ROADMAP` §4 隔离私有内容；
-   `mariage_fragment` 不进入历史。公开/私有内容边界不再讨论为“以后”，
-   建仓时立即执行。
+4. **公开发布时间**：公开仓库已初始化并推送（A1）
+   `git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`；
+   `main` + `v0.1.0` 已发布，CI 全绿。`mariage_fragment` 未进入历史。
 5. **全量曲目许可**：59 首里现代编配/教材改编需逐项核对；不确定的按
    `public_release: unknown → remove` 处理。
 6. **音频导出**：设计边界是不做 WAV/音频录音；若需要，单独立项，不阻塞主线。

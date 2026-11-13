@@ -51,6 +51,7 @@ FUNCTIONS = (
     ("page_4", "页面：创作", int(Qt.Key.Key_4), MOD_CTRL),
     ("page_5", "页面：设备", int(Qt.Key.Key_5), MOD_CTRL),
     ("page_6", "页面：设置", int(Qt.Key.Key_6), MOD_CTRL),
+    ("page_7", "页面：帮助", int(Qt.Key.Key_7), MOD_CTRL),
     ("map", "切换音域映射", int(Qt.Key.Key_M), MOD_CTRL),
     ("tone", "切换音色", int(Qt.Key.Key_P), MOD_CTRL),
     ("oct_down", "八度 −", int(Qt.Key.Key_BracketLeft), MOD_CTRL),

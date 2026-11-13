@@ -245,7 +245,8 @@ pc/resources/
 **当前实现（H9a）**：运行 `cd pc && python tools/build_public.py`。白名单由
 `content_manifest`（课程 `visibility`）与整个 `resources/` 扫描共同派生；
 私有课程资产、`visibility` 非 public 或 `public_release != "yes"` 的项目模板、
-禁止路径（`user-data/`、`learning.json`、`score_prefs.json`、`keybindings.json`、
+禁止路径（`user-data/`、`learning.json`、`calibration.json`、`onboarding.json`、
+`score_prefs.json`、`keybindings.json`、`accessibility.json`、`library_meta.json`、
 日志、缓存、`mockups/`、`dist/`、`.pio/`、临时文件）均被剔除。写包后会重新
 打开压缩包做二次审计；任一问题退出非零且不留下压缩包。包内
 `public_exclusions.json` 记录每条移除的原因与文件，`PUBLIC_CONTENT.md` 是

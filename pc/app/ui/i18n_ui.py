@@ -36,6 +36,8 @@ EN: dict[str, str] = {
     "曲谱": "Library",
     "创作": "Create",
     "设备": "Device",
+    "帮助": "Help",
+    "怎么用": "How to use",
     "设置": "Settings",
     "导航": "Navigation",
     "32 键电子琴": "32-key instrument",

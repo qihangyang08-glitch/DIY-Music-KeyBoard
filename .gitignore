@@ -26,6 +26,7 @@ backup/
 user-data/
 learning.json
 calibration.json
+onboarding.json
 keybindings.json
 accessibility.json
 score_prefs.json

@@ -55,6 +55,11 @@ def main() -> int:
     parser.add_argument("--port", help="force a serial port (e.g. COM5)")
     parser.add_argument("--no-serial", action="store_true", help="disable hardware auto-detect")
     parser.add_argument("--no-audio", action="store_true", help="run silently")
+    parser.add_argument(
+        "--no-onboarding",
+        action="store_true",
+        help="skip the first-run wizard this launch",
+    )
     parser.add_argument("--gain", type=float, default=0.6, help="FluidSynth gain (default 0.6)")
     parser.add_argument("--theme", choices=("studio", "stage"), default="studio")
     parser.add_argument("--fullscreen", action="store_true")
@@ -84,6 +89,7 @@ def main() -> int:
         fullscreen=args.fullscreen and not args.screenshot,
         progress_path=args.progress,
         library_root=args.library,
+        auto_onboarding=not args.no_onboarding and not args.screenshot,
     )
     if args.size:
         window.resize(*args.size)

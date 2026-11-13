@@ -135,11 +135,11 @@ class KeyboardNavigationUiTest(unittest.TestCase):
         QTest.keyClick(nav[0], Qt.Key.Key_Down)
         self.assertIs(QApplication.focusWidget(), nav[1])
         QTest.keyClick(nav[1], Qt.Key.Key_End)
-        self.assertIs(QApplication.focusWidget(), nav[5])
-        QTest.keyClick(nav[5], Qt.Key.Key_Home)
+        self.assertIs(QApplication.focusWidget(), nav[-1])
+        QTest.keyClick(nav[-1], Qt.Key.Key_Home)
         self.assertIs(QApplication.focusWidget(), nav[0])
         QTest.keyClick(nav[0], Qt.Key.Key_Up)
-        self.assertIs(QApplication.focusWidget(), nav[5])
+        self.assertIs(QApplication.focusWidget(), nav[-1])
 
     def test_return_activates_focused_nav_button(self) -> None:
         nav = self.window.nav_buttons[5]

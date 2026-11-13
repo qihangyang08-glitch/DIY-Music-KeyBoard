@@ -19,7 +19,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
-    QMessageBox,
     QPlainTextEdit,
     QPushButton,
     QSizePolicy,
@@ -54,6 +53,8 @@ from ..core.exam import exam_by_key
 from ..core.follow import FollowSession
 from ..core.instrument import Instrument
 from ..core.library import DISPLAY_SUFFIXES, default_import_dir
+from ..core.onboarding import OnboardingState
+from ..core.onboarding import default_path as onboarding_path_default
 from ..core.progress import LearningProgress
 from ..core.project import Project, default_project_dir
 from ..core.score import ScoreError, parse_score
@@ -62,13 +63,14 @@ from ..core.serial_service import SerialService
 from ..core.synth_service import make_synth
 from .creation_page import CreationPage
 from .drill_page import DrillPage
-from .keybindings import FUNCTION_LABELS, KeyBindings
+from .keybindings import KeyBindings
 from .keybindings_page import KeyBindingsPage
-from .keyboard_layout import KEY_ROWS
 from .learning_page import ExamTarget, LearningPage, PracticeTarget, ProjectTarget
 from .i18n_ui import apply_language, set_language, tr
 from .calibration_page import CalibrationPage
+from .help_page import HelpPage
 from .library_page import LibraryPage
+from .onboarding import OnboardingDialog
 from .pages import DevicePage, SettingsPage, SoundPage, MODULES
 from .perform_view import PerformView
 from .theme import (
@@ -86,6 +88,7 @@ NAV_ITEMS = (
     ("✎", "创作"),
     ("▣", "设备"),
     ("⚙", "设置"),
+    ("?", "帮助"),
 )
 
 SAMPLE_SCORE = (
@@ -148,6 +151,8 @@ class MainWindow(QMainWindow):
         prefs_path: str | Path | None = None,
         accessibility_path: str | Path | None = None,
         calibration_path: str | Path | None = None,
+        onboarding_path: str | Path | None = None,
+        auto_onboarding: bool = False,
         library_watch: bool = True,
     ):
         super().__init__()
@@ -182,6 +187,13 @@ class MainWindow(QMainWindow):
         self.calibration_applied = False
         self._calibration_apply_pending = False
         self._calibration_warning_shown = False
+        self.onboarding_path = (
+            Path(onboarding_path)
+            if onboarding_path is not None
+            else onboarding_path_default()
+        )
+        self.auto_onboarding = bool(auto_onboarding)
+        self._onboarding_shown = False
         self._calibration_timeout = QTimer(self)
         self._calibration_timeout.setSingleShot(True)
         self._calibration_timeout.timeout.connect(
@@ -249,6 +261,8 @@ class MainWindow(QMainWindow):
         apply_language(self)
         QApplication.instance().installEventFilter(self)
 
+        if self.auto_onboarding:
+            QTimer.singleShot(600, self._maybe_show_onboarding)
         if fullscreen:
             QTimer.singleShot(0, self.showFullScreen)
 
@@ -336,6 +350,17 @@ class MainWindow(QMainWindow):
         self.volume_btn = VolumeButton(self.theme)
         self.volume_btn.toggled.connect(self._on_mute_toggled)
         row.addWidget(self.volume_btn)
+
+        self.help_button = QPushButton("?")
+        self.help_button.setProperty("role", "icon")
+        self.help_button.setFixedSize(34, 34)
+        self.help_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.help_button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.help_button.setToolTip(tr("怎么用（F1）"))
+        self.help_button.clicked.connect(
+            lambda checked=False: self._show_help_page()
+        )
+        row.addWidget(self.help_button)
 
         settings = QPushButton("⋯")
         settings.setProperty("role", "icon")
@@ -426,7 +451,7 @@ class MainWindow(QMainWindow):
         self.settings_page.keybindingsRequested.connect(
             lambda: self._show_subpage(self.keybindings_page, 5)
         )
-        self.settings_page.helpRequested.connect(self._show_help)
+        self.settings_page.helpRequested.connect(self._show_help_page)
 
         self.calibration_page = CalibrationPage(
             self.theme,
@@ -444,8 +469,20 @@ class MainWindow(QMainWindow):
         self.device_page.calibrationRequested.connect(
             lambda: self._show_subpage(self.calibration_page, 4)
         )
+        self.help_page = HelpPage(
+            self.theme, self.instrument, self.bindings
+        )
+        self.help_page.onboardingRequested.connect(
+            lambda: self._show_onboarding(force=True)
+        )
+        self.help_page.calibrationRequested.connect(
+            lambda: self._show_subpage(self.calibration_page, 4)
+        )
+        self.help_page.keybindingsRequested.connect(
+            lambda: self._show_subpage(self.keybindings_page, 5)
+        )
 
-        # Six v3 nav pages; calibration / sound / keybindings are sub-pages.
+        # Seven v3 nav pages; calibration / sound / keybindings are sub-pages.
         self.pages = (
             self.perform,
             self.learning_page,
@@ -453,6 +490,7 @@ class MainWindow(QMainWindow):
             self.compose_page,
             self.device_page,
             self.settings_page,
+            self.help_page,
         )
         for page in self.pages:
             self.stack.addWidget(page)
@@ -1188,6 +1226,7 @@ class MainWindow(QMainWindow):
         self.keybindings_page.refresh()
         self.drill_page.refresh()
         self.calibration_page.refresh()
+        self.help_page.refresh()
         self._refresh_devices()
         self._refresh_notes()
 
@@ -1281,6 +1320,8 @@ class MainWindow(QMainWindow):
             self.compose_page.refresh()
         if index == 4:
             self.device_page.refresh()
+        if index == 6:
+            self.help_page.refresh()
         if left_drill:
             self._restore_follow_status()
 
@@ -1329,24 +1370,42 @@ class MainWindow(QMainWindow):
         self.keybindings_page.refresh()
         self.drill_page.refresh()
 
-    def _help_text(self) -> str:
-        lines: list[str] = []
-        for start, end in KEY_ROWS:
-            keys = " ".join(
-                self.bindings.keycap(bar) for bar in range(start + 1, end + 1)
-            )
-            lines.append(f"光条 {start + 1}–{end}：{keys}")
-        lines.append("")
-        for action, label in FUNCTION_LABELS.items():
-            chord = self.bindings.function_chord(action)
-            if chord is not None:
-                lines.append(f"{chord.text}  {label}")
-        lines.append("")
-        lines.append("中文输入法下仍按物理位置绑定；和弦多时优先用实体琴；点击光条不发声。")
-        return "\n".join(lines)
+    def _show_help_page(self) -> None:
+        self._show_page(6)
 
-    def _show_help(self) -> None:
-        QMessageBox.information(self, "怎么用", self._help_text())
+    def _maybe_show_onboarding(self) -> None:
+        if self._onboarding_shown:
+            return
+        state = OnboardingState.load(self.onboarding_path)
+        if state.done:
+            return
+        self._show_onboarding()
+
+    def _show_onboarding(self, force: bool = False) -> None:
+        """Open the wizard; the caller may force it from the Help page."""
+        state = OnboardingState.load(self.onboarding_path)
+        if not force and state.done:
+            return
+        self._onboarding_shown = True
+        dialog = OnboardingDialog(
+            self.theme,
+            self.instrument,
+            self.calibration_path,
+            self,
+        )
+        dialog.exec()
+        outcome = dialog.outcome
+        if outcome in ("completed", "calibration", "lesson"):
+            state.mark_completed()
+            state.save()
+        elif outcome == "skipped":
+            state.mark_skipped()
+            state.save()
+        if outcome == "calibration":
+            self._show_subpage(self.calibration_page, 4)
+        elif outcome == "lesson":
+            self._show_page(1, keep_learning_view=True)
+            self.learning_page.open_stage(0)
 
     def _on_focus_mode(self, on: bool) -> None:
         self.rail.setVisible(not on)
@@ -1408,6 +1467,7 @@ class MainWindow(QMainWindow):
             self.sound_page,
             self.settings_page,
             self.keybindings_page,
+            self.help_page,
         ):
             page.set_theme(self.theme)
         self.settings_page.set_current_theme(self.theme_name)
@@ -1591,7 +1651,7 @@ class MainWindow(QMainWindow):
             else:
                 self.perform.toggle_labels()
         elif action == "help":
-            self._show_help()
+            self._show_help_page()
         elif action == "map":
             inst.cycle_preset()
         elif action == "tone":

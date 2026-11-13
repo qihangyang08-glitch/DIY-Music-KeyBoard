@@ -229,6 +229,8 @@ class PackageAuditTest(unittest.TestCase):
                 "resources/scores/xiaoxingxing.musicxml",
                 "resources/scores/mariage_fragment.musicxml",
                 "user-data/learning.json",
+                "onboarding.json",
+                "calibration.json",
                 "mockups/p1_shell_studio.png",
                 "../outside.txt",
             ),
@@ -236,6 +238,8 @@ class PackageAuditTest(unittest.TestCase):
         joined = "\n".join(violations)
         self.assertIn("mariage_fragment.musicxml", joined)
         self.assertIn("user-data/learning.json", joined)
+        self.assertIn("onboarding.json", joined)
+        self.assertIn("calibration.json", joined)
         self.assertIn("mockups/p1_shell_studio.png", joined)
         self.assertIn("../outside.txt", joined)
         self.assertNotIn("xiaoxingxing", joined)
