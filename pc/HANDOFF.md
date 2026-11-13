@@ -17,10 +17,10 @@
 > **2026-11-13 新阶段（A1–A3 已完成）：** 用户已确认仓库
 > `git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`；A1 仓库/CI、
 > A2 逐键校准（纯逻辑/固件/页面/多指验证/自动下发）与 A3 首启向导/帮助
-> 已全部完成。当前 `main` = `afc8827`（文档提交，`[skip ci]`），
-> 最后一次全量 CI 在 `a341f5f`：`pc-tests` / `firmware-build` 均 **success**；
-> 工作树干净，测试 **684 项**。下一步做 **B9 GM 音色扩展（7 → 30+）**，
-> 随后 **B3 20 首新曲**。校准设计见
+> 已全部完成。A3 完成后的文档提交 `307dcc9` 已打 tag **v0.1.1** 并推送；
+> 最后一次全量 CI 在 `a341f5f`（代码）：`pc-tests` / `firmware-build` 均
+> **success**；tag 提交本身为文档 `[skip ci]`。工作树干净，测试 **684 项**。
+> 下一步做 **B9 GM 音色扩展（7 → 30+）**，随后 **B3 20 首新曲**。校准设计见
 > [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)，批次与仓库见
 > [ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
 >
@@ -53,7 +53,7 @@
 
 | 项 | 状态 |
 |---|---|
-| 可运行代码 | `pc/app/`，Python 3.11 + PySide6；**公开仓库已初始化并推送** `main` = `afc8827`、tag `v0.1.0`（`git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`）；私有曲/用户数据/日志/截图未进入历史 |
+| 可运行代码 | `pc/app/`，Python 3.11 + PySide6；**公开仓库已初始化并推送** tag `v0.1.1` = `307dcc9`（此前 `v0.1.0` = `471a058`）（`git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`）；私有曲/用户数据/日志/截图未进入历史 |
 | 学习页路径 | **74/74 就绪**；阶段 0–8 全部就绪（0=8/8、1=5/5、2=7/7、3=10/10、4=6/6、5=10/10、6=8/8、7=11/11、8=9/9） |
 | 创作页 | **H4 功能齐**：录音/叠录/循环/8 轨/音色/音量/声像/静音独奏/叠加/分区/混响/保存载入/钢琴卷帘/模板/导出 MIDI/回放/节拍器/预备拍 |
 | 指导书 | **P2-G 已完成**：阶段 0–8 共 **57/57 节**正文可读（Lesson JSON、五段式课程页、每课练习绑定、课次引用显示标题）；练习步骤可勾选并持久化；知识卡的 `image`/`staff`/`roll` 内嵌渲染（4 小节谱例、图示、缺素材明确提示）；未对应训练的课次明确提示 |
@@ -67,8 +67,8 @@
 | 性能 | **H9b-P1/P2 已完成**：曲库解析缓存；硬件帧去抖、onset 扫描提前停止、字体 LRU、搜索 150 ms 防抖 |
 | 下一步 | **A1、A2、A3 已完成**；接下来 **B9 GM 音色扩展 → B3 20 首新曲 → A4/A5/A7**。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
 | 私有内容 | `mariage_fragment`（梦中的婚礼 · 片段）标 `visibility="private"`；本机可用，已在 `.gitignore` 与公开构建中剔除 |
-| 工作树 | 已初始化 git，`origin` = 上述公开仓库；`main` = `afc8827`，工作树干净；tag `v0.1.0` 指向初始快照 `471a058`（**不含**之后的 CI 修复与 A3，如需发布可另打 `v0.1.1`）。交接前先跑全套测试，不留下临时 mockup/`.tmp` |
-| CI | `.github/workflows/ci.yml`；最后一次全量运行 commit `a341f5f`，`pc-tests` / `firmware-build` 均 **success**。`afc8827` 为 `[skip ci]` 文档提交 |
+| 工作树 | 已初始化 git，`origin` = 上述公开仓库；`main` 工作树干净；tag `v0.1.0` = 初始快照 `471a058`，**`v0.1.1` = `307dcc9`**（A3 完成 + CI 修复后的文档提交）。交接前先跑全套测试，不留下临时 mockup/`.tmp` |
+| CI | `.github/workflows/ci.yml`；最后一次全量运行 commit `a341f5f`，`pc-tests` / `firmware-build` 均 **success**。`v0.1.1` 指向的 `307dcc9` 及后续文档提交均为 `[skip ci]`（不改代码） |
 | 关键约定 | TDD / 纵向切片；未就绪内容只显示“制作中”；每次切片同步 `DESIGN_INDEX`、`app/README`、测试计数 |
 
 ### 1.1 新阶段任务（2026-11-13，A1 + A2 + A3 已完成）
@@ -78,7 +78,8 @@
 首启向导 + 第 7 个“帮助”入口**（四步向导、`onboarding.json`、帮助页、
 F1/顶栏/设置入口）已完成，基线 **684 项测试**（+78）；ESP32-S3 编译通过，
 COM5 真机冒烟通过，CI 全绿。公开仓库首提交 347 个文件、约 16 MB（含
-vendor），`main` + `v0.1.0` 已推送。本轮实现 A1/A2/A3 并同步以下文档：
+vendor），`main` + `v0.1.0` 已推送（A1 阶段；现由 **`v0.1.1` = `307dcc9`**
+接续）。本轮实现 A1/A2/A3 并同步以下文档：
 
 - 新增 [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)：逐键校准页的完整
   交互、固件协议、数据格式与验收。
@@ -1370,7 +1371,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 - [ ] 读本文 §1「最近交接点」、§2.1「剩余工作总览」、§3.2 H7f 残留、
   §3.4 H9 与 [DESIGN_INDEX.md](DESIGN_INDEX.md)「待做事项」。
 - [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 684 项通过
-  （基线 commit `afc8827`；最后一次全量 CI `a341f5f` 全绿）。
+  （基线 tag `v0.1.1` = `307dcc9`；最后一次全量 CI `a341f5f` 全绿）。
 - [ ] 确认 `curriculum.STAGES` 的实际就绪数（不要相信文档里的硬编码）；
   当前应为阶段 0–8 全部 ready、合计 74/74。
 - [ ] 启动一次真实应用：`pc\run.cmd`；先关闭 PlatformIO 串口监视器；
@@ -1409,9 +1410,9 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 3. ~~**五线谱引擎**~~ —— 已定：Qt `QPainter` 自绘（H7a），无第三方依赖。
 4. **公开发布时间**：公开仓库已初始化并推送（A1）
    `git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`；
-   `main` 已到 `afc8827`，CI 全绿。`v0.1.0` 标签仍指向初始快照
-   `471a058`（A1 首提交，不含 A2/A3 与后续 CI 修复）；是否补打
-   `v0.1.1` 由用户决定。`mariage_fragment` 未进入历史。
+   **`v0.1.1` 已打并推送（2026-11-13，指向 `307dcc9`）**，覆盖 A1–A3
+   与全部 CI 修复；`v0.1.0` 保留为初始快照 `471a058`。
+   `mariage_fragment` 未进入历史。
 5. **全量曲目许可**：59 首里现代编配/教材改编需逐项核对；不确定的按
    `public_release: unknown → remove` 处理。
 6. **音频导出**：设计边界是不做 WAV/音频录音；若需要，单独立项，不阻塞主线。
