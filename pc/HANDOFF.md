@@ -239,6 +239,9 @@ vendor），`main` + `v0.1.0` 已推送。本轮实现 A1/A2/A3 并同步以下�
   “怎么用”、`Ctrl+7` 都进入帮助页。
 - 验收：**684 项测试通过**（Windows 与 offscreen）；截图
   `pc/mockups/p11_help_page.png`、`p11_onboarding.png`。
+- CI：首次 A3 运行在 684 项 `OK` 后 Qt 解释器退出时崩溃（Windows
+  access violation）；新测试显式 `deleteLater()` 顶层 QDialog/HelpPage
+  后，`a341f5f` 的 `pc-tests` / `firmware-build` 均 **success**。
 - 未做：英文帮助正文（界面 chrome 已部分英文化）；公开 README/许可属 H10。
 
 **上一交接点（A1：公开仓库 + CI）文件**：
