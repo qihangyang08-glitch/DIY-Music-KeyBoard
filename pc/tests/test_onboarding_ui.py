@@ -72,8 +72,14 @@ class OnboardingDialogTest(unittest.TestCase):
         wait(50)
 
     def tearDown(self) -> None:
+        # Explicit deletion keeps a top-level QDialog from outliving
+        # QApplication during interpreter shutdown (Qt aborts on CI).
         self.dialog.close()
+        self.dialog.deleteLater()
         self.instrument._timer.stop()
+        self.instrument.deleteLater()
+        QTest.qWait(10)
+        QApplication.processEvents()
         self.tmp.cleanup()
 
     def test_four_step_flow_and_finish(self) -> None:

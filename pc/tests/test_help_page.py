@@ -48,8 +48,13 @@ class HelpPageTest(unittest.TestCase):
         wait(80)
 
     def tearDown(self) -> None:
+        # Do not let a top-level page outlive QApplication at process exit.
         self.page.close()
+        self.page.deleteLater()
         self.instrument._timer.stop()
+        self.instrument.deleteLater()
+        QTest.qWait(10)
+        QApplication.processEvents()
         self.tmp.cleanup()
 
     def test_seven_page_sections_are_present(self) -> None:

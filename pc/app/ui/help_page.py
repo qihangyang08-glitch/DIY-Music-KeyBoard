@@ -14,11 +14,9 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QVBoxLayout,
-    QWidget,
 )
 
 from ..core.instrument import Instrument
-from .i18n_ui import tr
 from .keybindings import FUNCTION_LABELS, KeyBindings
 from .keyboard_layout import KEY_ROWS
 from .learning_page import scroll_area

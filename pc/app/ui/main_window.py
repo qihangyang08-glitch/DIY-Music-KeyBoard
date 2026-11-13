@@ -1374,7 +1374,7 @@ class MainWindow(QMainWindow):
         self._show_page(6)
 
     def _maybe_show_onboarding(self) -> None:
-        if self._onboarding_shown:
+        if self._closed or self._onboarding_shown:
             return
         state = OnboardingState.load(self.onboarding_path)
         if state.done:
