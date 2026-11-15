@@ -16,9 +16,10 @@ from pathlib import Path
 from typing import Optional
 
 from .drums import DRUM_CHANNEL
+from .paths import bundle_root, vendor_path
 from .programs import CATALOG, PROGRAMS
 
-PC = Path(__file__).resolve().parents[2]
+PC = bundle_root()
 
 # The demo player uses its own MIDI channel so a demo note-off can never stop
 # a note the user is holding on channel 0.
@@ -51,8 +52,23 @@ def program_label_cn(name: str) -> str:
     return PROGRAM_CN.get(name, name)
 
 
+def _asset_bases() -> tuple[Path, ...]:
+    """Vendor locations in a frozen bundle and in every source-tree layout."""
+    candidates = (
+        vendor_path(),
+        PC / "vendor",
+        PC / "prototype" / "vendor",
+        PC / "resources",
+    )
+    unique: list[Path] = []
+    for base in candidates:
+        if base not in unique:
+            unique.append(base)
+    return tuple(unique)
+
+
 def _find_dll_dir() -> Optional[Path]:
-    for base in (PC / "vendor", PC / "prototype" / "vendor", PC / "resources"):
+    for base in _asset_bases():
         for candidate in sorted(base.glob("fluidsynth-*/bin")):
             if any(candidate.glob("libfluidsynth-*.dll")):
                 return candidate
@@ -60,7 +76,7 @@ def _find_dll_dir() -> Optional[Path]:
 
 
 def _find_soundfont() -> Optional[Path]:
-    for base in (PC / "vendor", PC / "prototype" / "vendor", PC / "resources"):
+    for base in _asset_bases():
         for candidate in sorted((base / "soundfont").glob("*.sf2")):
             return candidate
         for candidate in sorted(base.rglob("*.sf2")):

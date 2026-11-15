@@ -102,6 +102,10 @@ class LightBarBand(QWidget):
         self.setFixedHeight(BAND_HEIGHT)
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.setAccessibleName("32 键演奏光条")
+        self.setAccessibleDescription(
+            "显示实体琴的 32 个键、下一键提示、命中/未中标记与音量效果"
+        )
 
         self._timer = QTimer(self)
         self._timer.setInterval(33)

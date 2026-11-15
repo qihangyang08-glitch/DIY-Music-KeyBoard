@@ -11,7 +11,7 @@
 > + **P2-H2 剩余练习补齐（G/F、华尔兹、反向/平行、连奏/踏板/录音/弱起反复）**
 > + **H7a-P2 长谱分页** + **H9b-P2 性能后续**
 > + **H9c 英文界面第一切片 + P2-H8 四首入门曲**；
-> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **713 项通过**；
+> 指导书 **57/57 全就绪**；学习路径 **74/74**，测试 **790 项通过**；
 > 曲库 **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；公开包 **146 个内容文件**。
 >
 > **2026-11-13 新阶段（A1–A3 已完成）：** 用户已确认仓库
@@ -19,8 +19,13 @@
 > A2 逐键校准（纯逻辑/固件/页面/多指验证/自动下发）与 A3 首启向导/帮助
 > 已全部完成。A3 完成后的文档提交 `307dcc9` 已打 tag **v0.1.1** 并推送；
 > 最后一次全量 CI 在 `a341f5f`（代码）：`pc-tests` / `firmware-build` 均
-> **success**；tag 提交本身为文档 `[skip ci]`。工作树干净，测试 **713 项**。
-> **B9 GM 音色扩展与鼓组已完成（2026-11-14）**，下一步 **B3 20 首新曲**。校准设计见
+> **success**；tag 提交本身为文档 `[skip ci]`。2026-11-15 的 A4/A5/A7/C2–C4 改动尚未提交，测试 **790 项**。
+> **2026-11-15 功能对齐（用户指定：校准优先、新曲最后）**：真机发现校准页
+> 所有按钮无效——`refresh()` 把「开始检测」写成 `ready and not active`，而
+> `enter()` 已先置 `_active=True`，于是整页死锁；已修复，并补固件 `G` 增益
+> 查询/页面切换、固定 32 通道应用、噪声/弱键/饱和页级提示。随后完成
+> **B1 演奏循环/变速/节拍器、B4 曲库筛选/歌单、B5 谱面指法/踏板/奏法标记**。
+> **B2/B8 本批取消；B3 20 首新曲移到最后。** 校准设计见
 > [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)，批次与仓库见
 > [ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
 >
@@ -39,7 +44,7 @@
 ## 0. 快速接手（5 分钟）
 
 1. 读 §1 基线 → **§1.1 新阶段任务** → §2.1 优先级 → §3.2 H7f 残留 / §3.4 H9。
-2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **713 通过**。
+2. 跑测试：`cd pc && python -m unittest discover -s tests -v`，应为 **790 通过**。
 3. 启动真实应用：双击 `pc\run.cmd`（先关闭 PlatformIO 串口监视器；
    本机真机 COM5 + 0x5A/0x5C/0x5D）。
 4. **A1 仓库/CI、A2 校准与 A3 首启向导/帮助已完成**；下一步从
@@ -56,17 +61,19 @@
 | 可运行代码 | `pc/app/`，Python 3.11 + PySide6；**公开仓库已初始化并推送** tag `v0.1.1` = `307dcc9`（此前 `v0.1.0` = `471a058`）（`git@github.com:qihangyang08-glitch/DIY-Music-KeyBoard.git`）；私有曲/用户数据/日志/截图未进入历史 |
 | 学习页路径 | **74/74 就绪**；阶段 0–8 全部就绪（0=8/8、1=5/5、2=7/7、3=10/10、4=6/6、5=10/10、6=8/8、7=11/11、8=9/9） |
 | 创作页 | **H4 功能齐**：录音/叠录/循环/8 轨/音色/音量/声像/静音独奏/叠加/分区/混响/保存载入/钢琴卷帘/模板/导出 MIDI/回放/节拍器/预备拍 |
+| 演奏 | **B1 已完成**：A–B 循环、50–120% 变速、节拍器（GM 115 木鱼）、一拍预备拍；示范与练习都按循环回绕 |
 | 指导书 | **P2-G 已完成**：阶段 0–8 共 **57/57 节**正文可读（Lesson JSON、五段式课程页、每课练习绑定、课次引用显示标题）；练习步骤可勾选并持久化；知识卡的 `image`/`staff`/`roll` 内嵌渲染（4 小节谱例、图示、缺素材明确提示）；未对应训练的课次明确提示 |
-| 谱面 | **H7a/H7b**：自绘高/低音谱表、调号、拍号、小节线、音符/符干/加线/临时记号、播放头与下一音高亮；多 part、精确拼写、连音线合并、反复/结尾展开 |
-| 曲库 | **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；磁盘派生；收藏/标签/最近/递归扫描/目录监视/图片与 PDF 仅显示 |
+| 谱面 | **H7a/H7b + B5**：自绘高/低音谱表、调号、拍号、小节线、音符/符干/加线/临时记号、播放头与下一音高亮；多 part、精确拼写、连音线合并、反复/结尾展开；**指法 1–5、踏板 Ped.、连音线、断奏/重音/保持音**，工具栏「标记」可开关 |
+| 曲库 | **32 个可跟随文件（21 曲 + 11 训练）+ 2 首制作中**；磁盘派生；收藏/标签/最近/递归扫描/目录监视/图片与 PDF 仅显示；**B4 难度/调性/类型组合筛选 + 歌单（加入/移出/筛选/持久化）** |
 | 考核 | **H7d**：阶段 1（20 音首答 ≥80%）、阶段 2（60 BPM/16 拍全中/平均偏差 <60 ms）；可选，不影响阶段通关 |
+| 校准 | **A2 真机闭环修复（2026-11-15）**：开始检测按钮不再被 `not active` 禁用；固件 `G` 回报增益，页面显示并切换 1.0x–4.0x；应用固定写 32 通道；噪声/弱键/饱和汇总提示；真机人工验收待复测 |
 | 启动 | 双击 `pc\run.cmd` 或 `python pc/app/main.py`；先关闭 PlatformIO 串口监视器；本机真机为 **COM5**（3 个 MPR121：0x5A/0x5C/0x5D） |
-| 测试 | **713 项通过**：`cd pc && python -m unittest discover -s tests -v` |
+| 测试 | **790 项通过**：`cd pc && python -m unittest discover -s tests -v` |
 | 公开版 | **H9a 已完成**：`python tools/build_public.py` 生成白名单压缩包；私有/用户数据/截图/日志被自动剔除 |
-| 无障碍 | **H9b 已完成（K1/K2/P2 已补）**：×/✓ + 文字对错反馈、`减少动效`、字号 小/标准/大（`accessibility.json`）、导航/设置/走带/音轨/键位页/学习卡键盘可达 |
+| 无障碍 | **H9b + A7 已完成**：×/✓ + 文字对错反馈、`减少动效`、字号 小/标准/大、**高对比度主题变体（WCAG AA，立即生效）**（`accessibility.json`）；导航/设置/走带/音轨/键位页/学习卡键盘可达；`a11y.py` 为符号按钮、开关、阶段卡、光条、谱面、卷帘补读屏名称/描述；Narrator/NVDA 人工走查待做 |
 | 性能 | **H9b-P1/P2 已完成**：曲库解析缓存；硬件帧去抖、onset 扫描提前停止、字体 LRU、搜索 150 ms 防抖 |
 | 音色 | **B9 已完成**：目录 48 音色/5 分类/分类 chip + 搜索（中文名/英文名/GM 编号）；前 7 项索引不变；未知 GM 回退钢琴并提示；节拍器固定 GM 115 木鱼（76/77）；鼓组 8 套（bank 128/通道 9），32 键鼓垫显示鼓件名、不参与跟弹判定；项目仍存 GM 编号 |
-| 下一步 | **A1–A3、B9 已完成**；接下来 **B3 20 首新曲 → A4/A5/A7**。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
+| 下一步 | **A1–A5、A7、B1、B4、B5、B9、固件 C2/C3/C4 已完成；B2/B8 本批取消**；只剩 **B3 20 首新曲（最后）**；真机项（校准手感、NVS 掉电、卡键/热插拔、干净机器安装、Narrator）待验收。见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) |
 | 私有内容 | `mariage_fragment`（梦中的婚礼 · 片段）标 `visibility="private"`；本机可用，已在 `.gitignore` 与公开构建中剔除 |
 | 工作树 | 已初始化 git，`origin` = 上述公开仓库；`main` 工作树干净；tag `v0.1.0` = 初始快照 `471a058`，**`v0.1.1` = `307dcc9`**（A3 完成 + CI 修复后的文档提交）。交接前先跑全套测试，不留下临时 mockup/`.tmp` |
 | CI | `.github/workflows/ci.yml`；最后一次全量运行 commit `a341f5f`，`pc-tests` / `firmware-build` 均 **success**。`v0.1.1` 指向的 `307dcc9` 及后续文档提交均为 `[skip ci]`（不改代码） |
@@ -113,7 +120,38 @@ vendor），`main` + `v0.1.0` 已推送（A1 阶段；现由 **`v0.1.1` = `307dc
    32 键映射 GM 35–66 并显示鼓件名，鼓击不参与跟弹/学习判定。
 5. **B3 新增 20 首曲目（批次 4）**：公有领域优先，XML+MIDI 同源。
 
+**2026-11-15 新执行顺序（用户确认）**：
+
+1. **校准页真机闭环（P0）**：按钮死锁修复 + 增益查询/切换 +
+   固定 32 通道应用 + 页级警告——**已完成代码/测试/固件编译**；
+   人工验收待真机复测。
+2. **B1 演奏循环/变速/节拍器**——**已完成**。
+3. ~~B2 学习档案导出/导入、B8 成绩导出~~——**本批取消**。
+4. **B4 曲库筛选/歌单**——**已完成**。
+5. **B5 谱面指法/踏板/奏法标记**——**已完成**。
+6. 之后：**A4/A5/A7 → 固件 C2/C3/C4 → B3 20 首新曲（最后）**。
+   **A4/A5/A7（2026-11-15 已完成）**：Windows one-folder 打包
+   （`tools/build_app.py` + `packaging/keyborad.spec` + `app/core/paths.py`
+   + `app/core/packaging.py`；本机构建并运行冻结 exe 截图通过）；
+   英文目录补齐（`i18n_messages/labels/pages.py`，toast/错误/对话框全量、
+   帮助/向导/各页 chrome；`test_i18n_messages.py` 扫描所有 emit 防漏翻）；
+   无障碍（高对比度主题变体 + `a11y.py` 读屏名称 + 覆盖率/对比度测试）。
+   **C2/C3/C4（2026-11-15 已完成代码/编译）**：5 s 静置基线漂移补偿、
+   3 s 卡键抑制、I2C 总线复位/热插拔重扫、8 s 看门狗、NVS 阈值/增益/
+   自适应持久化、`PROTO 2`/`V` 握手、可选 Wi-Fi OTA（默认关闭）。
+   默认与 OTA 两种固件配置均编译 **SUCCESS**；真机掉电/卡键/热插拔与
+   干净机器安装仍待人工验收。
+
 #### A2：逐键校准页（必须先做）
+
+**2026-11-15 真机修复**：真机上校准页只有界面、按钮全部无效。根因是
+`refresh()` 的 `start_button.setEnabled(ready and not active)`——页面
+`enter()` 已把 `_active` 置真，所以「开始检测」永远禁用，其余按钮又依赖
+检测状态。已改为 `active and ready and idle`；同时补设备增益查询（固件
+`G` → `GAIN <index> <tenths> <name>`）、页面增益显示/切换、32 通道固定
+应用（未采键沿用已有方案或固件默认 12/6）和噪声/弱键/饱和页级提示。
+固件编译 SUCCESS；真机人工验收（小拇指/五键/静置/重启）仍需重启应用并
+烧录新固件后复测。
 
 **切片 1–4 已完成（2026-11-13）**：新增 `app/core/calibration.py`
 （`CalibrationSession` 状态机、曲线、建议/校验、`CalibrationProfile`
@@ -243,13 +281,116 @@ vendor），`main` + `v0.1.0` 已推送（A1 阶段；现由 **`v0.1.1` = `307dc
   `Track.split`，不写入 `score_prefs.json`。
 - **H7e 残留**：不等待的独立伴奏模式、左右手互换、伴奏音量/音色、
   曲库打开时的伴奏声明、宽音域双人编配（用户真正弹两只手）。
-- **H9**：无障碍/性能/打包/英文/公开版过滤/首次向导/真实校准。
+- **H9**：无障碍/性能/打包/英文/公开版过滤/首次向导/真实校准——
+  **除 A6 真机性能与少量人工验收外均已完成（2026-11-15）**。
 - **2026-11-12 新阶段**：A1 仓库/CI、A2 逐键校准、A3 首启向导/帮助
-  **均已完成（2026-11-13）**；待做 **B9 GM 音色扩展、B3 20 首新曲**；
-  详见 §1.1 与 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) §6–§7。
+  （2026-11-13）、A4 打包、A5 英文、A7 无障碍、B9 音色、B1/B4/B5、
+  固件 C2/C3/C4（2026-11-15）**均已完成**；只剩 **B3 20 首新曲**
+  与真机/干净机器/Narrator 人工验收；详见 §1.1 与
+  [ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
 - **其他**：五线谱高级排版（圆滑线/多声部/分页）、MusicXML 装饰音与极端
   volta、项目浏览器/重命名、按考核结果硬性解锁（产品上刻意不做）。
 - **体验待确认**：黑键暗色强度、分区持久化 +「重置」的文案是否清楚。
+
+**最近交接点（2026-11-15：校准真机修复 + B1/B4/B5）文件**：
+
+**校准页真机修复**
+- 现象：进入校准页后所有按钮无效。根因见上；「开始检测」改为
+  `active and ready and idle`，点击后按原流程发 `c`。
+- 增益：固件 `G` 查询 / `g` 切换都输出 `GAIN <index> <tenths> <name>`；
+  页面进入时查询并显示，切换会清除「已应用」并提示重新校准；方案保存
+  当前设备增益。
+- 应用：`full_threshold_values` 固定补全 32 通道；新增
+  `DEFAULT_TOUCH=12` / `DEFAULT_RELEASE=6`。
+- 提示：`CalibrationSession.warnings()` 汇总噪声 >15、峰值 <12、饱和。
+- 测试：`test_calibration.py`（28）、`test_calibration_page.py`（24）。
+- **真机复测仍待执行**：重启应用 + 烧录新固件后跑设计 §9.2。
+
+**B1 演奏走带**
+- `FollowSession`：`set_speed`（0.5–1.2）、`set_loop(start,end)`、
+  `beat` 信号、`set_metronome`、`set_count_in`；示范/练习循环回绕，
+  预备拍期间不推进音符。
+- `PerformView` 右侧「走带」卡；`MainWindow` 把 `beat` 接到木鱼点击。
+- 测试：`test_follow_transport.py`（5）、`test_perform_transport_ui.py`（4）。
+
+**B4 曲库筛选/歌单**
+- `LibraryPiece.difficulty`（课程阶段优先，导入按小节/音域）、`key_label`
+  （fifths → C/G/…/C#）、`kind_label`；`LibraryFilters` +
+  `select(filters=..., playlist_keys=...)`；`LibraryMeta.playlists`
+  （≤20 个、每个 ≤200 键、持久化）。
+- 曲库页难度/调性/类型下拉 + 歌单下拉；卡片「歌单」菜单加入/移出。
+- 测试：`test_library_filters.py`（7）、`test_library_ui.py` +2。
+
+**B5 谱面标记**
+- `ScoreNote` 新增 `finger` / `articulation` / `slur_start` / `slur_end`；
+  `Score.pedals` 记录秒级踏板区间；解析 `<fingering>`、
+  `<staccato|accent|tenuto>`、`<slur>`、`<pedal>`。
+- 谱面自绘指法数字、断奏点、重音 `>`、保持音线、连音线弧、Ped. 括号；
+  工具栏「标记」可开关；`StaffMeasure` 带拍区间。
+- 测试：`test_score_markings.py`（4）。
+
+- 验收：**756 项测试通过**；固件编译 **SUCCESS**；截图
+  `pc/mockups/p14_perform_transport.png`、`p15_score_markings.png`、
+  `p16_calibration_fixed.png`（增益/警告/再测状态）。
+
+**对抗审查修复（2026-11-15，20 个审查/复核代理）**：
+- 校准自动下发先查询设备增益：增益不一致时**不发送 T**、提示重新校准；
+  旧固件无 `GAIN` 回复时超时后按方案应用并提示。断线清空已知增益，
+  重连且页面打开时重新查询；采集期间禁用增益按钮，中途改增益会中止
+  本次曲线。
+- B1：变速同时缩放示范音符时值（否则 50% 时音符只响一半）；播放中
+  打开节拍器不再补发历史拍；练习循环回绕时释放并倒回自动伴奏。
+- B4：调性/歌单筛选目标消失时同步清空过滤条件；移除导入时清理
+  收藏/标签/最近/歌单中的残留 key。
+- B5：踏板保存拍区间，变速/换速不再把小节画错；连音线按谱表/声部
+  成对并支持跨小节（同一系统内）。
+- B5 仍未做：跨系统换行的连音线；曲中变拍/弱起小节的踏板定位
+  （`StaffLayout` 仍假设每小节拍数固定）。
+- 本批取消：B2 学习档案导入导出、B8 成绩导出（用户指定）。
+- **B3 20 首新曲移到所有功能项之后。**
+
+**最近交接点（2026-11-15：A4/A5/A7 + 固件 C2/C3/C4）文件**：
+
+**A4 Windows one-folder 包**
+- `app/core/paths.py`：源码取 `pc/`、冻结取 `sys._MEIPASS`；统一
+  `resource_path` / `vendor_path` / `mapping_path`。`curriculum.py`、
+  `synth_service.py`、`instrument.py`、`calibration.py`、`main_window.py`
+  已改用。
+- `app/core/packaging.py`：只收 `resources/`、`prototype/vendor/`（跳过
+  `.exe/.lib/.h/.pdb`）与仓库根 `mapping/`；排除用户数据。
+- `packaging/keyborad.spec` + `tools/build_app.py`；`requirements-dev.txt`。
+- 本机构建 **SUCCESS**，`dist\KeyBorad\KeyBorad.exe --no-serial
+  --screenshot` 正常启动（48 kHz、内置谱、完整界面）；约 133 MB。
+- 未验证：干净机器、杀软误报、MSI/签名。见 [PACKAGING.md](PACKAGING.md)。
+
+**A5 英文目录**
+- `i18n_ui.tr_message` 支持 `{…}` 模板与捕获值二次翻译；`tr_block`
+  逐行翻译多行 tooltip；`Toast.show_message` 统一翻译。
+- `i18n_labels.py`（静态 chrome/帮助/向导）、`i18n_messages.py`
+  （toast/错误/对话框）、`i18n_pages.py`（学习/曲库/创作/校准）。
+- `test_i18n_messages.py` 扫描所有 `emit`/`show_message`，缺目录即失败。
+- 内容正文、曲名、作曲家仍原文；动态统计在刷新后重新翻译。
+
+**A7 无障碍**
+- `accessibility.py` 新增 `high_contrast`；`theme.high_contrast_theme()`
+  生成两种主题的 AA 变体；设置页开关立即生效并持久化。
+- `app/ui/a11y.py` 给符号按钮、开关、阶段卡、光条、谱面、卷帘补
+  `accessibleName/Description`；`_show_page` 刷新后重跑。
+- `test_a11y.py`：对比度 ≥4.5、每个可交互控件有名称、开关持久化。
+
+**固件 C2/C3/C4**
+- C2：`adaptiveTick` 5 s 静置比较基线，漂移 ≥8 计数平移该键阈值，
+  `A` 切换、`ADAPT ON/OFF` 与逐键 `ADAPT` 行。
+- C3：`updateStuckKeys` 3 s 抑制并报 `STUCK/UNSTUCK`；`recoverBus`
+  连续 3 次探测失败后复位 I2C；8 s `esp_task_wdt`。
+- C4：Preferences NVS（magic `KB02`，preset/gain/adapt/touch[36]/
+  release[36]）；`PROTOCOL_VERSION=2`、`PROTO 2`/`V`；可选
+  `KEYBORAD_ENABLE_OTA` 用 ArduinoOTA（默认不编入）。
+- PC：`SerialService.protocolVersion` 解析 `PROTO`；v1 提示烧录新固件；
+  `STUCK n` 弹「键 n 卡住 · 已自动释放」。
+- 测试：`test_firmware_protocol.py`（7，含源码契约）。
+- 编译：默认与 `KEYBORAD_ENABLE_OTA=1` 均 **SUCCESS**。
+- 真机待验：NVS 掉电、卡键 3 s、热插拔恢复、OTA。
 
 **最近交接点（B9b：GM 鼓组）文件**：
 
@@ -1244,7 +1385,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 - 真机试弹（32 键 + 电脑键盘）；录音/分区等新交互必须真机验证。
   分区拖拽、白键 19 键、自动伴奏已做首次界面试弹；完整曲目跟弹仍建议
   每批人工确认。
-- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 713 项）；
+- 回归：`cd pc && python -m unittest discover -s tests -v`（当前 790 项）；
   每批更新 `DESIGN_INDEX` 的“待做事项”、`app/README` 的内容清单与测试计数。
 - 公开构建：改动内容后跑 `python tools/build_public.py`（当前 **146 个内容
   文件**）；失败即停止，
@@ -1426,8 +1567,9 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
     测试，全套 **684 项**；截图 `p11_help_page.png`、`p11_onboarding.png`。
     **A3 完成。**
 
-**下一项：B9 GM 音色扩展 → B3 20 首新曲 → A4/A5/A7。**
-具体优先级与批次见 §2.1、[ROADMAP_NEXT.md](ROADMAP_NEXT.md)。
+**下一项：B3 20 首新曲（最后一项功能内容批次）。**
+A4/A5/A7 与固件 C2/C3/C4 已完成代码/构建/编译；先跑真机验收清单，
+再按 [ROADMAP_NEXT.md](ROADMAP_NEXT.md) §7 逐首生产新曲。
 
 之后按 B 场景补齐 H9，再按 C 场景分批生产内容；
 内容批次与能力批次交替，避免长期只做功能或只堆内容。
@@ -1440,7 +1582,7 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 
 - [ ] 读本文 §1「最近交接点」、§2.1「剩余工作总览」、§3.2 H7f 残留、
   §3.4 H9 与 [DESIGN_INDEX.md](DESIGN_INDEX.md)「待做事项」。
-- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 713 项通过
+- [ ] 跑 `cd pc && python -m unittest discover -s tests -v`，确认 790 项通过
   （基线 tag `v0.1.1` = `307dcc9`；最后一次全量 CI `a341f5f` 全绿）。
 - [ ] 确认 `curriculum.STAGES` 的实际就绪数（不要相信文档里的硬编码）；
   当前应为阶段 0–8 全部 ready、合计 74/74。
@@ -1471,7 +1613,8 @@ P1e 首启向导/帮助 → P1f GM 音色 → P2 内容（20 首新曲）→ P1c
 
 1. ~~**范围**~~ **已定（2026-11-12）**：下一阶段按
    **A1 仓库 → A2 校准 → A3 向导/帮助 → B9 音色 → B3 新曲** 推进；
-   **A1/A2/A3 已完成（2026-11-13）**，下一步 B9。校准交互、固件协议、
+   **A1–A5、A7、B1、B4、B5、B9 与固件 C2/C3/C4 均已完成**，
+   只剩 **B3 新曲**与人工验收。校准交互、固件协议（含 C2–C4）、
    数据格式见 [CALIBRATION_DESIGN.md](CALIBRATION_DESIGN.md)。
    公开仓库已初始化并推送；私有内容未进入历史。
 2. **体验确认**：黑键暗色强度是否合适；分区点按曲目持久化 +「重置」的

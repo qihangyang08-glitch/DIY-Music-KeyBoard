@@ -40,6 +40,11 @@ class ScoreNote:
     step: str = ""
     alter: int = 0
     octave: int = 0
+    # B5 performance markings; MIDI has none and leaves these empty.
+    finger: int = 0          # 1..5
+    articulation: str = ""   # "staccato" | "accent" | "tenuto"
+    slur_start: bool = False
+    slur_end: bool = False
 
     @property
     def end(self) -> float:
@@ -63,6 +68,8 @@ class Score:
     format: str
     measure_count: int = 0     # authoritative for MusicXML; 0 -> derive
     key_fifths: int = 0        # negative = flats, positive = sharps
+    pedals: tuple[tuple[float, float], ...] = ()  # (start, stop) in seconds
+    pedal_beats: tuple[tuple[float, float], ...] = ()  # authoritative in beats
 
     @property
     def min_midi(self) -> int:
@@ -140,6 +147,35 @@ def _seconds_from_beats(beat: float, tempo_events: list[tuple[float, float]]) ->
         bpm = value
     seconds += (beat - previous) * 60.0 / bpm
     return seconds
+
+
+def _note_expressions(note_element) -> tuple[int, str, bool, bool]:
+    """Fingering, articulation and slur flags from one MusicXML note."""
+    finger = 0
+    articulation = ""
+    slur_start = False
+    slur_end = False
+    for notations in note_element:
+        if _local(notations.tag) != "notations":
+            continue
+        for item in notations.iter():
+            tag = _local(item.tag)
+            if tag == "fingering" and item.text:
+                try:
+                    value = int(item.text.strip())
+                except ValueError:
+                    value = 0
+                if 1 <= value <= 5:
+                    finger = value
+            elif tag in ("staccato", "accent", "tenuto") and not articulation:
+                articulation = tag
+            elif tag == "slur":
+                kind = (item.get("type") or "").lower()
+                if kind in ("start", "continue"):
+                    slur_start = True
+                if kind in ("stop", "continue"):
+                    slur_end = True
+    return finger, articulation, slur_start, slur_end
 
 
 def _tie_marks(note_element) -> tuple[set[str], set[str]]:
@@ -522,12 +558,14 @@ def _make_score(
     rights: str,
     tempo: float,
     time_signature: tuple[int, int],
-    specs: list[tuple[int, float, float, int, float, str, str, str, int, int]],
+    specs: list[tuple],
     tempo_events: list[tuple[float, float]],
     source: Path,
     fmt: str,
     measure_count: int = 0,
     key_fifths: int = 0,
+    pedals: tuple[tuple[float, float], ...] = (),
+    pedal_beats: tuple[tuple[float, float], ...] = (),
 ) -> Score:
     notes: list[ScoreNote] = []
     for (
@@ -541,6 +579,10 @@ def _make_score(
         step,
         alter,
         octave,
+        finger,
+        articulation,
+        slur_start,
+        slur_end,
     ) in specs:
         start = _seconds_from_beats(start_beat, tempo_events)
         end = _seconds_from_beats(start_beat + duration_beat, tempo_events)
@@ -556,6 +598,10 @@ def _make_score(
                 step=step,
                 alter=alter,
                 octave=octave,
+                finger=finger,
+                articulation=articulation,
+                slur_start=slur_start,
+                slur_end=slur_end,
             )
         )
     notes.sort(key=lambda note: (note.start, note.midi))
@@ -574,6 +620,8 @@ def _make_score(
         format=fmt,
         measure_count=measure_count,
         key_fifths=key_fifths,
+        pedals=pedals,
+        pedal_beats=pedal_beats,
     )
 
 
@@ -623,10 +671,10 @@ def parse_musicxml(path: Path) -> Score:
     divisions = 1
     time_signature = (4, 4)
     key_fifths = 0
-    specs: list[
-        tuple[int, float, float, int, float, str, str, str, int, int]
-    ] = []
+    specs: list[tuple] = []
     tempo_events: list[tuple[float, float]] = []
+    pedals_beats: list[tuple[float, float]] = []
+    pedal_open: dict[str, float] = {}
     default_tempo = 120.0
     measure_count = 0
     marks: list[tuple[set[str], set[str]]] = []
@@ -715,6 +763,20 @@ def parse_musicxml(path: Path) -> Score:
                             if bpm > 0:
                                 default_tempo = bpm
                                 tempo_events.append((position, bpm))
+                    if part_index == 0:
+                        for element in child.iter():
+                            if _local(element.tag) != "pedal":
+                                continue
+                            kind = (element.get("type") or "").lower()
+                            pedal_number = (
+                                (element.get("number") or "1").strip() or "1"
+                            )
+                            if kind in ("start", "continue"):
+                                pedal_open.setdefault(pedal_number, position)
+                            elif kind == "stop" and pedal_number in pedal_open:
+                                pedals_beats.append(
+                                    (pedal_open.pop(pedal_number), position)
+                                )
                 elif name == "backup":
                     try:
                         position -= (
@@ -772,6 +834,7 @@ def parse_musicxml(path: Path) -> Score:
                             step,
                             alter,
                             octave,
+                            *_note_expressions(child),
                         )
                     )
                     marks.append(_tie_marks(child))
@@ -779,6 +842,8 @@ def parse_musicxml(path: Path) -> Score:
                     if not is_chord:
                         last_note_start = start
 
+    for number in sorted(pedal_open):
+        pedals_beats.append((pedal_open[number], position))
     specs = _merge_ties(specs, marks, spec_segments)
     if not tempo_events:
         tempo_events = [(0.0, default_tempo)]
@@ -795,6 +860,17 @@ def parse_musicxml(path: Path) -> Score:
         fmt="MusicXML",
         measure_count=measure_count,
         key_fifths=key_fifths,
+        pedals=tuple(
+            (
+                _seconds_from_beats(start, tempo_events),
+                _seconds_from_beats(end, tempo_events),
+            )
+            for start, end in pedals_beats
+            if end > start
+        ),
+        pedal_beats=tuple(
+            (start, end) for start, end in pedals_beats if end > start
+        ),
     )
 
 
@@ -925,9 +1001,7 @@ def parse_midi(path: Path) -> Score:
     if not tempo_events:
         tempo_events = [(0, 120.0)]
     beats_per_measure = max(1, time_signature[0])
-    specs: list[
-        tuple[int, float, float, int, float, str, str, str, int, int]
-    ] = []
+    specs: list[tuple] = []
     for start_tick, stop_tick, midi in note_spans:
         start_beat = start_tick / division
         stop_beat = stop_tick / division
@@ -945,6 +1019,10 @@ def parse_midi(path: Path) -> Score:
                 "",
                 0,
                 0,
+                0,
+                "",
+                False,
+                False,
             )
         )
     tempo = sorted(tempo_events)[0][1]

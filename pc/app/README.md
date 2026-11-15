@@ -456,6 +456,18 @@ SMPTE 时间、装饰音、圆滑线、五线谱高级排版（自动分页）�
   （76/77），切换主音色不会改掉点击音。`app/core/drums.py` 提供 8 套
   GM 鼓组（bank 128 / 通道 9）；音色页「鼓垫模式」把 32 键变成 GM 35–66
   的鼓垫，光条/键位显示鼓件名，鼓击不参与跟弹/学习判定。
+- **演奏走带（B1）**：演奏页右侧新增「走带」卡：A–B 小节循环、
+  50–120% 变速、节拍器（固定 GM 115 木鱼）与一拍预备拍；循环对示范和
+  练习都生效，预备拍期间不推进音符。
+- **曲库筛选/歌单（B4）**：难度（课程阶段优先，导入按小节/音域）、调性
+  （调号 fifths）、类型（曲目/训练/导入/制作中）组合筛选；歌单可新建、
+  加入/移出、按歌单筛选，持久化到 `library_meta.json`（≤20 个、每个
+  ≤200 键）。
+- **谱面标记（B5）**：解析并自绘指法 1–5、踏板 `Ped.` 括号、连音线弧、
+  断奏点、重音 `>`、保持音线；谱面工具栏「标记」可整体开关。
+- **校准真机修复（A2）**：进入校准页后「开始检测」不再被误禁用；固件
+  `G` 查询当前增益并在页面显示/切换（1.0x–4.0x）；应用固定写入 32 组
+  阈值；噪声/弱键/饱和汇总提示。
 - **键位设置页**：设置 → 工具 → 键位设置；32 个音符键和全部功能键可改绑；
   捕获时 Esc 取消；冲突提示替换；自动保存到用户配置目录，支持导出/导入与恢复默认。
 - **F1 帮助**：按当前键位动态生成三行键位表和全部功能键；设置页也有入口。
@@ -656,6 +668,8 @@ pc/app/
     score_prefs.py         # 按曲目的用户偏好（拖拽分区点），容错载入/原子写
     calibration.py         # 逐键校准：CAL/T 协议、曲线/自动停止/建议/校验、方案 JSON（纯逻辑）
     onboarding.py          # 首启向导状态：onboarding.json 容错载入/原子写
+    paths.py               # 源码/冻结包统一的 resources、mapping、vendor 路径
+    packaging.py           # PyInstaller 数据计划：resources + vendor + mapping，排除用户数据
     instrument.py          # AppState：串口/电脑键盘 -> NoteEngine -> synth，pads，映射，内容映射覆盖/恢复
     serial_service.py      # QThread 串口读取、CAL/状态行分发、send_line 写入、自动重连
     synth_service.py       # FluidSynth / 静音降级
@@ -678,9 +692,15 @@ pc/app/
     piano_roll.py          # 钢琴卷帘画布：网格/音符块/循环区/播放头/鼠标编辑
     project_player.py      # 回放 QTimer：按计划发 note-on/off、循环、播放头位置
     pages.py               # 设备、音色、设置（校准页在 calibration_page.py）
-    theme.py               # Studio / Stage 颜色与 QSS
+    theme.py               # Studio / Stage 颜色与 QSS、高对比度变体
     widgets.py             # GlassFrame / 卡片 / 模块灯 / 开关 / 音量 / Toast
+    a11y.py                # 给无文字/符号按钮与自绘控件补读屏名称
+    i18n_ui.py             # tr / tr_message / tr_block + 语言切换
+    i18n_labels.py         # 静态标签、tooltip、帮助与向导英文目录
+    i18n_messages.py       # toast / 错误 / 对话框英文目录（含 f-string 模板）
+    i18n_pages.py          # 学习/曲库/创作/校准页英文目录
 pc/tools/
+  build_app.py             # PyInstaller one-folder 打包（A4）
   make_sample_score.py     # 生成公有领域样曲 MusicXML + MIDI
   make_beginner_pieces.py  # 8 首入门曲（阶段 0/3/4/5，含双手版）
   make_stage3_exercises.py # 阶段 3 三条右手训练（音阶/音程/连奏断奏）
@@ -846,7 +866,7 @@ pc/tests/
 - 和弦/双手判定：同一 onset 的多个音可任意顺序按下，全部匹配后只推进一次；
   按错/重复按已匹配音记一次未中；《欢乐颂 · 双手版》第一拍 G4 + E5 的
   双手判定在纯逻辑和曲库 UI 测试中均通过。
-- `python -m unittest discover -s tests -v`：713 项通过（原有 42 项 +
+- `python -m unittest discover -s tests -v`：790 项通过（原有 42 项 +
   可选考核 35 项 + 课程就绪检查 1 项 + 曲库 29 项纯逻辑 + 曲库页 23 项 +
   自动换窗回归 2 项 +
   内容资产 4 项 + 和弦/双手判定 5 项 + 左右分区 8 项 + 节奏休止/附点 5 项 +
@@ -855,7 +875,7 @@ pc/tests/
   识谱扩展 5 项 + 阶段 3 训练 4 项 + 阶段 4 训练 7 项 + 阶段 5 训练 5 项 +
   阶段 6 训练 5 项 + 阶段 0 上手 6 项：扫描/分组/解析就绪/同名合并/
   同格式额外文件/导入去重/同名后缀/坏文件保留/路径安全/筛选搜索/阶段引用/
-  计数 + 音色/鼓组 29 项 + 曲库页导航/鼠标/
+  计数 + 音色/鼓组/走带/曲库筛选/谱面标记 74 项 + 曲库页导航/鼠标/
   键盘/导入/移除/制作中/搜索/主题/外部文件刷新/路径失效/学习会话/失败载入/
   损坏解析/滚动/提示条/新曲学习接线/双手卡 + XML/MIDI 一致性/课程接线 +
   和弦任意顺序/按错/重复按/真实双手曲第一拍 + 左右分区映射/两段标签/
@@ -923,7 +943,11 @@ pc/tests/
   卡键/建议与校验/方案 JSON 容错/串口发送/校准模式吞音符与锁定/页面流程/
   点选阈值/应用与保存/32 格多指验证/自动下发与超时/坏文件与无方案 +
   公开仓库缺私有曲 1 项：库不显示 planned 卡或缺失警告 +
-  A3 23 项：onboarding 状态 5/帮助页 5/向导与首启入口 13）。
+  A3 23 项：onboarding 状态 5/帮助页 5/向导与首启入口 13 +
+  A4 13 项：冻结/源码路径/数据计划/私有内容剔除/依赖检查/spec +
+  A5 4 项：精确与模板消息/全部 emit 覆盖/toast 英文/未知消息保留 +
+  A7 11 项：高对比度对比度/偏好往返/读屏名称覆盖/符号按钮/自绘控件 +
+  固件 C2–C4 7 项：`PROTO` 分发/非协议行/`STUCK`/源码契约/NVS/看门狗/OTA）。
 - 1120×760 下学习页与曲谱库无横向溢出，阶段页可纵向滚动；识谱与节奏训练在
   1120×760 与 1440×900 下均可用。
 - 纸白、暗场、键帽/音名、设置、键位、学习、曲库、音色、设备、跟弹渲染图在 `pc/mockups/`；
@@ -938,6 +962,55 @@ pc/tests/
   `pc/mockups/p2h_stage2_six_eight.png`；阶段 6 新练习见
   `pc/mockups/p2h2_stage6_practices.png`。
 - 真实手指触摸未包含在自动测试里；用户实测电脑键盘与实体琴均通过。
+
+## Windows 包、英文界面、无障碍与固件 C2–C4（2026-11-15）
+
+### A4 免安装包
+
+```
+cd pc
+python -m pip install -r requirements-dev.txt
+python tools\build_app.py --clean
+```
+
+产物 `pc\dist\KeyBorad\KeyBorad.exe` + `_internal\`（约 133 MB），含
+PySide6、`resources/`、`mapping/`、FluidSynth DLL 与 TimGM6mb；用户数据不打包。
+本机已验证构建与冻结 exe 启动/截图（48 kHz、内置曲谱、完整界面）；干净机器、
+杀软误报与安装器尚未验证。详见 [PACKAGING.md](../PACKAGING.md)。
+`app/core/paths.py` 统一源码/冻结路径，`app/core/packaging.py` 生成数据计划。
+
+### A5 英文目录
+
+- 设置里切到 English 后，导航、演奏/学习/曲库/创作/设备/设置/帮助、向导、
+  校准页、所有 toast、错误提示与确认对话框都有英文；课程正文、曲名、作曲家
+  等**内容**仍按原文显示。
+- 消息目录支持 `{…}` 模板：`tr_message("设备已连接 · COM5")` 会得到
+  `Device connected · COM5`；toast 统一走 `tr_message`，多行 tooltip 走
+  `tr_block`（逐行翻译）。
+- `tests/test_i18n_messages.py` 会扫描所有 `emit`/`show_message`，缺目录直接
+  失败，防止以后新增中文提示漏翻。
+
+### A7 无障碍
+
+- 新增「高对比度」开关：两种主题各自生成 WCAG AA 变体（正文、次要文字、
+  强调色、危险色 ≥ 4.5:1），默认关闭，立即生效并写入 `accessibility.json`。
+- `app/ui/a11y.py` 为无文字/符号按钮（`?`、`⋯`、`−`、`+`…）、开关、阶段卡、
+  光条、五线谱、卷帘补 `accessibleName/Description`；每次切页与刷新后重跑。
+  `tests/test_a11y.py` 检查所有页面可交互控件都有读屏名称与对比度。
+- 仍未做：Narrator/NVDA 人工走查（验收项）。
+
+### 固件 C2/C3/C4
+
+| 项 | 行为 | 串口 |
+|---|---|---|
+| C2 自适应漂移 | 全部松手时每 5 s 比较基线；漂移 ≥ 8 计数就整键平移阈值（2–80），校准曲线形状保留 | 启动/切换：`ADAPT ON/OFF`；调整：`ADAPT <ch> <touch> <release> <drift>` |
+| C3 卡键 + 热插拔 | 连续按住 3 s 报卡键并抑制到真正松开；I2C 连续 3 次探测失败后复位总线并重初始化；8 s 看门狗 | `STUCK <ch>` / `UNSTUCK <ch>`、`!! I2C bus reset…` |
+| C4 NVS + 协议 + OTA | 阈值/增益/预设/自适应写 NVS，掉电保留；协议版本 2；OTA 默认关闭、按需编译 | `PROTO 2`（启动与 `V`）、`V`、`A` |
+
+PC 端 `SerialService.protocolVersion` 解析 `PROTO <n>`；低于 2 时提示烧录新固件。
+`STUCK <ch>` 会在应用里弹「键 n 卡住 · 已自动释放」。
+固件编译：默认与 `KEYBORAD_ENABLE_OTA=1` 两种配置均 **SUCCESS**（2026-11-15）；
+真机 NVS 掉电、卡键、热插拔仍待人工验收。
 
 ## 视觉参考
 

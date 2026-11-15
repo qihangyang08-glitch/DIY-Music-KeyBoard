@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 import time
-from pathlib import Path
 from typing import Optional
 
 from PySide6.QtCore import QObject, QTimer, Signal
@@ -33,8 +32,9 @@ from .mapping import (
 )
 from .note_engine import MAX_OCTAVE, MIN_OCTAVE, Frame, NoteEngine, midi_name
 
-ROOT = Path(__file__).resolve().parents[3]
-KEYMAP_PATH = ROOT / "mapping" / "keymap.json"
+from .paths import mapping_path
+
+KEYMAP_PATH = mapping_path("keymap.json")
 
 PAD_CHANNELS = {1: 33, 2: 34, 3: 35, 4: 36}
 MAP_LONG_PRESS_S = 0.30

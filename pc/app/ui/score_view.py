@@ -54,6 +54,33 @@ def with_alpha(color: QColor, alpha: int) -> QColor:
     return out
 
 
+def _slur_pairs(items) -> list[tuple[int, int]]:
+    """Pair slur starts with the next stop on the same staff and voice."""
+    used: set[int] = set()
+    pairs: list[tuple[int, int]] = []
+    for index, item in enumerate(items):
+        if not item.note.slur_start:
+            continue
+        for later_index in range(index + 1, len(items)):
+            if later_index in used:
+                continue
+            later = items[later_index]
+            if not later.note.slur_end:
+                continue
+            if later.staff != item.staff:
+                continue
+            if (
+                item.note.voice
+                and later.note.voice
+                and later.note.voice != item.note.voice
+            ):
+                continue
+            used.add(later_index)
+            pairs.append((index, later_index))
+            break
+    return pairs
+
+
 class ScoreCanvas(QWidget):
     pageChanged = Signal(int)
 
@@ -76,12 +103,21 @@ class ScoreCanvas(QWidget):
         self._next_note: Optional[ScoreNote] = None
         self._follow_playing = False
         self._drums = False
+        self._show_markings = True
         self.setMinimumHeight(220)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self.setAccessibleName("五线谱")
+        self.setAccessibleDescription(
+            "显示当前曲目、播放头、命中/未中与指法踏板标记"
+        )
         self._timer = QTimer(self)
         self._timer.setInterval(33)
         self._timer.timeout.connect(self._advance)
+
+    def set_show_markings(self, on: bool) -> None:
+        self._show_markings = bool(on)
+        self.update()
 
     def set_theme(self, theme: Theme) -> None:
         self._theme = theme
@@ -481,10 +517,112 @@ class ScoreCanvas(QWidget):
                         staff_top, line_gap, ink,
                     )
 
+            if self._show_markings:
+                self._draw_slurs(
+                    p, system, music_left, measure_w,
+                    treble_top, bass_top, line_gap, ink,
+                )
+            if self._show_markings and self._score is not None:
+                self._draw_pedals(
+                    p, system, music_left, measure_w, block_top, content_h,
+                    line_gap, ink,
+                )
+
             if system.index == play_system:
                 x = music_left + play_x * (right - music_left)
                 p.setPen(QPen(t.score_playhead, 1.5))
                 p.drawLine(QPointF(x, block_top - 5), QPointF(x, bottom_y + 5))
+
+    def _draw_slurs(
+        self, p, system, music_left, measure_w,
+        treble_top, bass_top, gap, ink,
+    ) -> None:
+        """Arcs pairing each slur_start with the next slur_end in a system.
+
+        Flattening the whole system first lets a slur cross a barline; pairing
+        stays within one staff/voice so independent left/right-hand slurs do
+        not steal each other's stops.
+        """
+        entries: list[tuple[StaffNote, float, float]] = []
+        for index, measure in enumerate(system.measures):
+            measure_x = music_left + index * measure_w
+            for item in measure.notes:
+                entries.append((item, measure_x, measure.beats))
+        pairs = _slur_pairs([entry[0] for entry in entries])
+        tops = {"treble": treble_top, "bass": bass_top}
+        for start_index, end_index in pairs:
+            item, mx_a, beats_a = entries[start_index]
+            partner, mx_b, beats_b = entries[end_index]
+            top_a = tops.get(item.staff)
+            top_b = tops.get(partner.staff)
+            if top_a is None or top_b is None:
+                continue
+            x1, y1 = self._note_xy(
+                item, mx_a, measure_w, beats_a, top_a, gap
+            )
+            x2, y2 = self._note_xy(
+                partner, mx_b, measure_w, beats_b, top_b, gap
+            )
+            above = item.staff == "treble"
+            ctrl_y = (
+                min(y1, y2) - gap * 2.4
+                if above
+                else max(y1, y2) + gap * 2.4
+            )
+            path = QPainterPath()
+            path.moveTo(QPointF(x1 + 3, y1))
+            path.quadTo(QPointF((x1 + x2) / 2, ctrl_y), QPointF(x2 - 3, y2))
+            p.setPen(QPen(ink, 1.0))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawPath(path)
+
+    def _draw_pedals(
+        self, p, system, music_left, measure_w, block_top, content_h,
+        gap, ink,
+    ) -> None:
+        """Sustain-pedal brackets under the system, from score.pedals."""
+        score = self._score
+        if score is None or not score.pedals or not system.measures:
+            return
+        first = system.measures[0]
+        last = system.measures[-1]
+        measure_beats = max(1e-6, float(first.beats))
+
+        spans = list(score.pedal_beats)
+        if not spans:
+            tempo = self._layout.tempo if self._layout is not None else 120.0
+            spans = [
+                (start * tempo / 60.0, stop * tempo / 60.0)
+                for start, stop in score.pedals
+            ]
+
+        def x_at(beat: float) -> float:
+            offset = max(0.0, beat - first.start_beat)
+            index = min(
+                len(system.measures) - 1, int(offset // measure_beats)
+            )
+            measure = system.measures[index]
+            within = (beat - measure.start_beat) / max(1e-6, measure.beats)
+            return music_left + (index + within) * measure_w
+
+        y = block_top + content_h + gap * 2.4
+        for start_beat, stop_beat in spans:
+            if stop_beat < first.start_beat or start_beat > last.end_beat:
+                continue
+            x1 = x_at(max(start_beat, first.start_beat))
+            x2 = x_at(min(stop_beat, last.end_beat))
+            if x2 - x1 < 2:
+                continue
+            p.setPen(QPen(ink, 1.0))
+            p.drawLine(QPointF(x1, y), QPointF(x2, y))
+            p.drawLine(QPointF(x1, y - gap * 0.6), QPointF(x1, y + gap * 0.6))
+            p.drawLine(QPointF(x2, y - gap * 0.6), QPointF(x2, y + gap * 0.6))
+            p.setFont(self._theme.font(max(7, int(gap * 1.1)), mono=True))
+            p.drawText(
+                QRectF(x1, y - gap * 2.0, 30, gap * 1.6),
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                "Ped.",
+            )
 
     def _draw_staff_lines(self, p, left, right, staff_top, gap, faint) -> None:
         p.setPen(QPen(faint, 1.0))
@@ -544,15 +682,23 @@ class ScoreCanvas(QWidget):
             f"{beats}\n{unit}",
         )
 
-    def _draw_staff_note(
-        self, p, item: StaffNote, measure_x, measure_w, beats,
-        staff_top, gap, ink,
-    ) -> None:
+    def _note_xy(
+        self, item: StaffNote, measure_x, measure_w, beats, staff_top, gap
+    ) -> tuple[float, float]:
         beat = max(1.0, min(beats, item.note.beat))
         x = measure_x + (beat - 1.0) / beats * measure_w
         x += min(7.0, max(1.0, measure_w * 0.07))
         bottom = staff_top + gap * 4
-        y = bottom - item.step * gap / 2.0
+        return x, bottom - item.step * gap / 2.0
+
+    def _draw_staff_note(
+        self, p, item: StaffNote, measure_x, measure_w, beats,
+        staff_top, gap, ink,
+    ) -> None:
+        x, y = self._note_xy(
+            item, measure_x, measure_w, beats, staff_top, gap
+        )
+        bottom = staff_top + gap * 4
         highlighted = (
             self._next_note is not None and item.note == self._next_note
         )
@@ -594,6 +740,37 @@ class ScoreCanvas(QWidget):
             p.drawLine(QPointF(x + 4.4, y - 1), QPointF(x + 4.4, y - stem))
         else:
             p.drawLine(QPointF(x - 4.4, y + 1), QPointF(x - 4.4, y + stem))
+
+        if not self._show_markings:
+            return
+        above = item.staff == "treble"
+        direction = -1.0 if above else 1.0
+        p.setPen(QPen(color, 1.0))
+        if item.note.finger:
+            p.setFont(self._theme.font(max(8, int(gap * 1.4)), mono=True))
+            fy = y - gap * 2.8 if above else y + gap * 1.2
+            p.drawText(
+                QRectF(x - 9, fy, 18, gap * 1.6),
+                Qt.AlignmentFlag.AlignCenter,
+                str(item.note.finger),
+            )
+        articulation = item.note.articulation
+        ay = y + direction * gap * 1.7
+        if articulation == "staccato":
+            p.setBrush(color)
+            p.drawEllipse(QPointF(x, ay), max(1.2, gap * 0.22), max(1.2, gap * 0.22))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+        elif articulation == "accent":
+            p.setFont(self._theme.font(max(8, int(gap * 1.5)), mono=True))
+            p.drawText(
+                QRectF(x - 7, ay - gap * 0.8, 14, gap * 1.6),
+                Qt.AlignmentFlag.AlignCenter,
+                ">",
+            )
+        elif articulation == "tenuto":
+            p.drawLine(
+                QPointF(x - gap * 0.7, ay), QPointF(x + gap * 0.7, ay)
+            )
 
     def _draw_roll(self, p: QPainter) -> None:
         if self._score is not None:
@@ -901,6 +1078,16 @@ class ScoreView(GlassFrame):
         self._page_next.hide()
 
         top.addStretch(1)
+        self.markers_button = QPushButton("标记")
+        self.markers_button.setProperty("role", "chip")
+        self.markers_button.setCheckable(True)
+        self.markers_button.setChecked(True)
+        self.markers_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.markers_button.setToolTip("显示指法、踏板、连音线与奏法标记")
+        self.markers_button.clicked.connect(
+            lambda checked=False: self.canvas.set_show_markings(checked)
+        )
+        top.addWidget(self.markers_button)
         self._zoom_label = QLabel("100%")
         self._zoom_label.setProperty("role", "faint")
         top.addWidget(self._zoom_label)

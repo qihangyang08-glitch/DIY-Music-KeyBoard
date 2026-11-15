@@ -29,6 +29,11 @@ KEY_COUNT = 32
 SIGNAL_MIN = -1
 SIGNAL_MAX = 255
 
+# Firmware defaults; used when a partial calibration is applied to all 32
+# channels so untouched keys keep the behaviour they had before.
+DEFAULT_TOUCH = 12
+DEFAULT_RELEASE = 6
+
 BASELINE_SECONDS = 1.5
 BASELINE_TOUCH = 20        # a clear press restarts noise collection
 TRIGGER_MARGIN = 8
@@ -48,8 +53,9 @@ STATE_STOPPED = "stopped"
 
 PROFILE_VERSION = 1
 
-ROOT = Path(__file__).resolve().parents[3]
-KEYMAP_PATH = ROOT / "mapping" / "keymap.json"
+from .paths import mapping_path
+
+KEYMAP_PATH = mapping_path("keymap.json")
 
 
 def default_path() -> Path:
@@ -285,7 +291,7 @@ class CalibrationProfile:
             if isinstance(raw.get("created_at"), str)
             else ""
         )
-        gain = _int_in(raw.get("gain", 0), 0, 8, 0)
+        gain = _int_in(raw.get("gain", 0), 0, 80, 0)
         if gain is None:
             return None
         keys: list[KeyThreshold] = []
@@ -585,6 +591,24 @@ class CalibrationSession:
             )
         return ThresholdCheck(True, "", tuple(warnings))
 
+    def warnings(self) -> list[str]:
+        """Page-level warnings gathered from the whole capture, not one key."""
+        texts: list[str] = []
+        for channel, noise in sorted(self.noise_max.items()):
+            if noise > 15:
+                key = self._channel_to_key.get(channel, channel)
+                texts.append(
+                    f"键 {key} 噪声偏高（{noise}），检查接线/覆膜"
+                )
+        for key, curve in sorted(self.curves.items()):
+            if curve.peak < 12:
+                texts.append(
+                    f"键 {key} 信号弱（峰值 {curve.peak}），可提高增益或检查电极"
+                )
+            if curve.peak >= SIGNAL_MAX:
+                texts.append(f"键 {key} 饱和，建议降低增益")
+        return texts
+
     def apply_values(
         self, touch_overrides: Optional[dict[int, int]] = None
     ) -> dict[int, tuple[int, int]]:
@@ -682,3 +706,63 @@ class CalibrationSession:
         self._above_since[key] = now
         if self._first_trigger_at is None:
             self._first_trigger_at = now
+
+
+@dataclass(frozen=True)
+class GainInfo:
+    """The firmware's current analog-gain preset."""
+
+    index: int
+    tenths: int  # 10 = 1.0x, 40 = 4.0x
+    name: str
+
+
+_GAIN_RE = re.compile(r"^GAIN\s+(\d+)\s+(\d+)(?:\s+(.*))?$")
+
+
+def parse_gain_line(text: str) -> Optional[GainInfo]:
+    """Parse ``GAIN <index> <tenths> <name>`` from the firmware."""
+    match = _GAIN_RE.match(text.strip())
+    if match is None:
+        return None
+    index = int(match.group(1))
+    tenths = int(match.group(2))
+    if not 0 <= index <= 15 or not 0 <= tenths <= 80:
+        return None
+    return GainInfo(index, tenths, (match.group(3) or "").strip())
+
+
+def gain_label(tenths: int) -> str:
+    """Human label; also accepts legacy profile values stored as a multiplier."""
+    value = int(tenths)
+    if value <= 0:
+        return "未知"
+    if value <= 8:
+        return f"{value:.1f}x"
+    return f"{value / 10:.1f}x"
+
+
+def full_threshold_values(
+    captured: dict[int, tuple[int, int]],
+    base: Optional[dict[int, tuple[int, int]]] = None,
+) -> dict[int, tuple[int, int]]:
+    """Channel -> (touch, release) for all 32 channels.
+
+    ``base`` (an existing complete profile) wins over the firmware defaults,
+    and freshly captured values win over both. This is what makes "apply"
+    always write a full table instead of only the keys touched this time.
+    """
+    values = {
+        channel: (DEFAULT_TOUCH, DEFAULT_RELEASE)
+        for channel in range(1, CHANNEL_COUNT + 1)
+    }
+    for source in (base or {}, captured):
+        for channel, pair in source.items():
+            try:
+                channel = int(channel)
+                touch, release = int(pair[0]), int(pair[1])
+            except (TypeError, ValueError, IndexError):
+                continue
+            if 1 <= channel <= CHANNEL_COUNT:
+                values[channel] = (touch, release)
+    return values

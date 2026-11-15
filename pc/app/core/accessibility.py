@@ -59,6 +59,7 @@ class AccessibilityPrefs:
         self.reduce_motion = False
         self.font_scale = 1.0
         self.language = LANGUAGE_ZH
+        self.high_contrast = False
 
     def to_dict(self) -> dict:
         return {
@@ -66,6 +67,7 @@ class AccessibilityPrefs:
             "reduce_motion": self.reduce_motion,
             "font_scale": self.font_scale,
             "language": self.language,
+            "high_contrast": self.high_contrast,
         }
 
     @classmethod
@@ -79,6 +81,7 @@ class AccessibilityPrefs:
         prefs.reduce_motion = raw.get("reduce_motion") is True
         prefs.font_scale = normalize_font_scale(raw.get("font_scale", 1.0))
         prefs.language = normalize_language(raw.get("language", LANGUAGE_ZH))
+        prefs.high_contrast = raw.get("high_contrast") is True
         return prefs
 
     @classmethod

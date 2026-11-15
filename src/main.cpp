@@ -27,11 +27,15 @@
  */
 
 #include <Arduino.h>
+#include <Preferences.h>
 #include <Wire.h>
 #include <ctype.h>
+#include <esp_task_wdt.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mpr121.h"
+#include "ota.h"
 
 // ---------------------------------------------------------------------------
 // Hardware configuration
@@ -62,6 +66,24 @@ static const uint32_t POLL_MS = 20;       // touch-status poll period
 static const uint32_t HEARTBEAT_MS = 2000;
 static const uint32_t HEALTH_MS = 2000;
 
+// C3: a key held this long without a release is reported and suppressed, so a
+// shorted electrode cannot hold a note forever.
+static const uint32_t STUCK_MS = 3000;
+static const uint8_t BUS_RECOVERY_FAILURES = 3;  // probes before resetting I2C
+static const uint32_t WATCHDOG_TIMEOUT_S = 8;
+
+// C2: software drift compensation. While all keys are released, compare each
+// baseline with the reference captured when the thresholds were last written;
+// a drift of ADAPT_DRIFT_COUNTS shifts that key's touch/release together.
+static const uint32_t ADAPT_INTERVAL_MS = 5000;
+static const int ADAPT_DRIFT_COUNTS = 8;
+static const uint8_t TOUCH_MIN = 2;
+static const uint8_t TOUCH_MAX = 80;
+
+// C4: serial protocol and NVS layout.
+static const uint8_t PROTOCOL_VERSION = 2;
+static const uint32_t CONFIG_MAGIC = 0x4B423032;  // "KB02"
+
 // ---------------------------------------------------------------------------
 // Threshold and gain presets
 // ---------------------------------------------------------------------------
@@ -77,14 +99,15 @@ static const uint8_t kPresetCount = sizeof(kTouchPresets) / sizeof(kTouchPresets
 struct GainPreset {
   uint8_t afe;      // 0x5C: FFI[7:6] + CDC[5:0] in uA
   uint8_t filter;   // 0x5D: ESI[7:6] + SFI[5:3] + CDT[2:0]
+  uint8_t tenths;   // 10 = 1.0x, 40 = 4.0x (machine-readable)
   const char *name;
 };
 static const GainPreset kGainPresets[] = {
-    {0x10, 0x20, "1.0x CDC=16uA"},
-    {0x18, 0x20, "1.5x CDC=24uA"},
-    {0x20, 0x20, "2.0x CDC=32uA"},
-    {0x30, 0x20, "3.0x CDC=48uA"},
-    {0x3F, 0x20, "4.0x CDC=63uA (max)"},
+    {0x10, 0x20, 10, "1.0x CDC=16uA"},
+    {0x18, 0x20, 15, "1.5x CDC=24uA"},
+    {0x20, 0x20, 20, "2.0x CDC=32uA"},
+    {0x30, 0x20, 30, "3.0x CDC=48uA"},
+    {0x3F, 0x20, 40, "4.0x CDC=63uA (max)"},
 };
 static const uint8_t kGainCount = sizeof(kGainPresets) / sizeof(kGainPresets[0]);
 static const uint8_t kDefaultGain = 4;
@@ -94,12 +117,28 @@ static const uint8_t kDefaultGain = 4;
 // ---------------------------------------------------------------------------
 
 static bool moduleReady[MODULE_COUNT] = {false, false, false};
+static uint8_t moduleFailures[MODULE_COUNT] = {0, 0, 0};
 static uint8_t presetIndex = 0;
 static uint8_t gainIndex = kDefaultGain;
+static bool adaptiveEnabled = true;
 
-// Bit n set = channel n+1 is over its touch threshold.
+// Bit n set = channel n+1 is over its touch threshold. rawMask is what the
+// chips report; channelMask additionally clears suppressed stuck keys.
+static uint64_t rawMask = 0;
 static uint64_t channelMask = 0;
 static uint64_t oorMask = 0;
+
+// Stuck-key tracking (C3): heldSince is 0 while the key is released.
+static uint32_t heldSince[TOTAL_CHANNELS];
+static bool stuckSuppressed[TOTAL_CHANNELS];
+
+// Drift compensation (C2). baselineRefValid is cleared until every ready
+// electrode has supplied one quiet baseline.
+static uint8_t baselineRef[TOTAL_CHANNELS];
+static bool baselineRefValid = false;
+static uint32_t lastAdapt = 0;
+
+static Preferences prefs;
 
 static uint32_t lastPoll = 0;
 static uint32_t lastHeartbeat = 0;
@@ -115,7 +154,7 @@ static uint32_t lastCalStream = 0;
 
 // The firmware's view of what it last wrote, channel 1..36 at index 0..35.
 // A module re-init resets thresholds to the preset, so initModule() re-applies
-// these values; Q reports them. NVS persistence is a later slice.
+// these values; Q reports them. C4 persists them in NVS.
 static uint8_t channelTouch[TOTAL_CHANNELS];
 static uint8_t channelRelease[TOTAL_CHANNELS];
 
@@ -129,6 +168,68 @@ static void applyPresetToMirror() {
     channelTouch[ch] = kTouchPresets[presetIndex];
     channelRelease[ch] = kReleasePresets[presetIndex];
   }
+}
+
+static void resetBaselineReference() {
+  baselineRefValid = false;
+  memset(baselineRef, 0, sizeof(baselineRef));
+}
+
+// A bad NVS record (flash corruption, an older firmware) must not leave a
+// threshold of zero or a release above touch: both make the chip unusable.
+static void clampMirror() {
+  for (uint8_t ch = 0; ch < TOTAL_CHANNELS; ch++) {
+    uint8_t touch = channelTouch[ch];
+    uint8_t release = channelRelease[ch];
+    if (touch < TOUCH_MIN) {
+      touch = TOUCH_MIN;
+    }
+    if (touch > TOUCH_MAX) {
+      touch = TOUCH_MAX;
+    }
+    if (release >= touch) {
+      release = (uint8_t)(touch > 0 ? touch - 1 : 0);
+    }
+    channelTouch[ch] = touch;
+    channelRelease[ch] = release;
+  }
+}
+
+// C4: restore preset/gain/adaptive/thresholds from NVS. Missing or invalid
+// records keep the boot defaults, so a fresh board behaves exactly as before.
+static void loadConfig() {
+  prefs.begin("keyborad", true);
+  const uint32_t magic = prefs.getUInt("magic", 0);
+  if (magic == CONFIG_MAGIC) {
+    presetIndex = prefs.getUChar("preset", presetIndex);
+    gainIndex = prefs.getUChar("gain", gainIndex);
+    adaptiveEnabled = prefs.getBool("adapt", true);
+    if (presetIndex >= kPresetCount) {
+      presetIndex = 0;
+    }
+    if (gainIndex >= kGainCount) {
+      gainIndex = kDefaultGain;
+    }
+    if (prefs.getBytesLength("touch") == TOTAL_CHANNELS &&
+        prefs.getBytesLength("release") == TOTAL_CHANNELS) {
+      prefs.getBytes("touch", channelTouch, TOTAL_CHANNELS);
+      prefs.getBytes("release", channelRelease, TOTAL_CHANNELS);
+      clampMirror();
+    }
+  }
+  prefs.end();
+  resetBaselineReference();
+}
+
+static void saveConfig() {
+  prefs.begin("keyborad", false);
+  prefs.putUInt("magic", CONFIG_MAGIC);
+  prefs.putUChar("preset", presetIndex);
+  prefs.putUChar("gain", gainIndex);
+  prefs.putBool("adapt", adaptiveEnabled);
+  prefs.putBytes("touch", channelTouch, TOTAL_CHANNELS);
+  prefs.putBytes("release", channelRelease, TOTAL_CHANNELS);
+  prefs.end();
 }
 
 // Key-recording mode: press 'r', then touch the keys in the layout's order.
@@ -182,6 +283,8 @@ static bool initModule(uint8_t module) {
       return false;
     }
   }
+  // A reset starts a new baseline, so the drift reference is stale.
+  resetBaselineReference();
   return true;
 }
 
@@ -249,6 +352,30 @@ static void probeAddresses() {
 // Reads the touch-status registers of every ready module and folds them into
 // the global 36-bit mask. A module that stops answering is marked not-ready;
 // the health check tries to bring it back.
+// C3: a held key that never releases would keep a note on forever. After
+// STUCK_MS it is reported once and removed from channelMask until the
+// electrode really goes up again; the next press then works normally.
+static void updateStuckKeys(uint32_t now) {
+  for (uint8_t ch = 0; ch < TOTAL_CHANNELS; ch++) {
+    const bool held = (rawMask & (1ULL << ch)) != 0;
+    if (!held) {
+      if (stuckSuppressed[ch]) {
+        stuckSuppressed[ch] = false;
+        Serial.printf("UNSTUCK %u\n", (unsigned)(ch + 1));
+      }
+      heldSince[ch] = 0;
+      continue;
+    }
+    if (heldSince[ch] == 0) {
+      heldSince[ch] = now;
+    } else if (!stuckSuppressed[ch] &&
+               now - heldSince[ch] >= STUCK_MS) {
+      stuckSuppressed[ch] = true;
+      Serial.printf("STUCK %u\n", (unsigned)(ch + 1));
+    }
+  }
+}
+
 static void pollTouch() {
   uint64_t mask = 0;
   for (uint8_t m = 0; m < MODULE_COUNT; m++) {
@@ -268,7 +395,94 @@ static void pollTouch() {
       }
     }
   }
-  channelMask = mask;
+  rawMask = mask;
+  updateStuckKeys(millis());
+  uint64_t reported = rawMask;
+  for (uint8_t ch = 0; ch < TOTAL_CHANNELS; ch++) {
+    if (stuckSuppressed[ch]) {
+      reported &= ~(1ULL << ch);
+    }
+  }
+  channelMask = reported;
+}
+
+// C2: quiet-state drift compensation. Baseline tracking in the chip handles
+// short-term noise; this catches the slow shift after a new overlay, a new
+// desk or a warm-up, which otherwise makes every key fire on its own. Only
+// thresholds move, and only by whole 8-count steps, so a calibrated profile
+// keeps its relative shape.
+static void adaptiveTick(uint32_t now) {
+  if (!adaptiveEnabled || calStream || recording) {
+    return;
+  }
+  if (now - lastAdapt < ADAPT_INTERVAL_MS) {
+    return;
+  }
+  lastAdapt = now;
+  if (rawMask != 0) {
+    return;  // not quiet: a finger (or a stuck key) is still down
+  }
+
+  bool changed = false;
+  bool sampled = false;
+  for (uint8_t m = 0; m < MODULE_COUNT; m++) {
+    if (!moduleReady[m]) {
+      continue;
+    }
+    const uint8_t electrodes =
+        (m == MODULE_COUNT - 1) ? 8 : ELECTRODES_PER_MODULE;
+    for (uint8_t e = 0; e < electrodes; e++) {
+      const int baseline = mpr121::baseline(Wire, MODULE_ADDR[m], e);
+      if (baseline < 0) {
+        continue;
+      }
+      const uint8_t ch = (uint8_t)(m * ELECTRODES_PER_MODULE + e);
+      sampled = true;
+      if (!baselineRefValid) {
+        baselineRef[ch] = (uint8_t)baseline;
+        continue;
+      }
+      const int drift = baseline - (int)baselineRef[ch];
+      if (abs(drift) < ADAPT_DRIFT_COUNTS) {
+        continue;
+      }
+      const int step = drift / ADAPT_DRIFT_COUNTS;
+      int touch = (int)channelTouch[ch] + step;
+      if (touch < TOUCH_MIN) {
+        touch = TOUCH_MIN;
+      }
+      if (touch > TOUCH_MAX) {
+        touch = TOUCH_MAX;
+      }
+      int release = (int)channelRelease[ch] + step;
+      if (release < 0) {
+        release = 0;
+      }
+      if (release > touch - 1) {
+        release = touch - 1;
+      }
+      if ((uint8_t)touch == channelTouch[ch] &&
+          (uint8_t)release == channelRelease[ch]) {
+        continue;
+      }
+      channelTouch[ch] = (uint8_t)touch;
+      channelRelease[ch] = (uint8_t)release;
+      baselineRef[ch] = (uint8_t)baseline;
+      if (mpr121::setElectrodeThreshold(Wire, MODULE_ADDR[m], e,
+                                        (uint8_t)touch,
+                                        (uint8_t)release)) {
+        changed = true;
+        Serial.printf("ADAPT %u %u %u %d\n", (unsigned)(ch + 1), (unsigned)touch,
+                      (unsigned)release, drift);
+      }
+    }
+  }
+  if (!baselineRefValid && sampled) {
+    baselineRefValid = true;
+  }
+  if (changed) {
+    saveConfig();
+  }
 }
 
 // Out-of-range bits are the chip's own "this electrode is not behaving" flag:
@@ -635,12 +849,40 @@ static void writeThresholdTable(char *line) {
     channelTouch[channel - 1] = entries[i].touch;
     channelRelease[channel - 1] = entries[i].release;
   }
+  saveConfig();
+  resetBaselineReference();
   Serial.println(F("OK T"));
 }
 
 // ---------------------------------------------------------------------------
 // Health check
 // ---------------------------------------------------------------------------
+
+// C3: a hot-unplug can leave the bus held low, and then every probe fails even
+// after the module is plugged back in. Releasing SDA/SCL, re-opening the bus
+// and re-initialising whatever answers recovers without a power cycle.
+static void recoverBus() {
+  Serial.println(F("!! I2C bus reset after repeated probe failures"));
+  Wire.end();
+  pinMode(PIN_I2C_SDA, INPUT_PULLUP);
+  pinMode(PIN_I2C_SCL, INPUT_PULLUP);
+  delay(2);
+  Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, I2C_CLOCK_HZ);
+  Wire.setTimeOut(20);
+  resetBaselineReference();
+  for (uint8_t m = 0; m < MODULE_COUNT; m++) {
+    moduleFailures[m] = 0;
+    if (!i2cPresent(MODULE_ADDR[m])) {
+      moduleReady[m] = false;
+      continue;
+    }
+    moduleReady[m] = initModule(m);
+    Serial.printf("%s module %u @ 0x%02X (%s): %s\n",
+                  moduleReady[m] ? "++" : "!!", m + 1, MODULE_ADDR[m],
+                  MODULE_STRAP[m],
+                  moduleReady[m] ? "recovered" : "present but init FAILED");
+  }
+}
 
 // Keeps the three modules alive. An MPR121 that loses power comes back with
 // every register at 0x00 — it still ACKs but senses nothing (ECR low nibble
@@ -652,8 +894,16 @@ static void healthCheck() {
 
     if (!moduleReady[m]) {
       if (!i2cPresent(addr)) {
+        if (moduleFailures[m] < 255) {
+          moduleFailures[m]++;
+        }
+        if (moduleFailures[m] >= BUS_RECOVERY_FAILURES) {
+          recoverBus();
+          return;
+        }
         continue;
       }
+      moduleFailures[m] = 0;
       moduleReady[m] = initModule(m);
       Serial.printf("%s module %u @ 0x%02X (%s): %s\n",
                     moduleReady[m] ? "++" : "!!", m + 1, addr, MODULE_STRAP[m],
@@ -668,6 +918,7 @@ static void healthCheck() {
                     MODULE_STRAP[m]);
       continue;
     }
+    moduleFailures[m] = 0;
     if ((ecr & 0x0F) == 0) {
       moduleReady[m] = initModule(m);
       Serial.printf("!! module %u @ 0x%02X (%s) lost its config (ECR=0x%02X), %s\n",
@@ -684,6 +935,8 @@ static void healthCheck() {
 static void cyclePreset() {
   presetIndex = (presetIndex + 1) % kPresetCount;
   applyPresetToMirror();
+  resetBaselineReference();
+  saveConfig();
   Serial.printf("\nthreshold preset -> touch=%u release=%u\n",
                 kTouchPresets[presetIndex], kReleasePresets[presetIndex]);
   for (uint8_t m = 0; m < MODULE_COUNT; m++) {
@@ -694,16 +947,40 @@ static void cyclePreset() {
   }
 }
 
+// Machine-readable so the calibration page can show the real device gain.
+static void printGain() {
+  const GainPreset &g = kGainPresets[gainIndex];
+  Serial.printf("GAIN %u %u %s\n", (unsigned)gainIndex, (unsigned)g.tenths,
+                g.name);
+}
+
 static void cycleGain() {
   gainIndex = (gainIndex + 1) % kGainCount;
   const GainPreset &g = kGainPresets[gainIndex];
-  Serial.printf("\nanalog gain -> %s (0x5C=0x%02X)\n", g.name, g.afe);
+  saveConfig();
+  resetBaselineReference();
+  printGain();
   for (uint8_t m = 0; m < MODULE_COUNT; m++) {
     if (moduleReady[m]) {
       mpr121::setAnalogConfig(Wire, MODULE_ADDR[m], g.afe, g.filter);
     }
   }
   Serial.println(F("applied; wait ~2 s for the baselines to settle"));
+}
+
+// C4: the PC queries this before applying a calibration profile so a firmware
+// upgrade cannot be mistaken for an old one.
+static void printVersion() {
+  Serial.printf("PROTO %u\n", (unsigned)PROTOCOL_VERSION);
+}
+
+// C2: adaptive drift compensation can be switched off when a fixed threshold
+// is wanted (a studio take, or when chasing a wiring fault).
+static void toggleAdaptive() {
+  adaptiveEnabled = !adaptiveEnabled;
+  saveConfig();
+  resetBaselineReference();
+  Serial.printf("ADAPT %s\n", adaptiveEnabled ? "ON" : "OFF");
 }
 
 static void printHelp() {
@@ -716,10 +993,15 @@ static void printHelp() {
   Serial.println(F("  x : abort recording"));
   Serial.println(F("  t : cycle touch/release threshold preset"));
   Serial.println(F("  g : cycle analog gain preset"));
+  Serial.println(F("  G : report the current analog gain"));
+  Serial.println(F("  A : toggle adaptive baseline drift compensation"));
+  Serial.println(F("  V : report the serial protocol version"));
   Serial.println(F("  c : toggle the 25 Hz CAL signal stream"));
   Serial.println(F("  T <ch> <touch> <release> ... : write thresholds by channel"));
   Serial.println(F("  Q : print the current threshold table"));
+  Serial.println(F("  V : print PROTO <version>"));
   Serial.println(F("  h : this help"));
+  Serial.println(F("Thresholds, gain and adaptive mode are saved in NVS."));
   Serial.println(F("===================="));
 }
 
@@ -747,6 +1029,9 @@ static void handleCommand(char c) {
       break;
     case 't': cyclePreset(); break;
     case 'g': cycleGain(); break;
+    case 'G': printGain(); break;
+    case 'A': toggleAdaptive(); break;
+    case 'V': printVersion(); break;
     case 'c': toggleCalibrationStream(); break;
     case 'h':
     case '?': printHelp(); break;
@@ -826,6 +1111,22 @@ void setup() {
   // The mirror must exist before the first initModule(): that function
   // re-applies it after begin() resets the thresholds.
   applyPresetToMirror();
+  loadConfig();
+
+  // C3: a wedged main loop reboots the board instead of leaving the keys dead.
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && ESP_ARDUINO_VERSION_MAJOR >= 3
+  esp_task_wdt_config_t watchdog = {};
+  watchdog.timeout_ms = WATCHDOG_TIMEOUT_S * 1000;
+  watchdog.idle_core_mask = 0;
+  watchdog.trigger_panic = true;
+  esp_task_wdt_init(&watchdog);
+#else
+  esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
+#endif
+  esp_task_wdt_add(NULL);
+
+  otaSetup();
+  printVersion();
 
   probeAddresses();
 
@@ -845,6 +1146,8 @@ void setup() {
 
   Serial.printf("\nthreshold %u/%u, gain %s\n", kTouchPresets[presetIndex],
                 kReleasePresets[presetIndex], kGainPresets[gainIndex].name);
+  printGain();
+  Serial.printf("ADAPT %s\n", adaptiveEnabled ? "ON" : "OFF");
   printHelp();
   printStatus();
 
@@ -852,6 +1155,8 @@ void setup() {
 }
 
 void loop() {
+  esp_task_wdt_reset();
+  otaLoop();
   const uint32_t now = millis();
 
   if (now - lastHealthCheck >= HEALTH_MS) {
@@ -859,6 +1164,8 @@ void loop() {
     healthCheck();
     pollOutOfRange();
   }
+
+  adaptiveTick(now);
 
   if (now - lastPoll >= POLL_MS) {
     lastPoll = now;

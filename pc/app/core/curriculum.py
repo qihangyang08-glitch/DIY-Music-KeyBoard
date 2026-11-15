@@ -23,11 +23,12 @@ from .drill import drill_spec
 from .lesson import Guide, overlay_lessons
 from .mapping import MappingSpec, mapping_spec, split_mapping
 from .project import Project
+from .paths import resource_path
 from .project_task import TASKS, ProjectTask
 
-SCORE_DIR = Path(__file__).resolve().parents[2] / "resources" / "scores"
-PROJECT_DIR = Path(__file__).resolve().parents[2] / "resources" / "projects"
-LESSON_DIR = Path(__file__).resolve().parents[2] / "resources" / "lessons"
+SCORE_DIR = resource_path("scores")
+PROJECT_DIR = resource_path("projects")
+LESSON_DIR = resource_path("lessons")
 
 SAMPLE_SCORE = "xiaoxingxing.musicxml"
 

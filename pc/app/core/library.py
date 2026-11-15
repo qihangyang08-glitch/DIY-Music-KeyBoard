@@ -106,6 +106,7 @@ class ScoreFacts:
     min_midi: int
     max_midi: int
     format: str
+    key_fifths: int = 0
 
     @property
     def range_label(self) -> str:
@@ -135,6 +136,28 @@ class LibraryFile:
     @property
     def all_paths(self) -> tuple[Path, ...]:
         return (self.path, *self.duplicate_paths)
+
+
+DIFFICULTY_ORDER = ("入门", "初级", "中级", "高级")
+KIND_ORDER = ("曲目", "训练", "导入", "制作中")
+KEY_ORDER = (
+    "C", "G", "D", "A", "E", "B", "F#", "C#",
+    "F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb",
+)
+
+_KEY_LABELS = {
+    -7: "Cb", -6: "Gb", -5: "Db", -4: "Ab", -3: "Eb", -2: "Bb", -1: "F",
+    0: "C", 1: "G", 2: "D", 3: "A", 4: "E", 5: "B", 6: "F#", 7: "C#",
+}
+
+
+@dataclass(frozen=True)
+class LibraryFilters:
+    """Empty fields mean no restriction; values come from the piece."""
+
+    difficulty: str = ""
+    key_label: str = ""
+    kind: str = ""
 
 
 @dataclass(frozen=True)
@@ -180,6 +203,49 @@ class LibraryPiece:
     def stage_indexes(self) -> tuple[int, ...]:
         return tuple(sorted({ref.stage_index for ref in self.stage_refs}))
 
+    @property
+    def difficulty(self) -> str:
+        """Curriculum stage wins; imports fall back to size/range heuristics."""
+        if self.stage_refs:
+            stage = min(ref.stage_index for ref in self.stage_refs)
+            if stage <= 2:
+                return "入门"
+            if stage <= 4:
+                return "初级"
+            if stage <= 6:
+                return "中级"
+            return "高级"
+        if self.facts is None:
+            return ""
+        span = self.facts.max_midi - self.facts.min_midi
+        measures = self.facts.measures
+        if measures <= 8 and span <= 12:
+            return "入门"
+        if measures <= 16 and span <= 19:
+            return "初级"
+        if measures <= 32 and span <= 26:
+            return "中级"
+        return "高级"
+
+    @property
+    def key_label(self) -> str:
+        if self.facts is None:
+            return ""
+        return _KEY_LABELS.get(self.facts.key_fifths, "")
+
+    @property
+    def kind_label(self) -> str:
+        if self.status == "planned":
+            return "制作中"
+        if self.origin == "imported":
+            return "导入"
+        kinds = {ref.item_kind for ref in self.stage_refs}
+        if kinds == {"training"}:
+            return "训练"
+        if "piece" in kinds:
+            return "曲目"
+        return "训练" if kinds else "曲目"
+
 
 @dataclass(frozen=True)
 class LibraryRegistry:
@@ -193,6 +259,8 @@ class LibraryRegistry:
         view: str = DEFAULT_VIEW,
         query: str = "",
         meta: LibraryMeta | None = None,
+        filters: LibraryFilters | None = None,
+        playlist_keys: set[str] | None = None,
     ) -> tuple[LibraryPiece, ...]:
         if view not in {key for key, _label in VIEW_ORDER}:
             raise ValueError(f"unknown library view: {view}")
@@ -211,6 +279,19 @@ class LibraryRegistry:
             selected = [by_key[key] for key in order if key in by_key]
         else:
             selected = list(self.pieces)
+        if playlist_keys is not None:
+            selected = [p for p in selected if p.key in playlist_keys]
+        if filters is not None:
+            if filters.difficulty:
+                selected = [
+                    p for p in selected if p.difficulty == filters.difficulty
+                ]
+            if filters.key_label:
+                selected = [
+                    p for p in selected if p.key_label == filters.key_label
+                ]
+            if filters.kind:
+                selected = [p for p in selected if p.kind_label == filters.kind]
         needle = _search_key(query)
         if needle:
             tag_key = lambda piece: " ".join(
@@ -269,6 +350,7 @@ class LibraryMeta:
     favorites: set[str] = field(default_factory=set)
     tags: dict[str, list[str]] = field(default_factory=dict)
     recent: list[str] = field(default_factory=list)
+    playlists: dict[str, list[str]] = field(default_factory=dict)
 
     def is_favorite(self, key: str) -> bool:
         return key in self.favorites
@@ -306,12 +388,78 @@ class LibraryMeta:
         self.recent.insert(0, key)
         del self.recent[RECENT_LIMIT:]
 
+    # -- playlists --------------------------------------------------------
+
+    @staticmethod
+    def _playlist_name(name: str) -> str:
+        return _WHITESPACE.sub(" ", str(name)).strip()[:24]
+
+    def playlist_names(self) -> tuple[str, ...]:
+        return tuple(sorted(self.playlists))
+
+    def ensure_playlist(self, name: str) -> str | None:
+        """Create an empty playlist (or return the existing name)."""
+        name = self._playlist_name(name)
+        if not name:
+            return None
+        if name not in self.playlists and len(self.playlists) >= 20:
+            return None
+        self.playlists.setdefault(name, [])
+        return name
+
+    def playlist_keys(self, name: str) -> set[str]:
+        return set(self.playlists.get(self._playlist_name(name), ()))
+
+    def playlists_for(self, key: str) -> tuple[str, ...]:
+        return tuple(
+            sorted(name for name, keys in self.playlists.items() if key in keys)
+        )
+
+    def prune_key(self, key: str) -> None:
+        """Drop every reference to a removed score from user metadata."""
+        self.favorites.discard(key)
+        self.tags.pop(key, None)
+        self.recent = [item for item in self.recent if item != key]
+        for name in list(self.playlists):
+            members = self.playlists[name]
+            if key in members:
+                members.remove(key)
+                if not members:
+                    self.playlists.pop(name, None)
+
+    def set_playlist_membership(self, name: str, key: str, on: bool) -> bool:
+        """Add/remove one key; returns the resulting membership.
+
+        Playlists are capped at 20 names / 200 keys so a stray dialog cannot
+        grow the metadata without bound.
+        """
+        name = self._playlist_name(name)
+        if not name or not key:
+            return False
+        if on:
+            if name not in self.playlists and len(self.playlists) >= 20:
+                return False
+            members = self.playlists.setdefault(name, [])
+            if key not in members:
+                members.append(key)
+                del members[200:]
+            return True
+        members = self.playlists.get(name)
+        if members is not None and key in members:
+            members.remove(key)
+            if not members:
+                self.playlists.pop(name, None)
+        return False
+
     def to_dict(self) -> dict:
         return {
             "version": META_VERSION,
             "favorites": sorted(self.favorites),
             "tags": {key: list(value) for key, value in sorted(self.tags.items())},
             "recent": list(self.recent),
+            "playlists": {
+                name: list(keys) for name, keys in sorted(self.playlists.items())
+            },
         }
 
     @classmethod
@@ -337,6 +485,17 @@ class LibraryMeta:
                 if isinstance(key, str) and key and key not in cleaned:
                     cleaned.append(key)
             meta.recent = cleaned[:RECENT_LIMIT]
+        playlists = raw.get("playlists")
+        if isinstance(playlists, dict):
+            for name, keys in playlists.items():
+                if not isinstance(name, str) or not isinstance(keys, list):
+                    continue
+                playlist = meta.ensure_playlist(name)
+                if playlist is None:
+                    continue
+                for key in keys:
+                    if isinstance(key, str) and key:
+                        meta.set_playlist_membership(playlist, key, True)
         return meta
 
     @classmethod
@@ -621,6 +780,7 @@ def score_facts(score: Score) -> ScoreFacts:
         min_midi=score.min_midi,
         max_midi=score.max_midi,
         format=_clean(score.format) or "MusicXML",
+        key_fifths=int(score.key_fifths),
     )
 
 

@@ -17,6 +17,7 @@ __pycache__/
 
 # Generated build / design artifacts
 pc/dist/
+pc/build/
 dist/
 pc/mockups/
 mockups/

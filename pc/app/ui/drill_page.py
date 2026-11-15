@@ -42,6 +42,7 @@ from ..core.rhythm import RhythmSession
 from ..core.synth_service import CLICK_ACCENT_MIDI, CLICK_CHANNEL, CLICK_MIDI
 from .light_bar import pitch_color, with_alpha
 from .rhythm_view import RhythmCanvas
+from .i18n_ui import apply_language
 from .theme import Theme, set_scaled_font
 from .widgets import CardFrame, GlassFrame
 
@@ -1110,6 +1111,7 @@ class DrillPage(GlassFrame):
             self._rhythm_canvas.update()
         self._update_range_hint()
         self._observe_sustain()
+        apply_language(self)
 
     # -- state -> view ----------------------------------------------------
 

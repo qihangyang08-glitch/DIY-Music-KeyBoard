@@ -373,6 +373,7 @@ class SettingsPage(GlassFrame):
     keybindingsRequested = Signal()
     helpRequested = Signal()
     reduceMotionChanged = Signal(bool)
+    highContrastChanged = Signal(bool)
     fontScaleChanged = Signal(float)
     languageRequested = Signal(str)
 
@@ -460,9 +461,28 @@ class SettingsPage(GlassFrame):
         motion_row.addWidget(motion_text, 1)
         self.reduce_motion_switch = ToggleSwitch(theme)
         self.reduce_motion_switch.setToolTip(motion_help)
+        self.reduce_motion_switch.setAccessibleName("减少动效")
         self.reduce_motion_switch.toggled.connect(self.reduceMotionChanged.emit)
         motion_row.addWidget(self.reduce_motion_switch)
         layout.addLayout(motion_row)
+
+        contrast_row = QHBoxLayout()
+        contrast_text = QLabel("高对比度")
+        contrast_text.setProperty("role", "muted")
+        contrast_help = (
+            "加深正文与次要文字、加强分隔线，所有文字对比度达到 WCAG AA；"
+            "主题观感会更硬朗。"
+        )
+        contrast_text.setToolTip(contrast_help)
+        contrast_row.addWidget(contrast_text, 1)
+        self.high_contrast_switch = ToggleSwitch(theme)
+        self.high_contrast_switch.setToolTip(contrast_help)
+        self.high_contrast_switch.setAccessibleName("高对比度")
+        self.high_contrast_switch.toggled.connect(
+            self.highContrastChanged.emit
+        )
+        contrast_row.addWidget(self.high_contrast_switch)
+        layout.addLayout(contrast_row)
 
         font_row = QHBoxLayout()
         font_label = QLabel("字号")
@@ -541,6 +561,10 @@ class SettingsPage(GlassFrame):
     def set_reduce_motion(self, on: bool) -> None:
         with QSignalBlocker(self.reduce_motion_switch):
             self.reduce_motion_switch.setChecked(bool(on))
+
+    def set_high_contrast(self, on: bool) -> None:
+        with QSignalBlocker(self.high_contrast_switch):
+            self.high_contrast_switch.setChecked(bool(on))
 
     def set_language(self, code: str) -> None:
         for button, button_code in zip(

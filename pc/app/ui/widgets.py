@@ -126,6 +126,8 @@ class VolumeButton(QAbstractButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setToolTip("静音切换")
+        self.setAccessibleName("静音切换")
+        self.setAccessibleDescription("按下后停止全部声音；再次按下恢复")
 
     def set_theme(self, theme: Theme) -> None:
         self._theme = theme
@@ -178,7 +180,9 @@ class Toast(QLabel):
         self._timer.timeout.connect(self.hide)
 
     def show_message(self, text: str, ms: int = 1700) -> None:
-        self.setText(text)
+        from .i18n_ui import tr_message
+
+        self.setText(tr_message(text))
         self.adjustSize()
         self.resize(self.width() + 14, self.height())
         parent = self.parentWidget()

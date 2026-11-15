@@ -31,11 +31,16 @@ from ..core.calibration import (
     CalibrationFrame,
     CalibrationProfile,
     CalibrationSession,
+    GainInfo,
     KeyCurve,
     format_thresholds,
+    full_threshold_values,
+    gain_label,
+    parse_gain_line,
     parse_threshold_reply,
 )
 from ..core.instrument import Instrument
+from .i18n_ui import tr_block
 from .theme import Theme, set_scaled_font
 from .widgets import CardFrame, GlassFrame
 
@@ -472,6 +477,7 @@ class CalibrationPage(GlassFrame):
         )
         self.session = CalibrationSession()
         self.profile: CalibrationProfile | None = None
+        self.device_gain: GainInfo | None = None
         self.profile_warning = ""
         self.thresholds: dict[int, int] = {}
         self._user_set: set[int] = set()
@@ -567,6 +573,14 @@ class CalibrationPage(GlassFrame):
         status_row.addWidget(self.status_detail)
         layout.addLayout(status_row)
 
+        self.warning_label = QLabel("")
+        self.warning_label.setWordWrap(True)
+        self.warning_label.setStyleSheet(
+            f"color: {self._theme.amber.name()}; font-size: {self._theme.px(11)}px;"
+        )
+        self.warning_label.hide()
+        layout.addWidget(self.warning_label)
+
         self.verify_strip = VerifyStrip(self._theme)
         self.verify_strip.hide()
         layout.addWidget(self.verify_strip)
@@ -622,6 +636,15 @@ class CalibrationPage(GlassFrame):
         footer.addWidget(self.save_button)
         footer.addWidget(self.retest_button)
         footer.addStretch(1)
+        self.gain_button = QPushButton("增益 —")
+        self.gain_button.setProperty("role", "chip")
+        self.gain_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.gain_button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.gain_button.setToolTip(
+            "切换固件模拟增益（1.0x–4.0x）；改增益后需要重新校准"
+        )
+        self.gain_button.clicked.connect(lambda checked=False: self.cycle_gain())
+        footer.addWidget(self.gain_button)
         self.device_label = QLabel("")
         self.device_label.setProperty("role", "faint")
         footer.addWidget(self.device_label)
@@ -676,6 +699,8 @@ class CalibrationPage(GlassFrame):
         self.verify_legend.hide()
         self._rebuild_cards()
         self.instrument.begin_calibration()
+        # Ask the firmware for its real gain; the saved profile may be stale.
+        self._send("G")
         self.refresh()
 
     def leave(self) -> None:
@@ -710,6 +735,20 @@ class CalibrationPage(GlassFrame):
         if card is not None:
             card.refresh()
 
+    def query_gain(self) -> bool:
+        """Ask the firmware for its current gain (safe to call on reconnect)."""
+        return self._send("G")
+
+    def cycle_gain(self) -> bool:
+        """Ask the firmware for its next gain preset (1.0x ... 4.0x)."""
+        if self.session.state != "idle":
+            self.message.emit("先结束本次检测再切换增益")
+            return False
+        if not self._send("g"):
+            self.message.emit("串口未连接，无法切换增益")
+            return False
+        return True
+
     # -- detection --------------------------------------------------------
 
     def start_detection(self) -> bool:
@@ -740,6 +779,21 @@ class CalibrationPage(GlassFrame):
         self.refresh()
         return True
 
+    def _abort_capture(self) -> None:
+        """Drop a capture whose samples came from a different gain."""
+        if self.session.state in ("baseline", "monitoring"):
+            self.session.stop(self._clock())
+        self._stop_stream()
+        self.session = CalibrationSession(self.session.keymap)
+        self.thresholds.clear()
+        self._user_set.clear()
+        self.applied = False
+        self.applied_values = {}
+        self.applied_by_key = {}
+        self._finalized = False
+        self._shown_keys = set()
+        self._rebuild_cards()
+
     def stop_detection(self) -> None:
         if self.session.state in ("baseline", "monitoring"):
             self.session.stop(self._clock())
@@ -762,6 +816,7 @@ class CalibrationPage(GlassFrame):
             self.session.stop(self._clock())
         self.stream_on = False
         self._want_stream = False
+        self.device_gain = None
         self.applied = False
         self._finalized = True
         self._sync_thresholds()
@@ -875,10 +930,14 @@ class CalibrationPage(GlassFrame):
             if not check.ok:
                 self.message.emit(f"键 {key}：{check.reason}")
                 return False
-        if self.profile is not None and self.profile.is_complete():
-            merged = self.profile.values_by_channel()
-            merged.update(values)
-            values = merged
+        base = (
+            self.profile.values_by_channel()
+            if self.profile is not None and self.profile.is_complete()
+            else None
+        )
+        # Always write a full table: untouched keys keep the existing profile
+        # values, or the firmware defaults on a first calibration.
+        values = full_threshold_values(values, base)
         key_to_channel = {
             int(info["key"]): channel
             for channel, info in self.session.keymap.items()
@@ -898,14 +957,19 @@ class CalibrationPage(GlassFrame):
         self.applied_values = {}
         self.applied_by_key = {}
         self.applied = False
-        self.message.emit("已发送阈值，等待设备确认")
+        self.message.emit("已发送 32 组阈值，等待设备确认")
         self.refresh()
         return True
 
     def save_profile(self) -> bool:
+        gain = (
+            self.device_gain.tenths
+            if self.device_gain is not None
+            else (self.profile.gain if self.profile else 0)
+        )
         profile = self.session.profile(
             name=(self.profile.name if self.profile else "本机校准"),
-            gain=(self.profile.gain if self.profile else 0),
+            gain=gain,
             touch_overrides=self.thresholds,
             base=self.profile,
         )
@@ -923,6 +987,36 @@ class CalibrationPage(GlassFrame):
 
     def handle_reply(self, text: str) -> bool:
         text = text.strip()
+        gain = parse_gain_line(text)
+        if gain is not None:
+            previous = self.device_gain
+            changed = previous is not None and previous.tenths != gain.tenths
+            self.device_gain = gain
+            if changed:
+                # Curves captured at the old gain no longer describe the pad.
+                if self.session.state in ("baseline", "monitoring"):
+                    self._abort_capture()
+                    self.message.emit(
+                        "增益已变化，已停止本次检测；请重新校准并应用"
+                    )
+                else:
+                    self.applied = False
+                    self.applied_values = {}
+                    self.applied_by_key = {}
+                    self.message.emit("增益已变化，建议重新校准并重新应用")
+            elif self.profile is not None and self.profile.gain:
+                wanted = (
+                    self.profile.gain * 10
+                    if 0 < self.profile.gain <= 8
+                    else self.profile.gain
+                )
+                if wanted != gain.tenths:
+                    self.message.emit(
+                        f"设备增益 {gain_label(gain.tenths)} 与方案 "
+                        f"{gain_label(wanted)} 不一致，建议重新校准"
+                    )
+            self.refresh()
+            return True
         if text == "CAL ON":
             self.stream_on = True
             return True
@@ -966,7 +1060,10 @@ class CalibrationPage(GlassFrame):
         active = self._active
         carrying = self.session.state in ("baseline", "monitoring")
         stopped = self.session.state == "stopped"
-        self.start_button.setEnabled(ready and not active)
+        # The page sets _active=True on enter(), so "not active" would disable
+        # the button for the whole visit: every control then looked dead.
+        self.start_button.setEnabled(active and ready and not carrying
+                                     and self.session.state == "idle")
         self.stop_button.setEnabled(active and carrying)
         self.apply_button.setEnabled(active and stopped and bool(self.session.curves))
         self.save_button.setEnabled(active and stopped and bool(self.session.curves))
@@ -976,16 +1073,34 @@ class CalibrationPage(GlassFrame):
             active and (self.verifying or bool(self.applied_values))
         )
 
+        if self.device_gain is not None:
+            gain_text = self.device_gain.name or gain_label(
+                self.device_gain.tenths
+            )
+        elif self.profile is not None and self.profile.gain:
+            gain_text = gain_label(self.profile.gain)
+        else:
+            gain_text = "未知"
+        self.gain_button.setText(f"增益 {gain_text}")
+        self.gain_button.setEnabled(
+            active
+            and not self.verifying
+            and self.session.state == "idle"
+        )
         if self.profile is not None:
-            gain = f"增益 {self.profile.gain}" if self.profile.gain else "增益未知"
             status = "已应用" if self.applied else "未应用"
             self.scheme_label.setText(
                 f"方案 · {self.profile.name or '未命名'} · "
-                f"{self.profile.created_at[:10] or '—'} · {gain} · {status}"
+                f"{self.profile.created_at[:10] or '—'} · "
+                f"增益 {gain_text} · {status}"
             )
         else:
             status = "本次已应用" if self.applied else "未校准"
-            self.scheme_label.setText(f"方案 · {status}")
+            self.scheme_label.setText(f"方案 · {status} · 增益 {gain_text}")
+
+        warnings = self.session.warnings()
+        self.warning_label.setText("；".join(warnings))
+        self.warning_label.setVisible(bool(warnings))
 
         online = self.instrument.module_count()
         self.device_label.setText(
@@ -1027,8 +1142,8 @@ class CalibrationPage(GlassFrame):
         else:
             text = "就绪"
             detail = ""
-        self.status_label.setText(text)
-        self.status_detail.setText(detail)
+        self.status_label.setText(tr_block(text))
+        self.status_detail.setText(tr_block(detail))
 
     def _load_profile(self) -> None:
         if self.profile_path is None:

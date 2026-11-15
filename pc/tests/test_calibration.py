@@ -11,13 +11,19 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app.core.calibration import (
+    DEFAULT_RELEASE,
+    DEFAULT_TOUCH,
     CalibrationFrame,
     CalibrationProfile,
     CalibrationSession,
+    KeyCurve,
     KeyThreshold,
     format_thresholds,
+    full_threshold_values,
+    gain_label,
     load_keymap,
     parse_calibration_line,
+    parse_gain_line,
     parse_threshold_reply,
     parse_thresholds_line,
 )
@@ -446,6 +452,55 @@ class CalibrationProfileTest(unittest.TestCase):
             loaded, warning = CalibrationProfile.load(wrong_version)
             self.assertIsNone(loaded)
             self.assertIn("版本", warning)
+
+
+class GainAndApplyTest(unittest.TestCase):
+    def test_gain_line_parses_index_tenths_and_name(self) -> None:
+        info = parse_gain_line("GAIN 4 40 4.0x CDC=63uA (max)")
+        self.assertIsNotNone(info)
+        self.assertEqual(info.index, 4)
+        self.assertEqual(info.tenths, 40)
+        self.assertEqual(info.name, "4.0x CDC=63uA (max)")
+
+        self.assertIsNone(parse_gain_line("analog gain -> 4.0x"))
+        self.assertIsNone(parse_gain_line("GAIN 4"))
+        self.assertIsNone(parse_gain_line(""))
+
+    def test_gain_label_accepts_tenths_and_legacy_multipliers(self) -> None:
+        self.assertEqual(gain_label(40), "4.0x")
+        self.assertEqual(gain_label(15), "1.5x")
+        self.assertEqual(gain_label(4), "4.0x")  # legacy profile value
+        self.assertEqual(gain_label(0), "未知")
+
+    def test_session_warnings_flag_noise_weak_and_saturated_keys(self) -> None:
+        session = CalibrationSession(load_keymap())
+        session.start(0.0)
+        session.noise_max = {12: 22}
+        session.curves = {
+            3: KeyCurve(key=3, channel=3, note="D#4", noise=2, peak=8, hold=6),
+            4: KeyCurve(
+                key=4, channel=4, note="E4", noise=3, peak=255, hold=250
+            ),
+        }
+
+        text = " | ".join(session.warnings())
+        self.assertIn("噪声偏高", text)
+        self.assertIn("信号弱", text)
+        self.assertIn("饱和", text)
+
+    def test_full_apply_covers_all_32_channels(self) -> None:
+        captured = {3: (48, 29), 17: (61, 36)}
+        values = full_threshold_values(captured)
+
+        self.assertEqual(sorted(values), list(range(1, 33)))
+        self.assertEqual(values[3], (48, 29))
+        self.assertEqual(values[17], (61, 36))
+        self.assertEqual(values[1], (DEFAULT_TOUCH, DEFAULT_RELEASE))
+
+        base = {channel: (33, 20) for channel in range(1, 33)}
+        merged = full_threshold_values(captured, base)
+        self.assertEqual(merged[3], (48, 29))
+        self.assertEqual(merged[1], (33, 20))
 
 
 if __name__ == "__main__":

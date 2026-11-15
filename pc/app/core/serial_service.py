@@ -27,6 +27,7 @@ from .note_engine import Frame
 STATUS_RE = re.compile(r"^\[\s*(\d+)\s*ms\]\s*(.*)$")
 MODULE_RE = re.compile(r"0x([0-9A-Fa-f]{2})\s+(OK|--)")
 KEYS_RE = re.compile(r"keys:\s*(.*)$")
+PROTO_RE = re.compile(r"^PROTO\s+(\d+)\s*$")
 
 ESP32_VID = 0x303A
 ESP32_PID = 0x1001
@@ -74,6 +75,7 @@ class SerialService(QThread):
     calibrationFrame = Signal(object)    # CalibrationFrame (CAL stream)
     connectionChanged = Signal(bool, str)  # connected, human-readable detail
     notice = Signal(str)                 # non-status firmware output
+    protocolVersion = Signal(int)        # PROTO <n> at boot and on 'V'
 
     def __init__(self, port: Optional[str] = None, parent=None):
         super().__init__(parent)
@@ -142,6 +144,10 @@ class SerialService(QThread):
         status line or a boot notice; malformed CAL lines fall through to
         ``notice`` rather than being silently dropped.
         """
+        proto = PROTO_RE.match(text)
+        if proto is not None:
+            self.protocolVersion.emit(int(proto.group(1)))
+            return
         frame = parse_calibration_line(text)
         if frame is not None:
             self.calibrationFrame.emit(frame)

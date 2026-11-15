@@ -52,6 +52,7 @@ from .learning_page import clear_layout, scroll_area
 from .light_bar import LightBarBand
 from .piano_roll import HEIGHT as ROLL_HEIGHT, PianoRollCanvas
 from .project_player import ProjectPlayer
+from .i18n_ui import apply_language
 from .theme import Theme, set_scaled_font
 from .widgets import CardFrame, GlassFrame
 
@@ -774,6 +775,7 @@ class CreationPage(GlassFrame):
         self._sync_play_button()
         self.roll.refresh()
         self._update_undo()
+        apply_language(self)
 
     def _render_tracks(self) -> None:
         clear_layout(self.track_layout)

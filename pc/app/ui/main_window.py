@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -37,6 +38,8 @@ from ..core.accessibility import default_path as accessibility_path_default
 from ..core.calibration import (
     CalibrationProfile,
     format_thresholds,
+    gain_label,
+    parse_gain_line,
     parse_threshold_reply,
 )
 from ..core.calibration import default_path as calibration_path_default
@@ -55,12 +58,18 @@ from ..core.instrument import Instrument
 from ..core.library import DISPLAY_SUFFIXES, default_import_dir
 from ..core.onboarding import OnboardingState
 from ..core.onboarding import default_path as onboarding_path_default
+from ..core.paths import resource_path
 from ..core.progress import LearningProgress
 from ..core.project import Project, default_project_dir
 from ..core.score import ScoreError, parse_score
 from ..core.score_prefs import ScorePrefs, default_path as score_prefs_path, score_key
 from ..core.serial_service import SerialService
-from ..core.synth_service import make_synth
+from ..core.synth_service import (
+    CLICK_ACCENT_MIDI,
+    CLICK_CHANNEL,
+    CLICK_MIDI,
+    make_synth,
+)
 from .creation_page import CreationPage
 from .drill_page import DrillPage
 from .keybindings import KeyBindings
@@ -69,6 +78,7 @@ from .learning_page import ExamTarget, LearningPage, PracticeTarget, ProjectTarg
 from .i18n_ui import apply_language, set_language, tr
 from .calibration_page import CalibrationPage
 from .help_page import HelpPage
+from .a11y import ensure_accessible_names
 from .library_page import LibraryPage
 from .onboarding import OnboardingDialog
 from .pages import DevicePage, SettingsPage, SoundPage, MODULES
@@ -76,6 +86,7 @@ from .perform_view import PerformView
 from .theme import (
     THEMES,
     Theme,
+    high_contrast_theme,
     refresh_scaled_fonts,
     set_scaled_font,
 )
@@ -91,9 +102,7 @@ NAV_ITEMS = (
     ("?", "帮助"),
 )
 
-SAMPLE_SCORE = (
-    Path(__file__).resolve().parents[2] / "resources" / "scores" / "xiaoxingxing.musicxml"
-)
+SAMPLE_SCORE = resource_path("scores", "xiaoxingxing.musicxml")
 
 
 class RootWidget(QWidget):
@@ -187,6 +196,8 @@ class MainWindow(QMainWindow):
         self.calibration_applied = False
         self._calibration_apply_pending = False
         self._calibration_warning_shown = False
+        self._pending_calibration: CalibrationProfile | None = None
+        self._calibration_gain_checked = False
         self.onboarding_path = (
             Path(onboarding_path)
             if onboarding_path is not None
@@ -211,6 +222,8 @@ class MainWindow(QMainWindow):
         self.bindings = KeyBindings(bindings_path)
         self.serial_enabled = serial_enabled
         self._serial: Optional[SerialService] = None
+        self.firmware_protocol: int | None = None
+        self._protocol_noticed = False
         self._closed = False
         self._first_refresh = True
         self._last_preset_key = ""
@@ -249,6 +262,9 @@ class MainWindow(QMainWindow):
         self.follow.message.connect(self.toast.show_message)
         self.follow.demoNote.connect(self.perform.add_wave)
         self.follow.windowChanged.connect(self._on_window_changed)
+        self.follow.beat.connect(self._play_click)
+        self._loop_a: int | None = None
+        self._refresh_transport()
         self.perform.score.scoreFileDropped.connect(self._load_score_file)
         self.perform.score.imageOpened.connect(self._on_display_opened)
         self.perform.score.restartRequested.connect(self._restart_score)
@@ -259,6 +275,7 @@ class MainWindow(QMainWindow):
         self._start_serial(port)
         self._refresh_state()
         apply_language(self)
+        ensure_accessible_names(self)
         QApplication.instance().installEventFilter(self)
 
         if self.auto_onboarding:
@@ -414,6 +431,12 @@ class MainWindow(QMainWindow):
             self._on_split_bar_committed
         )
         self.perform.resetSplitRequested.connect(self._reset_split_bar)
+        self.perform.loopToggled.connect(self._set_loop_enabled)
+        self.perform.loopARequested.connect(self._mark_loop_start)
+        self.perform.loopBRequested.connect(self._mark_loop_end)
+        self.perform.speedStepRequested.connect(self._step_speed)
+        self.perform.metronomeToggled.connect(self._set_metronome)
+        self.perform.countInToggled.connect(self._set_count_in)
 
         self.learning_page = LearningPage(self.theme, self.learning_progress)
         self.learning_page.practiceRequested.connect(self._start_study_practice)
@@ -505,11 +528,17 @@ class MainWindow(QMainWindow):
         self.settings_page.reduceMotionChanged.connect(
             self._set_reduce_motion
         )
+        self.settings_page.highContrastChanged.connect(
+            self._set_high_contrast
+        )
         self.settings_page.fontScaleChanged.connect(self._set_font_scale)
         self.settings_page.languageRequested.connect(self._set_language)
         self.perform.set_accessibility(self.accessibility.reduce_motion)
         self.settings_page.set_reduce_motion(
             self.accessibility.reduce_motion
+        )
+        self.settings_page.set_high_contrast(
+            self.accessibility.high_contrast
         )
         self.settings_page.set_font_scale(self.accessibility.font_scale)
         self.settings_page.set_language(self.accessibility.language)
@@ -579,6 +608,7 @@ class MainWindow(QMainWindow):
         self._serial.frameReady.connect(self.instrument.set_hardware_frame)
         self._serial.calibrationFrame.connect(self.calibration_page.feed_frame)
         self._serial.connectionChanged.connect(self._on_connection)
+        self._serial.protocolVersion.connect(self._on_protocol_version)
         self._serial.notice.connect(self._on_notice)
         self._serial.notice.connect(self.calibration_page.handle_reply)
         self._serial.notice.connect(self._on_calibration_reply)
@@ -602,18 +632,49 @@ class MainWindow(QMainWindow):
         self.instrument.set_connection(connected, detail)
         if not connected:
             self._calibration_apply_pending = False
+            self._pending_calibration = None
+            self._calibration_gain_checked = False
             self._calibration_timeout.stop()
             if hasattr(self, "calibration_page"):
                 self.calibration_page.device_disconnected()
         if connected:
             self.toast.show_message(f"设备已连接 · {detail}")
             self._apply_saved_calibration()
+            if (
+                hasattr(self, "calibration_page")
+                and self.calibration_page.active
+            ):
+                self.calibration_page.query_gain()
         elif "等待设备" not in detail:
             self.toast.show_message(f"设备断开 · {detail}")
 
+    @staticmethod
+    def _profile_gain_tenths(gain: int) -> int:
+        # Older profiles stored the multiplier (4 = 4.0x); newer ones tenths.
+        value = int(gain)
+        return value * 10 if 0 < value <= 8 else value
+
+    def _send_calibration_thresholds(self, profile: CalibrationProfile) -> bool:
+        if not self._send_serial_line(
+            format_thresholds(profile.values_by_channel())
+        ):
+            self._calibration_apply_pending = False
+            return False
+        self._pending_calibration = None
+        self._calibration_gain_checked = True
+        self._calibration_apply_pending = True
+        self._calibration_timeout.start(3000)
+        return True
+
     def _apply_saved_calibration(self) -> bool:
         """Re-send calibration.json after every connect; the firmware RAM is
-        wiped by a power cycle, so the PC is the source of truth."""
+        wiped by a power cycle, so the PC is the source of truth.
+
+        Query the device gain first: the firmware boots at 4.0x, and applying
+        thresholds captured at another gain would make every key fire early.
+        Old firmware has no ``G`` reply; the timeout then applies the plan with
+        a warning so existing devices keep working.
+        """
         profile, warning = CalibrationProfile.load(self.calibration_path)
         if warning:
             self.calibration_applied = False
@@ -624,32 +685,75 @@ class MainWindow(QMainWindow):
         if profile is None:
             self.calibration_applied = False
             return False
-        if not self._send_serial_line(
-            format_thresholds(profile.values_by_channel())
-        ):
+        self._pending_calibration = profile
+        self._calibration_gain_checked = False
+        if not self._send_serial_line("G"):
+            self._pending_calibration = None
             return False
         self._calibration_apply_pending = True
         self._calibration_timeout.start(3000)
         self.toast.show_message(
-            f"正在应用校准方案 · {profile.name or '未命名'}…", 2200
+            f"正在校验设备增益 · {profile.name or '未命名'}…", 2200
         )
         return True
 
     def _on_calibration_reply(self, text: str) -> None:
+        gain = parse_gain_line(text)
+        if gain is not None:
+            profile = self._pending_calibration
+            if profile is None:
+                return
+            self._calibration_timeout.stop()
+            wanted = self._profile_gain_tenths(profile.gain)
+            if wanted and wanted != gain.tenths:
+                self._calibration_apply_pending = False
+                self._pending_calibration = None
+                self.calibration_applied = False
+                self.toast.show_message(
+                    f"设备增益 {gain_label(gain.tenths)} 与方案 "
+                    f"{gain_label(wanted)} 不一致，未自动应用；"
+                    "请到校准页重新校准",
+                    4200,
+                )
+                return
+            if self._send_calibration_thresholds(profile):
+                self.toast.show_message(
+                    f"正在应用校准方案 · {profile.name or '未命名'}…", 2200
+                )
+            return
         reply = parse_threshold_reply(text)
         if reply is None:
             return
         kind, _channel = reply
         self._calibration_apply_pending = False
+        self._pending_calibration = None
         self._calibration_timeout.stop()
         self.calibration_applied = kind == "ok"
 
     def _on_calibration_timeout(self) -> None:
         if not self._calibration_apply_pending:
             return
+        profile = self._pending_calibration
+        if profile is not None and not self._calibration_gain_checked:
+            # Old firmware never answers G: keep compatibility, but say why.
+            self.toast.show_message(
+                "设备未回报增益，已按方案应用；建议烧录新固件以校验增益",
+                3200,
+            )
+            if self._send_calibration_thresholds(profile):
+                return
         self._calibration_apply_pending = False
+        self._pending_calibration = None
         self.calibration_applied = False
         self.toast.show_message("校准方案未应用 · 设备无应答", 3000)
+
+    def _on_protocol_version(self, version: int) -> None:
+        self.firmware_protocol = int(version)
+        if version < 2 and not self._protocol_noticed:
+            self._protocol_noticed = True
+            self.toast.show_message(
+                f"固件协议 v{version} · 建议烧录新固件（自适应与 NVS）", 3600
+            )
 
     def _on_notice(self, text: str) -> None:
         # Firmware boot banners and notices: keep the last one visible in the
@@ -657,6 +761,11 @@ class MainWindow(QMainWindow):
         if text:
             self.last_label.setText(text[:70])
             self.last_label.setToolTip(text)
+        stuck = re.fullmatch(r"STUCK\s+(\d+)", text or "")
+        if stuck is not None:
+            self.toast.show_message(
+                f"键 {stuck.group(1)} 卡住 · 已自动释放", 2800
+            )
 
     def _on_compose_recording(self, on: bool) -> None:
         self.record_dot.setVisible(on)
@@ -1062,6 +1171,83 @@ class MainWindow(QMainWindow):
         if restored:
             self.toast.show_message("已恢复内容默认分区", 1600)
 
+    # -- perform transport ------------------------------------------------
+
+    def _transport_measure(self) -> int:
+        f = self.follow
+        if f.score is None:
+            return 1
+        note = f.next_note
+        if f.playing or note is None:
+            return f.measure_for_position(f.position)
+        return note.measure
+
+    def _refresh_transport(self) -> None:
+        f = self.follow
+        if f.loop_enabled and f.loop_end > f.loop_start:
+            # 10 ms inside each edge: the boundary itself belongs to the next
+            # measure and float rounding otherwise labels 1–1 as 1–2.
+            start = f.measure_for_position(f.loop_start + 0.01)
+            end = f.measure_for_position(f.loop_end - 0.01)
+            label = f"循环 {start}–{end} 小节"
+        elif self._loop_a is not None:
+            label = f"A {self._loop_a} · 再点 B"
+        else:
+            label = "A–B 未设置"
+        self.perform.set_transport_state(
+            f.speed,
+            f.loop_enabled,
+            label,
+            f.metronome_enabled,
+            f.count_in_enabled,
+        )
+
+    def _set_loop_enabled(self, on: bool) -> None:
+        if on and not (self.follow.loop_end > self.follow.loop_start):
+            self.toast.show_message("先点 A 和 B 设置循环范围")
+            self._refresh_transport()
+            return
+        self.follow.set_loop_enabled(on)
+        self._refresh_transport()
+
+    def _mark_loop_start(self) -> None:
+        self._loop_a = self._transport_measure()
+        self.toast.show_message(f"循环起点 · 第 {self._loop_a} 小节，再点 B 设终点")
+        self._refresh_transport()
+
+    def _mark_loop_end(self) -> None:
+        measure = self._transport_measure()
+        start = self._loop_a if self._loop_a is not None else measure
+        self._loop_a = min(start, measure)
+        end = max(start, measure)
+        if self.follow.set_loop(self._loop_a, end):
+            self.toast.show_message(f"循环 {self._loop_a}–{end} 小节 · 已开启")
+        else:
+            self.toast.show_message("这个范围没有音符，换一个小节")
+        self._refresh_transport()
+
+    def _step_speed(self, step: int) -> None:
+        self.follow.set_speed(self.follow.speed + step / 100.0)
+        self._refresh_transport()
+
+    def _set_metronome(self, on: bool) -> None:
+        self.follow.set_metronome(on)
+        self._refresh_transport()
+
+    def _set_count_in(self, on: bool) -> None:
+        self.follow.set_count_in(on)
+        self._refresh_transport()
+
+    def _play_click(self, accent: bool) -> None:
+        midi = CLICK_ACCENT_MIDI if accent else CLICK_MIDI
+        self.instrument.synth.note_on(midi, 100, channel=CLICK_CHANNEL)
+        QTimer.singleShot(
+            70,
+            lambda: self.instrument.synth.note_off(
+                midi, channel=CLICK_CHANNEL
+            ),
+        )
+
     def _on_score_changed(self, score) -> None:
         self.perform.set_score(score)
         self._apply_auto_windows()
@@ -1154,6 +1340,7 @@ class MainWindow(QMainWindow):
 
     def _on_follow_state(self) -> None:
         f = self.follow
+        self._refresh_transport()
         index = f.next_note_index
         drums = self.instrument.drums_enabled
         self.perform.set_follow_state(
@@ -1319,7 +1506,6 @@ class MainWindow(QMainWindow):
         if self.stack.currentWidget() is self.keybindings_page:
             self.keybindings_page.cancel_capture("已离开键位页；未保存这次改绑。")
         self.stack.setCurrentWidget(self.pages[index])
-        apply_language(self.pages[index])
         btn = self.nav_buttons[index]
         if not btn.isChecked():
             btn.setChecked(True)
@@ -1331,6 +1517,9 @@ class MainWindow(QMainWindow):
             self.device_page.refresh()
         if index == 6:
             self.help_page.refresh()
+        # After refresh(), which can rebuild cards, labels and buttons lazily.
+        apply_language(self.pages[index])
+        ensure_accessible_names(self.pages[index])
         if left_drill:
             self._restore_follow_status()
 
@@ -1424,7 +1613,18 @@ class MainWindow(QMainWindow):
 
     def _build_theme(self, name: str) -> Theme:
         base = THEMES[name if name in THEMES else "studio"]
+        if self.accessibility.high_contrast:
+            base = high_contrast_theme(base)
         return replace(base, font_scale=self.accessibility.font_scale)
+
+    def _set_high_contrast(self, on: bool) -> None:
+        enabled = bool(on)
+        if self.accessibility.high_contrast == enabled:
+            return
+        self.accessibility.high_contrast = enabled
+        self.accessibility.save()
+        self.apply_theme(self.theme_name)
+        self.settings_page.set_high_contrast(enabled)
 
     def _set_reduce_motion(self, on: bool) -> None:
         reduce_motion = bool(on)

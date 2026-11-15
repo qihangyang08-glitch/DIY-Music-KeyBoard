@@ -17,16 +17,18 @@ from PySide6.QtCore import (
     QTimer,
     Signal,
 )
-from PySide6.QtGui import QFont, QPainter, QPen
+from PySide6.QtGui import QCursor, QFont, QPainter, QPen
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
+    QComboBox,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
     QInputDialog,
     QLabel,
     QLineEdit,
+    QMenu,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -38,6 +40,9 @@ from PySide6.QtWidgets import (
 from ..core.curriculum import SCORE_DIR, mapping_tag_for_refs
 from ..core.library import (
     DEFAULT_VIEW,
+    DIFFICULTY_ORDER,
+    KEY_ORDER,
+    KIND_ORDER,
     VIEW_ALL,
     VIEW_FAVORITES,
     VIEW_IMPORTED,
@@ -46,6 +51,7 @@ from ..core.library import (
     VIEW_READY,
     VIEW_RECENT,
     ImportResult,
+    LibraryFilters,
     LibraryMeta,
     LibraryPiece,
     LibraryRegistry,
@@ -56,6 +62,7 @@ from ..core.library import (
     import_score,
     remove_imports,
 )
+from .i18n_ui import apply_language, tr_message
 from .theme import Theme, rgba, set_scaled_font
 from .widgets import CardFrame, GlassFrame
 
@@ -101,6 +108,7 @@ class PieceCard(CardFrame):
     removeRequested = Signal(object)
     favoriteToggled = Signal(object, bool)
     tagsRequested = Signal(object)
+    playlistRequested = Signal(object)
     displayRequested = Signal(object)
     focused = Signal(object)
 
@@ -263,8 +271,19 @@ class PieceCard(CardFrame):
                 lambda checked=False: self.tagsRequested.emit(self.piece)
             )
             action_row.addWidget(self.tag_button)
+
+            self.playlist_button = QPushButton("歌单")
+            self.playlist_button.setProperty("role", "flat")
+            self.playlist_button.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.playlist_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            self.playlist_button.setToolTip("加入或移出歌单")
+            self.playlist_button.clicked.connect(
+                lambda checked=False: self.playlistRequested.emit(self.piece)
+            )
+            action_row.addWidget(self.playlist_button)
         else:
             self.tag_button = None
+            self.playlist_button = None
         if self.piece.origin == "imported" and self.piece.import_paths:
             self.remove_button = QPushButton("移除")
             self.remove_button.setProperty("role", "danger")
@@ -469,6 +488,8 @@ class LibraryPage(GlassFrame):
         self.cards: tuple[PieceCard, ...] = ()
         self.view = DEFAULT_VIEW
         self.query = ""
+        self.filters = LibraryFilters()
+        self.playlist: str | None = None
         self.empty_text = ""
         self.empty_action: QPushButton | None = None
         self._import_notice = ""
@@ -588,6 +609,33 @@ class LibraryPage(GlassFrame):
         filters.addWidget(self.refresh_button)
         outer.addLayout(filters)
 
+        extra = QHBoxLayout()
+        extra.setSpacing(6)
+
+        def add_combo(caption: str, values: Iterable[str]):
+            combo = QComboBox()
+            combo.addItem(caption, "")
+            for value in values:
+                combo.addItem(value, value)
+            combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+            combo.currentIndexChanged.connect(
+                lambda _index: self._apply_filters()
+            )
+            extra.addWidget(combo)
+            return combo
+
+        self.difficulty_combo = add_combo("难度 · 全部", DIFFICULTY_ORDER)
+        self.key_combo = add_combo("调性 · 全部", ())
+        self.kind_combo = add_combo("类型 · 全部", KIND_ORDER)
+        self.playlist_combo = QComboBox()
+        self.playlist_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.playlist_combo.currentIndexChanged.connect(
+            self._on_playlist_combo
+        )
+        extra.addWidget(self.playlist_combo)
+        extra.addStretch(1)
+        outer.addLayout(extra)
+
         self.notice_frame = CardFrame()
         notice_layout = QHBoxLayout(self.notice_frame)
         notice_layout.setContentsMargins(12, 8, 12, 8)
@@ -682,8 +730,20 @@ class LibraryPage(GlassFrame):
         self.roadmap_button.setVisible(counts["planned"] > 0)
         self._update_notice()
 
+        self._sync_filter_options()
+        playlist_keys = (
+            self.meta.playlist_keys(self.playlist)
+            if self.playlist is not None
+            else None
+        )
         pieces = (
-            self.registry.select(self.view, self.query, self.meta)
+            self.registry.select(
+                self.view,
+                self.query,
+                self.meta,
+                filters=self.filters,
+                playlist_keys=playlist_keys,
+            )
             if self.registry is not None
             else ()
         )
@@ -701,6 +761,7 @@ class LibraryPage(GlassFrame):
                 card.removeRequested.connect(self.remove_piece)
                 card.favoriteToggled.connect(self.toggle_favorite)
                 card.tagsRequested.connect(self.edit_tags)
+                card.playlistRequested.connect(self.edit_playlists)
                 card.displayRequested.connect(self._on_display_requested)
                 card.focused.connect(self._on_card_focused)
                 self._grid.addWidget(card, index // CARD_COLUMNS, index % CARD_COLUMNS)
@@ -708,6 +769,7 @@ class LibraryPage(GlassFrame):
             self.cards = tuple(cards)
         else:
             self._add_empty_state()
+        apply_language(self)
 
     def _clear_grid(self) -> None:
         while self._grid.count():
@@ -796,6 +858,143 @@ class LibraryPage(GlassFrame):
             self.search.setText(self.query)
         self.render()
         self.scroll.verticalScrollBar().setValue(0)
+
+    # -- filters / playlists ----------------------------------------------
+
+    def _apply_filters(self) -> None:
+        self.filters = LibraryFilters(
+            difficulty=self.difficulty_combo.currentData() or "",
+            key_label=self.key_combo.currentData() or "",
+            kind=self.kind_combo.currentData() or "",
+        )
+        self.render()
+        self.scroll.verticalScrollBar().setValue(0)
+
+    def set_filters(
+        self,
+        difficulty: str | None = None,
+        key_label: str | None = None,
+        kind: str | None = None,
+    ) -> None:
+        values = (
+            (self.difficulty_combo, difficulty),
+            (self.key_combo, key_label),
+            (self.kind_combo, kind),
+        )
+        for combo, value in values:
+            index = combo.findData(value or "")
+            if index >= 0:
+                with QSignalBlocker(combo):
+                    combo.setCurrentIndex(index)
+        self._apply_filters()
+
+    def _sync_filter_options(self) -> None:
+        pieces = self.registry.pieces if self.registry is not None else ()
+        present = {piece.key_label for piece in pieces if piece.key_label}
+        ordered = [key for key in KEY_ORDER if key in present]
+        ordered += sorted(present - set(ordered))
+        current = self.key_combo.currentData() or ""
+        with QSignalBlocker(self.key_combo):
+            self.key_combo.clear()
+            self.key_combo.addItem("调性 · 全部", "")
+            for label in ordered:
+                self.key_combo.addItem(label, label)
+            index = self.key_combo.findData(current)
+            self.key_combo.setCurrentIndex(index if index >= 0 else 0)
+        selected_key = self.key_combo.currentData() or ""
+        if selected_key != self.filters.key_label:
+            # The selected key vanished with a removed import; drop the stale
+            # filter so the grid and the visible combo agree again.
+            self.filters = LibraryFilters(
+                difficulty=self.filters.difficulty,
+                key_label=selected_key,
+                kind=self.filters.kind,
+            )
+
+        names = self.meta.playlist_names()
+        if self.playlist is not None and self.playlist not in names:
+            self.playlist = None
+        current_playlist = self.playlist or ""
+        with QSignalBlocker(self.playlist_combo):
+            self.playlist_combo.clear()
+            self.playlist_combo.addItem("歌单 · 全部", "")
+            for name in names:
+                self.playlist_combo.addItem(name, name)
+            self.playlist_combo.addItem("新建歌单…", "__new__")
+            index = self.playlist_combo.findData(current_playlist)
+            self.playlist_combo.setCurrentIndex(index if index >= 0 else 0)
+
+    def set_playlist(self, name: str | None) -> None:
+        self.playlist = name or None
+        self._sync_filter_options()
+        self.render()
+        self.scroll.verticalScrollBar().setValue(0)
+
+    def _on_playlist_combo(self, _index: int) -> None:
+        data = self.playlist_combo.currentData() or ""
+        if data == "__new__":
+            name, ok = QInputDialog.getText(
+                self, "新建歌单", "歌单名称："
+            )
+            if ok:
+                playlist = self.meta.ensure_playlist(name)
+                if playlist is None:
+                    self.message.emit("歌单名称为空或已达上限")
+                    self.set_playlist(self.playlist)
+                    return
+                self._save_meta()
+                self.set_playlist(playlist)
+                return
+            self.set_playlist(self.playlist)
+            return
+        self.set_playlist(data or None)
+
+    def toggle_playlist(
+        self, piece: LibraryPiece, name: str, on: bool
+    ) -> bool:
+        result = self.meta.set_playlist_membership(name, piece.key, on)
+        self._save_meta()
+        self._sync_filter_options()
+        self.render()
+        self.message.emit(
+            f"{'已加入' if result else '已移出'}歌单「{name}」· {piece.title}"
+        )
+        return result
+
+    def edit_playlists(self, piece: LibraryPiece) -> None:
+        menu = QMenu(self)
+        names = self.meta.playlist_names()
+        current = set(self.meta.playlists_for(piece.key))
+        for name in names:
+            action = menu.addAction(name)
+            action.setCheckable(True)
+            action.setChecked(name in current)
+            action.triggered.connect(
+                lambda checked=False, target=name: self.toggle_playlist(
+                    piece, target, checked
+                )
+            )
+        if names:
+            menu.addSeparator()
+        create = menu.addAction("新建歌单…")
+        create.triggered.connect(
+            lambda checked=False: self._new_playlist_for(piece)
+        )
+        menu.exec(QCursor.pos())
+
+    def _new_playlist_for(self, piece: LibraryPiece) -> None:
+        name, ok = QInputDialog.getText(self, "新建歌单", "歌单名称：")
+        if not ok:
+            return
+        playlist = self.meta.ensure_playlist(name)
+        if playlist is None:
+            self.message.emit("歌单名称为空或已达上限")
+            return
+        self.meta.set_playlist_membership(playlist, piece.key, True)
+        self._save_meta()
+        self._sync_filter_options()
+        self.render()
+        self.message.emit(f"已加入歌单「{playlist}」· {piece.title}")
 
     # -- favorites / tags / recent / watch --------------------------------
 
@@ -968,10 +1167,12 @@ class LibraryPage(GlassFrame):
         if confirm:
             answer = QMessageBox.question(
                 self,
-                "移除导入",
-                f"删除导入的《{piece.title}》？\n"
-                f"将删除本机副本 {len(piece.import_paths)} 个文件，"
-                "不影响源文件、内置曲目或当前练习。",
+                tr_message("移除导入"),
+                tr_message(
+                    f"删除导入的《{piece.title}》？\n"
+                    f"将删除本机副本 {len(piece.import_paths)} 个文件，"
+                    "不影响源文件、内置曲目或当前练习。"
+                ),
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No,
             )
@@ -980,11 +1181,7 @@ class LibraryPage(GlassFrame):
         result = remove_imports(piece.import_paths, self.import_dir)
         if result.ok:
             self._import_notice = ""
-            self.meta.favorites.discard(piece.key)
-            self.meta.tags.pop(piece.key, None)
-            self.meta.recent = [
-                key for key in self.meta.recent if key != piece.key
-            ]
+            self.meta.prune_key(piece.key)
             self._save_meta()
         self.refresh()
         if result.ok:

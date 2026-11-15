@@ -24,6 +24,7 @@ from app.core.library import (
     VIEW_PLANNED,
     VIEW_READY,
     VIEW_RECENT,
+    LibraryFilters,
     LibraryMeta,
 )
 from app.ui.main_window import MainWindow
@@ -79,6 +80,44 @@ class LibraryWindowTest(unittest.TestCase):
         page = self.window.library_page
         self.assertIs(self.window.stack.currentWidget(), page)
         return page
+
+    def test_difficulty_filter_and_playlist_limit_the_cards(self) -> None:
+        page = self.open_library()
+        page.set_filters(difficulty="入门")
+        self.assertTrue(page.cards)
+        for card in page.cards:
+            self.assertEqual(card.piece.difficulty, "入门")
+
+        page.set_filters()
+        first = page.cards[0].piece
+        self.assertTrue(page.toggle_playlist(first, "练习", True))
+        page.set_playlist("练习")
+        self.assertEqual([card.piece.key for card in page.cards], [first.key])
+
+        reloaded = LibraryMeta.load(page.meta_path)
+        self.assertEqual(reloaded.playlist_keys("练习"), {first.key})
+
+        page.toggle_playlist(first, "练习", False)
+        self.assertIsNone(page.playlist)
+        self.assertGreater(len(page.cards), 1)
+
+    def test_a_vanished_key_filter_is_dropped(self) -> None:
+        page = self.open_library()
+        page.filters = LibraryFilters(key_label="Z#")
+
+        page.render()
+
+        self.assertEqual(page.filters.key_label, "")
+        self.assertTrue(page.cards)
+
+    def test_key_filter_is_populated_from_parsed_scores(self) -> None:
+        page = self.open_library()
+        labels = [
+            page.key_combo.itemData(index)
+            for index in range(page.key_combo.count())
+        ]
+        self.assertEqual(labels[0], "")
+        self.assertGreater(len(labels), 1)
 
     def test_search_typing_is_debounced_and_applied(self) -> None:
         page = self.open_library()

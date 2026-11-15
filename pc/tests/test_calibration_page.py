@@ -79,6 +79,8 @@ class CalibrationPageTest(unittest.TestCase):
         self.page.resize(900, 700)
         self.page.show()
         self.page.enter()
+        # enter() asks the firmware for its current gain; tests start clean.
+        self.sent.clear()
 
     def tearDown(self) -> None:
         self.page.leave()
@@ -114,11 +116,95 @@ class CalibrationPageTest(unittest.TestCase):
 
     # -- detection --------------------------------------------------------
 
+    def test_start_button_is_usable_as_soon_as_the_page_opens(self) -> None:
+        # Regression: the page is already "active" (calibration mode) when it
+        # opens, so gating the button on `not active` left every control dead.
+        self.assertTrue(self.page.start_button.isEnabled())
+        self.page.start_button.click()
+        self.assertEqual(self.sent, ["c"])
+        self.assertEqual(self.page.session.state, "baseline")
+
     def test_start_sends_c_and_enters_baseline(self) -> None:
         self.assertTrue(self.page.start_detection())
         self.assertEqual(self.sent, ["c"])
         self.assertEqual(self.page.session.state, "baseline")
         self.assertTrue(self.page.stop_button.isEnabled())
+
+    def test_enter_queries_the_device_gain(self) -> None:
+        sent: list[str] = []
+        page = CalibrationPage(
+            THEMES["studio"],
+            self.instrument,
+            lambda text: sent.append(text) or True,
+            profile_path=self.root / "gain.json",
+            clock=lambda: self.clock_value,
+            ready=lambda: True,
+        )
+        page.message.connect(self.messages.append)
+        page.enter()
+
+        self.assertEqual(sent, ["G"])
+        self.assertTrue(page.handle_reply("GAIN 4 40 4.0x CDC=63uA (max)"))
+        self.assertIn("4.0x", page.gain_button.text())
+        page.leave()
+        page.close()
+
+    def test_gain_change_clears_applied_state_and_warns(self) -> None:
+        self.page.handle_reply("GAIN 4 40 4.0x CDC=63uA (max)")
+        self.page.applied = True
+        self.page.applied_values = {1: (12, 6)}
+        self.page.applied_by_key = {1: (12, 6)}
+
+        self.assertTrue(self.page.handle_reply("GAIN 3 30 3.0x CDC=48uA"))
+
+        self.assertFalse(self.page.applied)
+        self.assertEqual(self.page.applied_values, {})
+        self.assertIn("重新校准", self.messages[-1])
+        self.assertIn("3.0x", self.page.gain_button.text())
+
+    def test_gain_button_cycles_the_firmware_preset(self) -> None:
+        self.page.gain_button.click()
+        self.assertEqual(self.sent[-1], "g")
+
+    def test_gain_is_locked_while_detecting(self) -> None:
+        self.page.start_detection()
+        self.assertFalse(self.page.gain_button.isEnabled())
+        self.assertFalse(self.page.cycle_gain())
+
+    def test_gain_change_mid_capture_aborts_the_curves(self) -> None:
+        self.reach_stopped_with_one_key()
+        self.page.start_detection()
+        start = self.clock_value
+        self.page.feed_frame(self.frame(start, {12: 2}))
+        self.clock_value = start + 1.6
+        self.page.feed_frame(self.frame(self.clock_value, {12: 2}))
+        self.assertEqual(self.page.session.state, "monitoring")
+
+        self.page.handle_reply("GAIN 4 40 4.0x CDC=63uA (max)")
+        self.page.handle_reply("GAIN 0 10 1.0x CDC=16uA")
+
+        self.assertEqual(self.page.session.state, "idle")
+        self.assertEqual(self.page.session.curves, {})
+        self.assertIn("停止本次检测", self.messages[-1])
+
+    def test_disconnect_forgets_the_device_gain(self) -> None:
+        self.page.handle_reply("GAIN 4 40 4.0x CDC=63uA (max)")
+        self.assertEqual(self.page.device_gain.tenths, 40)
+
+        self.page.device_disconnected()
+
+        self.assertIsNone(self.page.device_gain)
+
+    def test_warnings_surface_noise_weak_and_saturated_keys(self) -> None:
+        self.reach_stopped_with_one_key()
+        self.page.session.noise_max[12] = 22
+        self.page.session.curves[1].peak = 8
+        self.page.refresh()
+
+        text = self.page.warning_label.text()
+        self.assertIn("噪声偏高", text)
+        self.assertIn("信号弱", text)
+        self.assertTrue(self.page.warning_label.isVisibleTo(self.page))
 
     def test_not_ready_refuses_to_start_without_sending(self) -> None:
         page = CalibrationPage(
@@ -167,8 +253,15 @@ class CalibrationPageTest(unittest.TestCase):
         self.page.set_threshold(1, 48)
 
         self.assertTrue(self.page.apply_to_device())
-        self.assertEqual(self.sent[-1].split()[0], "T")
-        self.assertEqual(self.sent[-1], "T 12 48 29")
+        tokens = self.sent[-1].split()
+        self.assertEqual(tokens[0], "T")
+        self.assertEqual(len(tokens), 1 + 32 * 3)
+        pairs = {
+            tokens[index]: (tokens[index + 1], tokens[index + 2])
+            for index in range(1, len(tokens), 3)
+        }
+        self.assertEqual(pairs["12"], ("48", "29"))
+        self.assertEqual(pairs["1"], ("12", "6"))  # untouched firmware default
         self.assertFalse(self.page.applied)
 
         self.assertTrue(self.page.handle_reply("OK T"))
@@ -327,9 +420,11 @@ class CalibrationWindowTest(unittest.TestCase):
         )
 
         self.window._on_connection(True, "COM5")
-        self.assertEqual(len(sent), 1)
-        self.assertTrue(sent[0].startswith("T "))
-        self.assertEqual(len(sent[0].split()), 97)  # T + 32 triples
+        self.assertEqual(sent, ["G"])
+        self.window._on_calibration_reply("GAIN 4 40 4.0x CDC=63uA (max)")
+        self.assertEqual(len(sent), 2)
+        self.assertTrue(sent[1].startswith("T "))
+        self.assertEqual(len(sent[1].split()), 97)  # T + 32 triples
         self.window._on_calibration_reply("OK T")
         self.window.calibration_page.handle_reply("OK T")
         self.assertTrue(self.window.calibration_applied)
@@ -344,22 +439,63 @@ class CalibrationWindowTest(unittest.TestCase):
         self.window._show_page(0)
         QApplication.processEvents()
 
-        # The firmware's RAM is lost on a power cycle; reconnect resends.
+        # The firmware's RAM is lost on a power cycle; reconnect resends,
+        # but only after the gain check matches again.
         self.window._on_connection(True, "COM5")
-        self.assertEqual(len(sent), 2)
+        self.assertEqual(sent[-1], "G")
+        self.window._on_calibration_reply("GAIN 4 40 4.0x CDC=63uA (max)")
+        self.assertTrue(sent[-1].startswith("T "))
+        self.assertEqual(len(sent), 4)
 
     def test_auto_apply_timeout_marks_not_applied(self) -> None:
         CalibrationProfile(
             name="超时方案", gain=4, keys=full_profile_keys()
         ).save(self.window.calibration_path)
-        self.window._send_serial_line = lambda text: True
+        sent: list[str] = []
+        self.window._send_serial_line = (
+            lambda text: sent.append(text) or True
+        )
 
         self.window._on_connection(True, "COM5")
         self.assertTrue(self.window._calibration_apply_pending)
-        self.window._on_calibration_timeout()
+        self.window._on_calibration_timeout()  # no GAIN: apply anyway
 
+        self.assertTrue(sent[-1].startswith("T "))
+        self.assertTrue(self.window._calibration_apply_pending)
+
+        self.window._on_calibration_timeout()  # no OK T: not applied
         self.assertFalse(self.window._calibration_apply_pending)
         self.assertFalse(self.window.calibration_applied)
+
+    def test_gain_mismatch_blocks_auto_apply(self) -> None:
+        CalibrationProfile(
+            name="1.0x 方案", gain=10, keys=full_profile_keys()
+        ).save(self.window.calibration_path)
+        sent: list[str] = []
+        self.window._send_serial_line = (
+            lambda text: sent.append(text) or True
+        )
+
+        self.window._on_connection(True, "COM5")
+        self.assertEqual(sent, ["G"])
+        self.window._on_calibration_reply("GAIN 4 40 4.0x CDC=63uA (max)")
+
+        self.assertEqual(sent, ["G"])
+        self.assertFalse(self.window._calibration_apply_pending)
+        self.assertFalse(self.window.calibration_applied)
+
+    def test_reconnect_while_the_page_is_open_requeries_gain(self) -> None:
+        self.window.device_page.calibration_button.click()
+        QApplication.processEvents()
+        sent: list[str] = []
+        # The page captured its send callback at construction time.
+        self.window.calibration_page._send = (
+            lambda text: sent.append(text) or True
+        )
+
+        self.window._on_connection(True, "COM5")
+
+        self.assertGreaterEqual(sent.count("G"), 1)
 
     def test_corrupt_profile_is_not_sent_and_warns_once(self) -> None:
         self.window.calibration_path.write_text("{bad json", encoding="utf-8")

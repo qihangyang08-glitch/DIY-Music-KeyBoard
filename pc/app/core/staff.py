@@ -94,6 +94,8 @@ class StaffMeasure:
     number: int             # 1-based display number
     notes: tuple[StaffNote, ...]
     beats: float
+    start_beat: float = 0.0
+    end_beat: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -193,6 +195,8 @@ def build_staff_layout(
                 )
             ),
             beats=beats,
+            start_beat=index * beats,
+            end_beat=(index + 1) * beats,
         )
         for index in range(measure_count)
     ]

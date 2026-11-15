@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .i18n_ui import tr_message
 from .keybindings import (
     Chord,
     FUNCTION_LABELS,
@@ -412,15 +413,18 @@ class KeyBindingsPage(GlassFrame):
 
     def _ask_replace(self, conflicts: list[tuple[str, str, int | str]]) -> bool:
         box = QMessageBox(self)
-        box.setWindowTitle("键位冲突")
+        box.setWindowTitle(tr_message("键位冲突"))
         box.setIcon(QMessageBox.Icon.Warning)
         box.setText(
-            "这个键已经绑定：\n"
+            tr_message("这个键已经绑定：")
+            + "\n"
             + "\n".join(f"· {description}" for description, _kind, _ident in conflicts)
         )
-        box.setInformativeText("替换会清除上面的绑定。")
-        replace = box.addButton("替换", QMessageBox.ButtonRole.AcceptRole)
-        box.addButton("取消", QMessageBox.ButtonRole.RejectRole)
+        box.setInformativeText(tr_message("替换会清除上面的绑定。"))
+        replace = box.addButton(
+            tr_message("替换"), QMessageBox.ButtonRole.AcceptRole
+        )
+        box.addButton(tr_message("取消"), QMessageBox.ButtonRole.RejectRole)
         box.exec()
         return box.clickedButton() is replace
 
@@ -429,11 +433,15 @@ class KeyBindingsPage(GlassFrame):
     def _reset_defaults(self) -> None:
         self.cancel_capture()
         box = QMessageBox(self)
-        box.setWindowTitle("恢复默认")
+        box.setWindowTitle(tr_message("恢复默认"))
         box.setIcon(QMessageBox.Icon.Question)
-        box.setText("恢复三行顺序默认会覆盖当前所有键位，确定吗？")
-        reset = box.addButton("恢复默认", QMessageBox.ButtonRole.AcceptRole)
-        box.addButton("取消", QMessageBox.ButtonRole.RejectRole)
+        box.setText(
+            tr_message("恢复三行顺序默认会覆盖当前所有键位，确定吗？")
+        )
+        reset = box.addButton(
+            tr_message("恢复默认"), QMessageBox.ButtonRole.AcceptRole
+        )
+        box.addButton(tr_message("取消"), QMessageBox.ButtonRole.RejectRole)
         box.exec()
         if box.clickedButton() is not reset:
             return

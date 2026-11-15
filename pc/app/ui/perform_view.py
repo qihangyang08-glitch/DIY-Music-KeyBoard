@@ -45,6 +45,12 @@ class PerformView(QWidget):
     message = Signal(str)
     focusToggled = Signal(bool)
     resetSplitRequested = Signal()
+    loopToggled = Signal(bool)
+    loopARequested = Signal()
+    loopBRequested = Signal()
+    speedStepRequested = Signal(int)
+    metronomeToggled = Signal(bool)
+    countInToggled = Signal(bool)
 
     def __init__(self, theme: Theme, instrument: Instrument, bindings, parent=None):
         super().__init__(parent)
@@ -227,6 +233,92 @@ class PerformView(QWidget):
             chips.addWidget(btn, index // 2, index % 2)
         mapping.addLayout(chips)
         col.addWidget(map_card)
+
+        # 走带：循环 / 速度 / 节拍器 / 预备拍
+        self.transport_card = CardFrame()
+        transport = QVBoxLayout(self.transport_card)
+        transport.setContentsMargins(12, 10, 12, 10)
+        transport.setSpacing(6)
+        transport_label = QLabel("走带")
+        transport_label.setProperty("role", "label")
+        transport.addWidget(transport_label)
+
+        loop_row = QHBoxLayout()
+        loop_row.setSpacing(6)
+        self.loop_switch = ToggleSwitch(t)
+        self.loop_switch.setToolTip("循环播放 A–B 小节范围")
+        self.loop_switch.toggled.connect(self.loopToggled.emit)
+        loop_row.addWidget(self.loop_switch)
+        loop_text = QLabel("循环")
+        loop_text.setProperty("role", "muted")
+        loop_row.addWidget(loop_text)
+        loop_row.addStretch(1)
+        self.loop_a_button = QPushButton("A")
+        self.loop_b_button = QPushButton("B")
+        for button, tip in (
+            (self.loop_a_button, "把循环起点设在当前小节"),
+            (self.loop_b_button, "把循环终点设在当前小节"),
+        ):
+            button.setProperty("role", "chip")
+            button.setFixedWidth(30)
+            button.setToolTip(tip)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            loop_row.addWidget(button)
+        self.loop_a_button.clicked.connect(self.loopARequested.emit)
+        self.loop_b_button.clicked.connect(self.loopBRequested.emit)
+        transport.addLayout(loop_row)
+        self.loop_label = QLabel("A–B 未设置")
+        self.loop_label.setProperty("role", "faint")
+        set_scaled_font(self.loop_label, self._theme, 9)
+        transport.addWidget(self.loop_label)
+
+        speed_row = QHBoxLayout()
+        speed_row.setSpacing(6)
+        speed_text = QLabel("速度")
+        speed_text.setProperty("role", "muted")
+        speed_row.addWidget(speed_text)
+        speed_row.addStretch(1)
+        self.speed_minus = QPushButton("−")
+        self.speed_plus = QPushButton("+")
+        for button, step in ((self.speed_minus, -10), (self.speed_plus, 10)):
+            button.setProperty("role", "step")
+            button.setFixedSize(24, 24)
+            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            button.clicked.connect(
+                lambda checked=False, value=step: self.speedStepRequested.emit(
+                    value
+                )
+            )
+            speed_row.addWidget(button)
+        self.speed_value = QLabel("100%")
+        set_scaled_font(self.speed_value, self._theme, 12, QFont.Weight.DemiBold, mono=True)
+        self.speed_value.setFixedWidth(44)
+        self.speed_value.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        speed_row.addWidget(self.speed_value)
+        transport.addLayout(speed_row)
+
+        click_row = QHBoxLayout()
+        click_row.setSpacing(6)
+        click_text = QLabel("节拍器")
+        click_text.setProperty("role", "muted")
+        click_row.addWidget(click_text)
+        self.metronome_switch = ToggleSwitch(t)
+        self.metronome_switch.setToolTip("跟弹时按拍发出木鱼声")
+        self.metronome_switch.setAccessibleName("节拍器")
+        self.metronome_switch.toggled.connect(self.metronomeToggled.emit)
+        click_row.addWidget(self.metronome_switch)
+        click_row.addStretch(1)
+        count_text = QLabel("预备拍")
+        count_text.setProperty("role", "muted")
+        click_row.addWidget(count_text)
+        self.count_in_switch = ToggleSwitch(t)
+        self.count_in_switch.setToolTip("开始前先空一小节，只响拍子不计分")
+        self.count_in_switch.setAccessibleName("预备拍")
+        self.count_in_switch.toggled.connect(self.countInToggled.emit)
+        click_row.addWidget(self.count_in_switch)
+        transport.addLayout(click_row)
+        col.addWidget(self.transport_card)
 
         # 八度 / 移调
         offset_card = CardFrame()
@@ -450,6 +542,31 @@ class PerformView(QWidget):
     def set_pad_state(self, state: dict[int, bool]) -> None:
         # Pad 1 is sustain; the other pads act on the instrument directly.
         self.band.set_sustain(state.get(1, False))
+
+    def set_transport_state(
+        self,
+        speed: float,
+        loop_on: bool,
+        loop_label: str,
+        metronome: bool,
+        count_in: bool,
+    ) -> None:
+        state = (round(speed, 2), loop_on, loop_label, metronome, count_in)
+        if state == getattr(self, "_transport_state", None):
+            return  # called on every 33 ms follow tick
+        self._transport_state = state
+        with QSignalBlocker(self.loop_switch):
+            self.loop_switch.setChecked(loop_on)
+        with QSignalBlocker(self.metronome_switch):
+            self.metronome_switch.setChecked(metronome)
+        with QSignalBlocker(self.count_in_switch):
+            self.count_in_switch.setChecked(count_in)
+        self.speed_value.setText(f"{round(speed * 100)}%")
+        self.loop_label.setText(loop_label)
+        self.loop_switch.setToolTip(
+            "循环播放 A–B 小节范围" if loop_label == "A–B 未设置"
+            else loop_label
+        )
 
     def toggle_labels(self) -> None:
         self.band.set_labels(not self.band.labels_on)

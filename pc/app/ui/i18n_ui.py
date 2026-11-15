@@ -13,6 +13,8 @@ so); rebuilding every live widget in place is deliberately out of scope.
 
 from __future__ import annotations
 
+import re
+
 from PySide6.QtWidgets import (
     QAbstractButton,
     QComboBox,
@@ -170,6 +172,15 @@ EN: dict[str, str] = {
 }
 
 
+from .i18n_labels import LABELS  # noqa: E402  (kept below EN on purpose)
+from .i18n_messages import MESSAGES  # noqa: E402
+from .i18n_pages import PAGES  # noqa: E402
+
+EN.update(LABELS)
+EN.update(PAGES)
+EN.update(MESSAGES)
+
+
 def normalize_language(value) -> str:
     return value if value in LANGUAGE_CODES else LANGUAGE_ZH
 
@@ -189,6 +200,77 @@ def tr(text: str) -> str:
     return text
 
 
+_PATTERN_CACHE: list[tuple[re.Pattern[str], str]] | None = None
+
+
+def _patterns() -> list[tuple[re.Pattern[str], str]]:
+    """Catalogue entries with ``{…}`` holes, longest anchors first.
+
+    Dynamic UI text ("键 3 · 阈值 12") is written as an f-string, so no
+    message can be looked up verbatim. The catalogue stores the template with
+    each interpolation replaced by ``{…}``; the English side uses ``{}`` for
+    the captured values. Exact entries still win, so a literal string that
+    happens to contain braces is unaffected.
+    """
+    global _PATTERN_CACHE
+    if _PATTERN_CACHE is None:
+        compiled = []
+        for source, target in EN.items():
+            if "{…}" not in source:
+                continue
+            pieces = [re.escape(part) for part in source.split("{…}")]
+            regex = re.compile("^" + "(.+?)".join(pieces) + "$", re.S)
+            compiled.append((regex, target))
+        compiled.sort(
+            key=lambda item: (
+                -item[0].pattern.count("(.+?)"),
+                -len(item[0].pattern),
+            )
+        )
+        _PATTERN_CACHE = compiled
+    return _PATTERN_CACHE
+
+
+def tr_message(text: str, _depth: int = 0) -> str:
+    """Translate a whole message, including f-string templates."""
+    if _current != LANGUAGE_EN or not text:
+        return text
+    translated = EN.get(text)
+    if translated is not None:
+        return translated
+    for regex, template in _patterns():
+        match = regex.fullmatch(text)
+        if match is not None:
+            try:
+                groups = match.groups()
+                if _depth >= 3:
+                    values = groups
+                else:
+                    # A captured value can itself be a translated phrase
+                    # ("阶段 4 左手与和弦", "开"), so translate it once more.
+                    values = tuple(
+                        tr_message(group, _depth + 1) for group in groups
+                    )
+                return template.format(*values)
+            except (IndexError, KeyError, ValueError):
+                continue
+    return text
+
+
+def tr_block(text: str) -> str:
+    """Translate a multi-line block line by line, then join it back.
+
+    Tooltips and result labels stack independent lines ("C5–G6", "32 个音",
+    "file · 可解析"); translating the block as one string would miss them.
+    """
+    if _current != LANGUAGE_EN or not text:
+        return text
+    direct = tr_message(text)
+    if direct != text or "\n" not in text:
+        return direct
+    return "\n".join(tr_message(line) for line in text.split("\n"))
+
+
 def apply_language(root: QWidget) -> None:
     """Translate the current widget tree in place.
 
@@ -200,22 +282,23 @@ def apply_language(root: QWidget) -> None:
     for widget in [root, *root.findChildren(QWidget)]:
         if isinstance(widget, (QLabel, QAbstractButton, QGroupBox)):
             text = widget.text()
-            translated = EN.get(text)
-            if translated is not None:
+            translated = tr_block(text)
+            if translated != text:
                 widget.setText(translated)
         if isinstance(widget, QLineEdit):
             placeholder = widget.placeholderText()
-            translated = EN.get(placeholder)
-            if translated is not None:
+            translated = tr_message(placeholder)
+            if translated != placeholder:
                 widget.setPlaceholderText(translated)
         if isinstance(widget, QComboBox):
             for index in range(widget.count()):
-                translated = EN.get(widget.itemText(index))
-                if translated is not None:
+                text = widget.itemText(index)
+                translated = tr_message(text)
+                if translated != text:
                     widget.setItemText(index, translated)
         tooltip = widget.toolTip()
-        translated = EN.get(tooltip)
-        if translated is not None:
+        translated = tr_block(tooltip)
+        if translated != tooltip:
             widget.setToolTip(translated)
 
 
@@ -229,4 +312,6 @@ __all__ = [
     "normalize_language",
     "set_language",
     "tr",
+    "tr_block",
+    "tr_message",
 ]

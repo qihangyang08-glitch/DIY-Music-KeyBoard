@@ -51,6 +51,7 @@ from ..core.exam import exam_spec
 from ..core.progress import LearningProgress
 from ..core.score import ScoreError, excerpt_score, parse_score
 from .score_view import ScoreCanvas
+from .i18n_ui import apply_language
 from .theme import Theme, set_scaled_font
 from .widgets import CardFrame, GlassFrame
 
@@ -328,6 +329,8 @@ class StageCard(ClickFrame):
         self.clicked.connect(on_click)
         ready = max(1, stage.ready_count)
         self.setToolTip(f"可练内容完成 {done}/{stage.ready_count}")
+        self.setAccessibleName(f"阶段 {stage.index} · {stage.name}")
+        self.setAccessibleDescription(self.toolTip())
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 10, 12, 10)
         lay.setSpacing(4)
@@ -1147,6 +1150,7 @@ class LearningPage(GlassFrame):
                 self._course_view.set_course(stage, guide)
         elif self._view == "stage":
             self._stage_view.set_stage(stage_by_index(self._stage_index))
+        apply_language(self)
 
     # -- practice hand-off -------------------------------------------------
 

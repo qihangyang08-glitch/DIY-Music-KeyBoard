@@ -36,6 +36,7 @@ class FollowSession(QObject):
     message = Signal(str)
     demoNote = Signal(int)             # bar for the demo column effect
     windowChanged = Signal(object)     # WindowSegment | None
+    beat = Signal(bool)                # True = accented downbeat
 
     def __init__(self, instrument, parent=None):
         super().__init__(parent)
@@ -60,6 +61,17 @@ class FollowSession(QObject):
         self._accomp_cursor = 0
         self._accomp_held: list[tuple[float, int]] = []  # (end_time, midi)
         self._last_next = None
+        self.speed = 1.0
+        self.loop_enabled = False
+        self.loop_start = 0.0
+        self.loop_end = 0.0
+        self.metronome_enabled = False
+        self.count_in_enabled = False
+        self._next_beat = 0.0
+        self._count_in_remaining = 0.0
+        self._count_in_elapsed = 0.0
+        self._count_in_next = 0.0
+        self._start_position = 0.0
         self._timer = QTimer(self)
         self._timer.setInterval(33)
         self._timer.timeout.connect(self._tick)
@@ -73,6 +85,7 @@ class FollowSession(QObject):
     ) -> None:
         self._stop_demo()
         self._release_accompaniment()
+        self.clear_loop()
         self.score = score
         self.accompaniment = tuple(accompaniment)
         self._accomp_cursor = 0
@@ -94,6 +107,7 @@ class FollowSession(QObject):
         """Drop the current score without pretending a new one was loaded."""
         self._stop_demo()
         self._release_accompaniment()
+        self.clear_loop()
         self.accompaniment = ()
         self._accomp_cursor = 0
         self._demo_accomp_cursor = 0
@@ -155,6 +169,95 @@ class FollowSession(QObject):
         if self.score is None or self.score.duration <= 0:
             return 0.0
         return max(0.0, min(1.0, self.position / self.score.duration))
+
+    # -- transport: loop / speed / click / count-in ----------------------
+
+    @property
+    def beat_seconds(self) -> float:
+        tempo = self.score.tempo if self.score is not None else 120.0
+        return 60.0 / (tempo if tempo > 0 else 120.0)
+
+    @property
+    def beats_per_bar(self) -> int:
+        if self.score is None:
+            return 4
+        return max(1, int(self.score.time_signature[0]))
+
+    def set_speed(self, speed: float) -> None:
+        """Demo speed; practice stays key-paced."""
+        self.speed = max(0.5, min(1.2, round(float(speed), 2)))
+
+    def measure_start(self, measure: int) -> float | None:
+        if self.score is None:
+            return None
+        for note in self.score.notes:
+            if note.measure >= measure:
+                return note.start
+        return self.score.duration
+
+    def measure_end(self, measure: int) -> float | None:
+        if self.score is None:
+            return None
+        for note in self.score.notes:
+            if note.measure > measure:
+                return note.start
+        return self.score.duration
+
+    def measure_for_position(self, position: float) -> int:
+        if self.score is None:
+            return 1
+        current = 1
+        for note in self.score.notes:
+            if note.start > position + 1e-6:
+                break
+            current = note.measure
+        return current
+
+    def set_loop(self, start_measure: int, end_measure: int) -> bool:
+        """Loop a measure range (1-based, inclusive)."""
+        start = self.measure_start(int(start_measure))
+        end = self.measure_end(int(end_measure))
+        if start is None or end is None or end <= start:
+            return False
+        self.loop_start = start
+        self.loop_end = end
+        self.loop_enabled = True
+        return True
+
+    def clear_loop(self) -> None:
+        self.loop_enabled = False
+        self.loop_start = 0.0
+        self.loop_end = 0.0
+
+    def set_loop_enabled(self, on: bool) -> None:
+        self.loop_enabled = bool(on) and self.loop_end > self.loop_start
+
+    def set_metronome(self, on: bool) -> None:
+        on = bool(on)
+        if on and not self.metronome_enabled and self.playing:
+            # Do not replay every beat that elapsed while the click was off.
+            beat = self.beat_seconds
+            self._next_beat = (
+                int((self.position + 1e-9) / beat) + 1
+            ) * beat
+        self.metronome_enabled = on
+
+    def set_count_in(self, on: bool) -> None:
+        self.count_in_enabled = bool(on)
+
+    def _first_note_at_or_after(self, position: float) -> int:
+        if self.score is None:
+            return 0
+        for index, note in enumerate(self.score.notes):
+            if note.start >= position - 1e-6:
+                return index
+        return len(self.score.notes)
+
+    def _release_demo_notes(self) -> None:
+        for midi in list(self._demo_held):
+            self.instrument.synth.note_off(midi, channel=DEMO_CHANNEL)
+        self._demo_held.clear()
+        self._demo_releases.clear()
 
     # -- automatic 32-key windows ---------------------------------------
 
@@ -252,6 +355,31 @@ class FollowSession(QObject):
             if len(self._onset_matched) >= len(onset):
                 self.index += len(onset)
                 self._onset_matched.clear()
+                if (
+                    self.loop_enabled
+                    and self.loop_end > self.loop_start
+                    and (
+                        self.index >= len(self.score.notes)
+                        or self.score.notes[self.index].start
+                        >= self.loop_end - 1e-6
+                    )
+                ):
+                    self.index = self._first_note_at_or_after(self.loop_start)
+                    self._release_accompaniment()
+                    self._accomp_cursor = self._accomp_index_from(
+                        self.loop_start
+                    )
+                    following = self.next_note
+                    self.position = (
+                        following.start
+                        if following is not None
+                        else self.loop_start
+                    )
+                    self.sync_window()
+                    self.judged.emit(True, matched_note)
+                    self.stateChanged.emit()
+                    self._emit_next(force=True)
+                    return
                 following = self.next_note
                 if following is None:
                     self.position = self.score.duration
@@ -369,6 +497,15 @@ class FollowSession(QObject):
         self._last_tick = time.monotonic() if at is None else at
         self._demo_releases.clear()
         self._demo_held.clear()
+        self._start_position = self.position
+        self._count_in_elapsed = 0.0
+        self._count_in_next = 0.0
+        self._count_in_remaining = (
+            self.beats_per_bar * self.beat_seconds
+            if self.count_in_enabled
+            else 0.0
+        )
+        self._next_beat = self.position
         self.sync_window(self.index)
         self._emit_next(force=True)
         self._timer.start()
@@ -384,6 +521,8 @@ class FollowSession(QObject):
     def _stop_demo(self) -> None:
         self.playing = False
         self._reset_onset()
+        self._count_in_remaining = 0.0
+        self._count_in_elapsed = 0.0
         self._timer.stop()
         for midi in list(self._demo_held):
             self.instrument.synth.note_off(midi, channel=DEMO_CHANNEL)
@@ -402,9 +541,45 @@ class FollowSession(QObject):
         """Advance the demo clock; `now` is injectable for tests."""
         if not self.playing or self.score is None:
             return
-        delta = max(0.0, min(0.12, now - self._last_tick))
+        delta = max(0.0, min(0.12, now - self._last_tick)) * self.speed
         self._last_tick = now
+
+        if self._count_in_remaining > 0.0:
+            self._count_in_elapsed += delta
+            while (
+                self._count_in_next < self._count_in_remaining - 1e-9
+                and self._count_in_elapsed + 1e-9 >= self._count_in_next
+            ):
+                beats = int(round(self._count_in_next / self.beat_seconds))
+                self.beat.emit(beats % self.beats_per_bar == 0)
+                self._count_in_next += self.beat_seconds
+            if self._count_in_elapsed + 1e-9 < self._count_in_remaining:
+                self.stateChanged.emit()
+                return
+            self._count_in_remaining = 0.0
+            self.position = self._start_position
+            self._next_beat = self.position + self.beat_seconds
+            self._emit_next(force=True)
+
         self.position += delta
+
+        if (
+            self.loop_enabled
+            and self.loop_end > self.loop_start
+            and self.position >= self.loop_end - 1e-6
+        ):
+            self._release_demo_notes()
+            self.position = self.loop_start
+            self._demo_cursor = self._first_note_at_or_after(self.position)
+            self._demo_accomp_cursor = self._accomp_index_from(self.position)
+            self._next_beat = self.position
+            self._emit_next(force=True)
+
+        if self.metronome_enabled:
+            while self._next_beat <= self.position + 1e-9:
+                beats = int(round(self._next_beat / self.beat_seconds))
+                self.beat.emit(beats % self.beats_per_bar == 0)
+                self._next_beat += self.beat_seconds
 
         # release demo notes whose score-time end has arrived
         for release_at, midi in list(self._demo_releases):
@@ -455,7 +630,9 @@ class FollowSession(QObject):
         """Sound one note on the demo channel and schedule its release."""
         self.instrument.synth.note_on(note.midi, 100, channel=DEMO_CHANNEL)
         self._demo_held.add(note.midi)
-        remaining = max(0.05, note.end - self.position)
+        # Score seconds must be converted back to wall time; without this the
+        # note lasts 1/speed too long (or too short) whenever speed != 100%.
+        remaining = max(0.05, note.end - self.position) / self.speed
         self._demo_releases.append((now + remaining, note.midi))
 
     def _emit_next(self, force: bool = False) -> None:

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import QWidget
@@ -409,3 +409,36 @@ STAGE = Theme(
 )
 
 THEMES = {"studio": STUDIO, "stage": STAGE}
+
+
+def high_contrast_theme(theme: Theme) -> Theme:
+    """A WCAG-AA variant of a theme (A7).
+
+    Defaults keep the designed palette; this opt-in raises every text role to
+    at least 4.5:1 on the theme background and strengthens hairline borders.
+    ``font_scale`` and the theme identity are preserved so the rest of the
+    window behaves exactly as before.
+    """
+    if theme.dark:
+        return replace(
+            theme,
+            ink=c("#FFFFFF"),
+            muted=c("#C9C9C3"),
+            faint=c("#B0B0A9"),
+            amber=c("#F2C46D"),
+            danger=c("#FF9E90"),
+            hair=c("#FFFFFF", 60),
+            card_edge=c("#FFFFFF", 55),
+            panel_edge=c("#FFFFFF", 60),
+        )
+    return replace(
+        theme,
+        ink=c("#000000"),
+        muted=c("#4A4A45"),
+        faint=c("#5A5A54"),
+        amber=c("#7A4E00"),
+        danger=c("#8A2419"),
+        hair=c("#121214", 70),
+        card_edge=c("#121214", 60),
+        panel_edge=c("#121214", 60),
+    )

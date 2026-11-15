@@ -46,6 +46,10 @@ class PianoRollCanvas(QWidget):
         self.setCursor(Qt.CursorShape.CrossCursor)
         self.setMouseTracking(True)
         self.setFixedHeight(HEIGHT)
+        self.setAccessibleName("钢琴卷帘")
+        self.setAccessibleDescription(
+            "显示当前音轨的音符与播放头；左键画、右键擦、拖动移动"
+        )
         self.refresh()
 
     # -- state ------------------------------------------------------------
